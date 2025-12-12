@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de1002d6e423dd74bbf7490c9128109b, type: 3}
+  m_Name: YunYun
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterType
+  CharacterID: 1
+  Name: Yun-Yun
+  Prefab: {fileID: 5517364687848987101, guid: 65b6bb743d8ad524e97c45f5a369120a, type: 3}
+  SlowWalkSpeed: 1.56
+  WalkSpeed: 4
+  RunSpeed: 8
