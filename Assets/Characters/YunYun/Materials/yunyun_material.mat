@@ -12,10 +12,16 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
+  - _DISABLE_FRESNEL_SPECULAR_HIGHLIGHT_ON_FACE_ON
+  - _DISABLE_FRESNEL_SPECULAR_HIGHLIGHT_ON_HAIR_ON
   - _FACE_SDF_ON
-  - _FACE_UV_CORNER_TOP_ON
+  - _FRESNEL_SPECULAR_HIGHLIGHT_ON
+  - _RIM_LIGHT_ON
+  - _RIM_LIGHT_SMOOTHSTEP_ON
+  - _SHADOW_ON
   m_InvalidKeywords:
   - _FACE_SDF_ON_ON
+  - _FACE_UV_CORNER_TOP_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -36,17 +42,30 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints:
+    - _DISABLE_FRESNEL_SPECULAR_HIGHLIGHT_ON_FACE: 1
+    - _DISABLE_FRESNEL_SPECULAR_HIGHLIGHT_ON_HAIR: 1
     - _FACE_SDF: 1
+    - _FRESNEL_SPECULAR_HIGHLIGHT: 1
+    - _RIM_LIGHT: 1
+    - _RIM_LIGHT_ON_SHADOW_SIDE: 0
+    - _RIM_LIGHT_SMOOTHSTEP: 1
+    - _SHADOW: 1
     m_Floats:
     - _FaceLightSmooth: 0.01
     - _FaceMidBand: 0.01
     - _FaceShadowAngle: 0
     - _LightSmooth: 0.023
     - _MidBand: 0.01
+    - _RimLightFalloff: 0.2
+    - _RimLightPower: 0.7
+    - _SpecularFalloff: 1
+    - _SpecularStrength: 0.95
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _HalfShadowColor: {r: 0.9433962, g: 0.9433962, b: 0.9433962, a: 1}
+    - _RimLightColor: {r: 0.86339706, g: 0.2971698, b: 1, a: 1}
     - _ShadowColor: {r: 0.9150943, g: 0.9150943, b: 0.9150943, a: 1}
+    - _SpecularColor: {r: 0.34901962, g: 0.15686275, b: 0.3019608, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &7843896551394781546

@@ -1,0 +1,25 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <ui:EnumField label="Noise Type" value="Center" type="FloatingIslandGenerator+NoiseType, Assembly-CSharp" binding-path="noiseType" name="noiseType" />
+    <ui:IntegerField label="Resolution (X)" value="128" binding-path="resX" name="resX" />
+    <ui:IntegerField label="Resolution (Y)" value="128" binding-path="resY" name="resY" />
+    <uie:PropertyField label="Offset" binding-path="offset" name="offset" />
+    <uie:PropertyField label="Size" binding-path="size" name="size" />
+    <uie:PropertyField label="Scale" binding-path="scale" name="scale" />
+    <uie:PropertyField label="Height" binding-path="height" name="height" />
+    <uie:PropertyField label="UV Scale" binding-path="uvScale" name="uvScale" />
+    <uie:PropertyField label="pointiness" binding-path="pointiness" name="pointiness" />
+    <uie:PropertyField label="Scaling Power Base" binding-path="scalingPowerBase" name="scalingPowerBase" />
+    <uie:PropertyField label="Iterations" binding-path="iterations" name="iterations" />
+    <ui:EnumField label="Warp Type" value="NONE" type="FloatingIslandGenerator+WarpType, Assembly-CSharp" binding-path="warpType" name="warpType" />
+    <ui:Toggle label="Enable Collision" binding-path="enableCollision" value="true" name="enableCollision" />
+    <ui:Label text="Grass&#10;" />
+    <uie:PropertyField name="spawnGrass" binding-path="spawnGrass" label="spawnGrass" />
+    <uie:PropertyField label="Grass Material" binding-path="grassMaterial" name="grassMaterial" />
+    <uie:PropertyField label="grassMinWidth" binding-path="grassMinWidth" name="grassMinWidth" />
+    <uie:PropertyField label="grassMaxWidth" binding-path="grassMaxWidth" name="grassMaxWidth" />
+    <uie:PropertyField label="grassMinHeight" binding-path="grassMinHeight" name="grassMinHeight" />
+    <uie:PropertyField label="grassMaxHeight" binding-path="grassMaxHeight" name="grassMaxHeight" />
+    <uie:PropertyField label="grassMaxTilt" binding-path="grassMaxTilt" name="grassMaxTilt" />
+    <uie:PropertyField label="grassSeed" binding-path="grassSeed" name="grassSeed" />
+    <ui:Button text="Refresh" binding-path="Refresh" name="refresh-button" />
+</ui:UXML>

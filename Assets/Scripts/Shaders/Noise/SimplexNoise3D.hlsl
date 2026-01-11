@@ -81,4 +81,24 @@ float SimplexNoise3D(float3 v)
     return SimplexNoise3DGrad(v).w;
 }
 
+float SimplexNoise3DFbm(float3 x, float frequencyChange, float amplitudeChange, float2 shift, float rotAngle, int octaves) {
+    float v = 0.0;
+    float frequency = frequencyChange;
+    float amplitude = 1;
+    //float2 shift = float2(100.0, 0.0);
+    // Rotate to reduce axial bias
+    float2x2 rot = float2x2(cos(rotAngle), sin(rotAngle), -sin(rotAngle), cos(rotAngle));
+    for (int i = 0; i < octaves; ++i) {
+        
+        v += amplitude * SimplexNoise3D(x);
+        x.xy *= frequency;
+       // float2 r = mul(rot, x.xz); 
+        //x.xz = r * 2.0 + shift;
+        frequency *= frequencyChange;
+        amplitude *= amplitudeChange;
+    }
+    return v;
+}
+
+
 #endif

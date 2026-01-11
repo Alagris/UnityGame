@@ -9,11 +9,15 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: yunyun_bikini_material
   m_Shader: {fileID: 4800000, guid: 7692199809f5f37478777de5775b127a, type: 3}
-  m_Parent: {fileID: 0}
+  m_Parent: {fileID: 2100000, guid: d55b21fe59ba26546bd2b5a3ad3a115f, type: 2}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
+  - _FACE_SDF_ON
+  - _RIM_LIGHT_ON
+  - _RIM_LIGHT_SMOOTHSTEP_ON
+  - _SHADOW_ON
+  m_InvalidKeywords:
   - _FACE_UV_CORNER_TOP_ON
-  m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -29,26 +33,14 @@ Material:
         m_Texture: {fileID: 2800000, guid: aabf6ac2b5ed4a242a2c261918ae03d6, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _FaceSdfMap:
-        m_Texture: {fileID: 2800000, guid: ebb7adcc5416b8f40adf12e8e294d45f, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     m_Ints:
-    - _FACE_SDF: 0
-    - _FACE_SDF_ON: 0
-    - _FACE_UV_CORNER_LEFT: 0
-    - _FACE_UV_CORNER_TOP: 1
-    - _RED: 0
+    - _DISABLE_FRESNEL_SPECULAR_HIGHLIGHT_ON_FACE: 0
+    - _DISABLE_FRESNEL_SPECULAR_HIGHLIGHT_ON_HAIR: 0
+    - _FRESNEL_SPECULAR_HIGHLIGHT: 0
+    - _RIM_LIGHT_ON_SHADOW_SIDE: 0
     m_Floats:
-    - _FACE_UV_CORNER_SIZE: 0.5
-    - _FACE_UV_CORNER_U: 0
-    - _FACE_UV_CORNER_V: 1
-    - _LightSmooth: 0.023
-    - _MidBand: 0.01
-    m_Colors:
-    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
-    - _HalfShadowColor: {r: 0.6960922, g: 0.61667854, b: 0.7735849, a: 1}
-    - _ShadowColor: {r: 0.49056602, g: 0.49056602, b: 0.49056602, a: 1}
+    - _RimLightPower: 2
+    m_Colors: []
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &7843896551394781546
