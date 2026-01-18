@@ -5,7 +5,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-[CustomEditor(typeof(FloatingIslandGenerator))]
+[CustomEditor(typeof(ProcTerrainGenerator))]
 public class ProcTerrainGeneratorEditor : Editor
 {
     public VisualTreeAsset InspectorUXML;
@@ -30,7 +30,7 @@ public class ProcTerrainGeneratorEditor : Editor
             Button refreshBtn = uxmlContent.Q<Button>("refresh-button");
             refreshBtn.clickable.clicked += () =>
             {
-                ((FloatingIslandGenerator)target).Refresh();
+                ((ProcTerrainGenerator)target).Refresh();
             };
             myInspector.Add(uxmlContent);
         }

@@ -1,3 +1,4 @@
+using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -11,7 +12,22 @@ public abstract class AnyCharacterController : MonoBehaviour
     public CharacterType CharacterType;
     
     protected CharacterPrefabController CharacterInstance;
-
+    public CharacterPrefabController GetCharacterInstance()
+    {
+        return CharacterInstance;
+    }
+    public bool HasCharacter()
+    { 
+        return CharacterInstance != null;
+    }
+    public Transform GetCharacterTransform()
+    {
+        return CharacterInstance.transform;
+    }
+    public float3 GetCharacterPosition()
+    {
+        return CharacterInstance.transform.position;
+    }
     public void SetCharacterType(CharacterType characterType)
     {
         CharacterType = characterType;

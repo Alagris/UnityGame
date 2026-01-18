@@ -62,7 +62,7 @@ MonoBehaviour:
   Lens:
     FieldOfView: 60.000004
     OrthographicSize: 5
-    NearClipPlane: 0.3
+    NearClipPlane: 0.1
     FarClipPlane: 1000
     Dutch: 0
     ModeOverride: 0
@@ -249,18 +249,6 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 8d30b52e0f21a8f41b16466dc1652a18, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0.005
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 8d30b52e0f21a8f41b16466dc1652a18, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -0.515
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 8d30b52e0f21a8f41b16466dc1652a18, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -9.478326
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 8d30b52e0f21a8f41b16466dc1652a18, type: 3}
       propertyPath: m_LocalRotation.w
       value: 0.067734435
       objectReference: {fileID: 0}
@@ -345,14 +333,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb2b861dda98b434385805f9667ed985, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  CharacterType: {fileID: 0}
-  inventory: {fileID: 0}
+  CharacterType: {fileID: 11400000, guid: e33635e7baa0d5d439710544f0e2eb86, type: 2}
+  inventory: {fileID: 5306127962675061490}
   gravity: 9.81
   jumpForce: 10
   walkSpeed: 4
   cam: {fileID: 0}
-  cinecam: {fileID: 0}
-  ZoomSensitivity: -0.5
+  cinecam: {fileID: 7435286256705249997}
+  ZoomSensitivity: -0.2
   MinZoom: 0.3
   MaxZoom: 3
 --- !u!114 &5494668527510411092

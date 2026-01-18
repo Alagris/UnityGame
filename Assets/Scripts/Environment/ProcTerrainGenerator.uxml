@@ -1,8 +1,16 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
-    <ui:EnumField label="Noise Type" value="Center" type="FloatingIslandGenerator+NoiseType, Assembly-CSharp" binding-path="noiseType" name="noiseType" />
-    <ui:IntegerField label="Resolution (X)" value="128" binding-path="resX" name="resX" />
-    <ui:IntegerField label="Resolution (Y)" value="128" binding-path="resY" name="resY" />
+    <ui:Label text="General" />
+    <uie:PropertyField name="SectionPrefab" binding-path="SectionPrefab" label="SectionPrefab" />
+    <uie:PropertyField name="Player" binding-path="Player" label="Player" />
+    <ui:IntegerField label="Chunk render distance" value="128" binding-path="chunkDespawnRadius" name="chunkDespawnRadius" />
+    <uie:PropertyField name="chunkSpawnRadius" label="Chunk Spawn Radius" binding-path="chunkSpawnRadius" />
+    <uie:PropertyField name="chunkSize" binding-path="chunkSize" label="Chunk size" />
+    <ui:IntegerField label="Chunk Resolution (X)" value="32" binding-path="resX" name="resX" />
+    <ui:IntegerField label="Chunk Resolution (Y)" value="32" binding-path="resY" name="resY" />
     <uie:PropertyField label="Offset" binding-path="offset" name="offset" />
+    <ui:Label text="Terrain" />
+    <ui:EnumField label="Warp Type" value="NONE" type="FloatingIslandGenerator+WarpType, Assembly-CSharp" binding-path="warpType" name="warpType" />
+    <ui:EnumField label="Noise Type" value="Center" type="FloatingIslandGenerator+NoiseType, Assembly-CSharp" binding-path="noiseType" name="noiseType" />
     <uie:PropertyField label="Size" binding-path="size" name="size" />
     <uie:PropertyField label="Scale" binding-path="scale" name="scale" />
     <uie:PropertyField label="Height" binding-path="height" name="height" />
@@ -10,7 +18,6 @@
     <uie:PropertyField label="pointiness" binding-path="pointiness" name="pointiness" />
     <uie:PropertyField label="Scaling Power Base" binding-path="scalingPowerBase" name="scalingPowerBase" />
     <uie:PropertyField label="Iterations" binding-path="iterations" name="iterations" />
-    <ui:EnumField label="Warp Type" value="NONE" type="FloatingIslandGenerator+WarpType, Assembly-CSharp" binding-path="warpType" name="warpType" />
     <ui:Toggle label="Enable Collision" binding-path="enableCollision" value="true" name="enableCollision" />
     <ui:Label text="Grass&#10;" />
     <uie:PropertyField name="spawnGrass" binding-path="spawnGrass" label="spawnGrass" />
