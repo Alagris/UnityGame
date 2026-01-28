@@ -30,9 +30,9 @@ Shader "Custom/HellSkyShader"
 
             #pragma vertex vert
             #pragma fragment frag
-            #include "../../Scripts/Shaders/Noise/Noise1D.hlsl"
-            #include "../../Scripts/Shaders/Noise/SimplexNoise2D.hlsl"
-            #include "../../Scripts/Shaders/Noise/SimplexNoise3D.hlsl"
+            #include "../../../Scripts/Shaders/Noise/Noise1D.hlsl"
+            #include "../../../Scripts/Shaders/Noise/SimplexNoise2D.hlsl"
+            #include "../../../Scripts/Shaders/Noise/SimplexNoise3D.hlsl"
             #include "UnityCG.cginc"
            
 

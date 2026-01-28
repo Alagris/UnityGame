@@ -67,17 +67,13 @@ public class ProcTerrainGenerator : MonoBehaviour
     internal Color grassDark = new Color(0.5f,1,0.5f);
 
     [SerializeField]
-    internal int chunkDespawnRadius = 3;
-    [SerializeField]
-    internal float chunkSpawnRadius = 2;
-    [SerializeField]
     internal float chunkSize =10;
     [SerializeField]
-    PlayerController Player;
+    internal PlayerController Player;
     [SerializeField]
     ProcSection SectionPrefab;
 
-    MovingGrid<ProcSection> Grid;
+    
     // GraphicsBuffer grassEulerAngles;
     // GraphicsBuffer grassVertices;
     // GraphicsBuffer grassColors;
@@ -90,37 +86,26 @@ public class ProcTerrainGenerator : MonoBehaviour
             Player = FindFirstObjectByType<PlayerController>();
         }
 
-        Grid = new MovingGrid<ProcSection>((idx) => {
-            GameObject sectionObj = Instantiate(SectionPrefab.gameObject, transform);
-            ProcSection section = sectionObj.GetComponent<ProcSection>();
-            section.Setup(this, idx);
-            return section;
-        }, chunkSize, chunkDespawnRadius, chunkSpawnRadius, new float3(0,0,0));
+       
         //MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
         //meshRenderer.sharedMaterial = new Material(Shader.Find("Standard"));
         
         
     }
 
-   
-    public void Refresh()
+    public ProcSection SpawnSection(int idx)
     {
-        if (Player.HasCharacter())
-        {
-            Grid.reset(chunkDespawnRadius, chunkSize, Player.GetCharacterPosition());
-        }
-        else
-        {
-            Grid.forEachSection(m => m.Refresh());
-        }
+        GameObject sectionObj = Instantiate(SectionPrefab.gameObject, transform);
+        ProcSection section = sectionObj.GetComponent<ProcSection>();
+        section.Setup(this, idx);
+        return section;
     }
+
+
+    
     // Update is called once per frame
     void Update()
     {
-        if (Player.HasCharacter())
-        {
-            float3 position = Player.GetCharacterPosition();
-            Grid.update(position, chunkSpawnRadius);
-        }
+       
     }
 }

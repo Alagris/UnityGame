@@ -28,5 +28,4 @@
     <uie:PropertyField label="grassMaxHeight" binding-path="grassMaxHeight" name="grassMaxHeight" />
     <uie:PropertyField label="grassMaxTilt" binding-path="grassMaxTilt" name="grassMaxTilt" />
     <uie:PropertyField label="grassSeed" binding-path="grassSeed" name="grassSeed" />
-    <ui:Button text="Refresh" binding-path="Refresh" name="refresh-button" />
 </ui:UXML>

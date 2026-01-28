@@ -27,11 +27,13 @@ public class ProcTerrainGeneratorEditor : Editor
         if (InspectorUXML != null)
         {
             VisualElement uxmlContent = InspectorUXML.CloneTree();
+            /*
             Button refreshBtn = uxmlContent.Q<Button>("refresh-button");
             refreshBtn.clickable.clicked += () =>
             {
-                ((ProcTerrainGenerator)target).Refresh();
+              ((ProcTerrainGenerator)target).Refresh();
             };
+            */
             myInspector.Add(uxmlContent);
         }
 

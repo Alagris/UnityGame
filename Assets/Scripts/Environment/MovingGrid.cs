@@ -3,27 +3,30 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data.SqlTypes;
 using Unity.AppUI.Redux;
+using Unity.AppUI.UI;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public interface Section {
+public interface Section  {
 	void OnLoad(float distance, int2 absolutePosition);
     void OnDistanceChanged(float distance);
     void OnUnload();
 	void OnExit();
+	void Refresh();
 
-	string GetDebugStr();
+
+    string GetDebugStr();
 }
 
-struct Chunk<T> where T : class, Section
+struct Chunk
 {
-    public T section;
+    public Section section;
 	public float distance;
 	public int2 posFromCenter;
 
-    public T Unload()
+    public Section Unload()
 	{
 		if (section == null)
 		{
@@ -32,12 +35,12 @@ struct Chunk<T> where T : class, Section
 		else
 		{
 			section.OnUnload();
-			T s = section;
+            Section s = section;
 			section = null;
 			return s;
 		}
 	}
-    public void Load(T t, int2 absolutePosition)
+    public void Load(Section t, int2 absolutePosition)
     {
         section = t;
 		section.OnLoad(distance, absolutePosition);
@@ -46,7 +49,7 @@ struct Chunk<T> where T : class, Section
 	{
 		return section != null;
 	}
-	public void SetSection(T section)
+	public void SetSection(Section section)
 	{
 		this.section = section;
 		if (section != null)
@@ -68,27 +71,58 @@ struct Chunk<T> where T : class, Section
     }
 }
 
-public class MovingGrid<T> where T : class, Section
+public class MovingGrid : MonoBehaviour
 {
 
-	private readonly Func<int, T> sectionSpawner;
-    public float chunkSize = 1000;
-	int radius = 0;
-	int diameter = 0;
-    internal readonly Stack<T> unusedSections = new Stack<T>();
-	internal Chunk<T>[] chunks;
+
+    [SerializeField]
+    internal int chunkDespawnRadius = 3;
+    [SerializeField]
+    internal float chunkSpawnRadius = 2;
+
+    int diameter = 0;
+    internal readonly Stack<Section> unusedSections = new Stack<Section>();
+	internal Chunk[] chunks;
 	int[] sortedByDistance;
 	int2 absCenterChunkOffset;
+
+	[SerializeField]
+	ProcTerrainGenerator gen;
 	
-	public MovingGrid(Func<int, T> sectionSpawner, float chunkSize, int renderRadius, float spawnRadius, float3 initialPlayerPosition)
+	
+	private void Start()
 	{
-        this.sectionSpawner = sectionSpawner;
-        absCenterChunkOffset = getChunkAbsPosFromWorldPos(initialPlayerPosition);
-        setGridSize(renderRadius, chunkSize);
-		addChunksWithinRadius(spawnRadius);
+		if (gen == null)
+		{
+            gen = GetComponent<ProcTerrainGenerator>();
+        }
+		Refresh();
+        
+    }
+    public void Refresh()
+    {
+        if (gen.Player.HasCharacter())
+        {
+            absCenterChunkOffset = getChunkAbsPosFromWorldPos(gen.Player.GetCharacterPosition());
+            RebuildGrid();
+            addChunksWithinRadius(chunkSpawnRadius);
+        }
+        else
+        {
+            forEachSection(m => m.Refresh());
+        }
+    }
+    
+    private void Update()
+    {
+        if (gen.Player.HasCharacter())
+        {
+            float3 position = gen.Player.GetCharacterPosition();
+            update(position, chunkSpawnRadius);
+        }
     }
     public int getRadius() {
-		return radius;
+		return chunkDespawnRadius;
 	}
     public int getDiameter() {
 		return diameter;
@@ -98,13 +132,7 @@ public class MovingGrid<T> where T : class, Section
 	}
 	
 	
-	public void reset(int radius, float chunkSize, float3 playerPosition) {
-        absCenterChunkOffset = getChunkAbsPosFromWorldPos(playerPosition);
-        reset(radius, chunkSize);
-	}
-    public void reset(int radius, float chunkSize) {
-		setGridSize(radius, chunkSize);
-	}
+	
 	public void UnloadAll()
 	{
 		if (chunks != null)
@@ -120,7 +148,7 @@ public class MovingGrid<T> where T : class, Section
 		
         while (unusedSections.Count < area)
         {
-            unusedSections.Push(sectionSpawner(unusedSections.Count));
+            unusedSections.Push(gen.SpawnSection(unusedSections.Count));
 
         }
         while (unusedSections.Count > area)
@@ -129,19 +157,17 @@ public class MovingGrid<T> where T : class, Section
 
         }
     }
-    public void setGridSize(int radius, float chunkSize) {
-		this.chunkSize = chunkSize;
-        this.radius = radius;
-		diameter = radius * 2 + 1;
+    public void RebuildGrid() {
+		diameter = getRadius() * 2 + 1;
 		int area = diameter * diameter;
 		UnloadAll();
         EnsureSectionCount(area);
-        chunks = new Chunk<T>[area];
+        chunks = new Chunk[area];
         sortedByDistance = new int[area];
 
         for (int y = 0, i = 0; y < diameter; y++) {
 			for (int x = 0; x < diameter; x++, i++) {
-				int2 posFromCenter = new int2(x - radius, y - radius);
+				int2 posFromCenter = new int2(x - getRadius(), y - getRadius());
 				float distL2 = math.sqrt(math.dot(posFromCenter, posFromCenter));
 				//const int distL1 = math::sum(math::abs(posFromCenter));
 				//int distLinf = math::max(math::abs(posFromCenter.x), math::abs(posFromCenter.y));
@@ -168,26 +194,26 @@ public class MovingGrid<T> where T : class, Section
 		int chunkY = chunkIdx / diameter;
 		return new int2(chunkX, chunkY);
 	}
-	public T getSection(int chunkIdx) {
+	public Section getSection(int chunkIdx) {
 		if (chunkIdx < 0) return null;
 		return this.chunks[chunkIdx].section;
 	}
-	public T getSection(int2 chunkPos) {
+	public Section getSection(int2 chunkPos) {
 		return getSection(getChunkIdx(chunkPos));
 	}
-	public T setSection(int chunkIdx, T section) {
+	public Section setSection(int chunkIdx, Section section) {
 		if (chunkIdx == -1)return null;
-		T prev = this.chunks[chunkIdx].section;
+        Section prev = this.chunks[chunkIdx].section;
 		this.chunks[chunkIdx].section = section;
 		return prev;
 	}
-	private void addToUnused(T section)
+	private void addToUnused(Section section)
 	{
 		if (section != null) {
 			unusedSections.Push(section);
 		}
 	}
-    public T setSection(int2 chunkRelPos, T section) {
+    public Section setSection(int2 chunkRelPos, Section section) {
 		return setSection(getChunkIdx(chunkRelPos), section);
 	}
 	public void dropChunk(int chunkIdx) {
@@ -199,14 +225,14 @@ public class MovingGrid<T> where T : class, Section
 		}
 	}
 	public int2 getChunkAbsPosFromWorldPos(float posX, float posY) {
-		return new int2(Mathf.FloorToInt(posX / chunkSize), Mathf.FloorToInt(posY / chunkSize));
+		return new int2(Mathf.FloorToInt(posX / gen.chunkSize), Mathf.FloorToInt(posY / gen.chunkSize));
 	}
 	public  int2 getChunkAbsPosFromWorldPos(float3 pos) {
 		return getChunkAbsPosFromWorldPos(pos.x, pos.z);
 	}
 
 	public  int2 getAbsOffsetToBottomLeftmostChunk() {
-		return new int2(this.absCenterChunkOffset.x - radius, this.absCenterChunkOffset.y - radius);
+		return new int2(this.absCenterChunkOffset.x - getRadius(), this.absCenterChunkOffset.y - getRadius());
 	}
 	public  int2 absToRelPos(int2 chunkAbsPos) {
 		return chunkAbsPos - getAbsOffsetToBottomLeftmostChunk();
@@ -312,7 +338,7 @@ public class MovingGrid<T> where T : class, Section
 		return false;
 	}
 
-	public void forEachSection(System.Action<T> f)
+	public void forEachSection(System.Action<Section> f)
 	{
         for (int i = 0; i < chunks.Length; i++)
         {
