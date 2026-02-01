@@ -229,17 +229,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Version: 4
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
-  m_LightLayerMask: 1
-  m_RenderingLayers: 1
   m_CustomShadowLayers: 0
-  m_ShadowLayerMask: 1
-  m_ShadowRenderingLayers: 1
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 1
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -366,17 +372,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 59a6aec1db1e4a64ebfe9463357060db, type: 3}
---- !u!114 &1070163683 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5209732938090144719, guid: 59a6aec1db1e4a64ebfe9463357060db, type: 3}
-  m_PrefabInstance: {fileID: 1070163682}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fb2b861dda98b434385805f9667ed985, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerController
 --- !u!1 &1352393503
 GameObject:
   m_ObjectHideFlags: 0
@@ -387,7 +382,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1352393507}
   - component: {fileID: 1352393505}
-  - component: {fileID: 1352393508}
   - component: {fileID: 1352393509}
   m_Layer: 0
   m_Name: Island
@@ -416,6 +410,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -437,6 +433,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -456,47 +453,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1352393508
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1352393503}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 67f1f7db4a73e284ab07e16814c38b4f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FloatingIslandGenerator
-  warpType: 3
-  noiseType: 2
-  offset: 0
-  resX: 128
-  resY: 128
-  size:
-    x: 100
-    y: 100
-  scale: 100
-  height: 30
-  uvScale: 1
-  pointiness: 0.5
-  scalingPowerBase: 3
-  iterations: 9
-  enableCollision: 1
-  seed: 4534842
-  spawnGrass: 1
-  grassMaterial: {fileID: 2100000, guid: fc723f354e3b20441b0d37f05699d880, type: 2}
-  grassSeed: 474767
-  grassMaxTilt: 0
-  grassMinWidth: 1
-  grassMaxWidth: 1
-  grassMinHeight: 1
-  grassMaxHeight: 1
-  grassBright: {r: 1, g: 1, b: 1, a: 1}
-  grassDark: {r: 0.5, g: 1, b: 0.5, a: 1}
-  chunkSize: 10
-  Player: {fileID: 1070163683}
-  SectionPrefab: {fileID: 6395268407268524509, guid: d84e7a2914e94ef459bfb73a9a0747d3, type: 3}
 --- !u!114 &1352393509
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -508,10 +464,14 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ec3259473913fe247a4e3a13592ab930, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: EnvRuntime::StaticGrid
+  ProcEnv: {fileID: 2841676755933307327, guid: c27a375bc91305b4eb04b8eccb43db5a, type: 3}
+  ResX: 32
+  ResZ: 32
+  ChunkSize: 100
+  OffsetY: 0
   Rows: 3
   Columns: 3
-  gen: {fileID: 1352393508}
 --- !u!1 &1736631786
 GameObject:
   m_ObjectHideFlags: 0
@@ -619,7 +579,6 @@ MonoBehaviour:
   m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
-  m_Version: 2
   m_TaaSettings:
     m_Quality: 3
     m_FrameInfluence: 0.1
@@ -627,6 +586,7 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+  m_Version: 2
 --- !u!81 &1736631789
 AudioListener:
   m_ObjectHideFlags: 0

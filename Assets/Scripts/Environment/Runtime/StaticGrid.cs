@@ -1,7 +1,7 @@
 using Unity.Mathematics;
 using UnityEngine;
 
-public class StaticGrid : MonoBehaviour
+public class StaticGrid : ProcSectionSpawner
 {
     [SerializeField]
     internal int Rows = 3;
@@ -11,20 +11,15 @@ public class StaticGrid : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
     Section[] sections;
-    [SerializeField]
-    ProcTerrainGenerator gen;
+    
 
 
     private void Start()
     {
-        if (gen == null)
-        {
-            gen = GetComponent<ProcTerrainGenerator>();
-        }
         Refresh();
 
     }
-    public void Refresh()
+    public override void Refresh()
     {
 
         if (sections != null)
@@ -40,12 +35,11 @@ public class StaticGrid : MonoBehaviour
         {
             for (int y = 0; y < Rows; y++, i++)
             {
-                sections[i] = gen.SpawnSection(i);
+                sections[i] = SpawnSection(i);
                 sections[i].OnLoad(0, new int2(x, y) - offset);
             }
         }
     }
 
-
-
+    
 }

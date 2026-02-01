@@ -43,28 +43,7 @@ public class ProcTerrainGenerator : MonoBehaviour
     internal int iterations =5;
     [SerializeField]
     internal bool enableCollision =true;
-    [SerializeField]
-    internal uint seed =4534842;
-    [SerializeField]
-    internal bool spawnGrass=true;
-    [SerializeField]
-    internal Material grassMaterial;
-    [SerializeField]
-    internal uint grassSeed = 474767;
-    [SerializeField]
-    internal float grassMaxTilt = 30;
-    [SerializeField]
-    internal float grassMinWidth = 1.0f;
-    [SerializeField]
-    internal float grassMaxWidth = 1.0f;
-    [SerializeField]
-    internal float grassMinHeight = 1.0f;
-    [SerializeField]
-    internal float grassMaxHeight = 1.0f;
-    [SerializeField]
-    internal Color grassBright = new Color(1,1,1);
-    [SerializeField]
-    internal Color grassDark = new Color(0.5f,1,0.5f);
+ 
 
     [SerializeField]
     internal float chunkSize =10;
@@ -72,12 +51,13 @@ public class ProcTerrainGenerator : MonoBehaviour
     internal PlayerController Player;
     [SerializeField]
     ProcSection SectionPrefab;
+    [SerializeField]
+    internal bool ShadeFlat = false;
 
-    
     // GraphicsBuffer grassEulerAngles;
     // GraphicsBuffer grassVertices;
     // GraphicsBuffer grassColors;
-    
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -93,13 +73,6 @@ public class ProcTerrainGenerator : MonoBehaviour
         
     }
 
-    public ProcSection SpawnSection(int idx)
-    {
-        GameObject sectionObj = Instantiate(SectionPrefab.gameObject, transform);
-        ProcSection section = sectionObj.GetComponent<ProcSection>();
-        section.Setup(this, idx);
-        return section;
-    }
 
 
     

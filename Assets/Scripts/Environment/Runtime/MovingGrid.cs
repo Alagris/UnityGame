@@ -1,13 +1,8 @@
+using Env.Runtime;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Data.SqlTypes;
-using Unity.AppUI.Redux;
-using Unity.AppUI.UI;
 using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public interface Section  {
 	void OnLoad(float distance, int2 absolutePosition);
@@ -71,7 +66,7 @@ struct Chunk
     }
 }
 
-public class MovingGrid : MonoBehaviour
+public class MovingGrid : ProcSectionSpawner
 {
 
 
@@ -86,24 +81,19 @@ public class MovingGrid : MonoBehaviour
 	int[] sortedByDistance;
 	int2 absCenterChunkOffset;
 
-	[SerializeField]
-	ProcTerrainGenerator gen;
 	
-	
-	private void Start()
+    [SerializeField]
+    internal Transform Player;
+
+    private void Start()
 	{
-		if (gen == null)
-		{
-            gen = GetComponent<ProcTerrainGenerator>();
-        }
-		Refresh();
-        
+        Refresh();   
     }
-    public void Refresh()
+    public override void Refresh()
     {
-        if (gen.Player.HasCharacter())
+        if (Player!=null)
         {
-            absCenterChunkOffset = getChunkAbsPosFromWorldPos(gen.Player.GetCharacterPosition());
+            absCenterChunkOffset = getChunkAbsPosFromWorldPos(Player.position);
             RebuildGrid();
             addChunksWithinRadius(chunkSpawnRadius);
         }
@@ -115,9 +105,9 @@ public class MovingGrid : MonoBehaviour
     
     private void Update()
     {
-        if (gen.Player.HasCharacter())
+        if (Player!=null)
         {
-            float3 position = gen.Player.GetCharacterPosition();
+            float3 position = Player.position;
             update(position, chunkSpawnRadius);
         }
     }
@@ -148,7 +138,7 @@ public class MovingGrid : MonoBehaviour
 		
         while (unusedSections.Count < area)
         {
-            unusedSections.Push(gen.SpawnSection(unusedSections.Count));
+            unusedSections.Push(ProcEnv.SpawnSection(unusedSections.Count));
 
         }
         while (unusedSections.Count > area)
@@ -225,7 +215,7 @@ public class MovingGrid : MonoBehaviour
 		}
 	}
 	public int2 getChunkAbsPosFromWorldPos(float posX, float posY) {
-		return new int2(Mathf.FloorToInt(posX / gen.chunkSize), Mathf.FloorToInt(posY / gen.chunkSize));
+		return new int2(Mathf.FloorToInt(posX / ChunkSize), Mathf.FloorToInt(posY / ChunkSize));
 	}
 	public  int2 getChunkAbsPosFromWorldPos(float3 pos) {
 		return getChunkAbsPosFromWorldPos(pos.x, pos.z);

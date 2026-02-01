@@ -1,3 +1,4 @@
+using System;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -193,5 +194,17 @@ public struct RandomNumberGenerator
         const ulong mask = 0x0000FFFFFFFFFFFFL;
 
         x_ = (multiplier * x_ + addend) & mask;
+    }
+    /**minTilt, maxTilt is in radians*/
+    internal Quaternion RandomRot(float3 nor, float minTilt, float maxTilt)
+    {
+        return Quaternion.LookRotation(Vector3.forward, nor) * RandomRot(minTilt, maxTilt);
+    }
+    /**minTilt, maxTilt is in radians*/
+    internal Quaternion RandomRot(float minTilt, float maxTilt)
+    {
+        float pitch = get_float_in(minTilt, maxTilt);
+        float yaw = get_float_in(0, Mathf.PI*2);
+        return Quaternion.EulerAngles(pitch, yaw, 0);
     }
 }

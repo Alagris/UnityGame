@@ -28,4 +28,5 @@
     <uie:PropertyField label="grassMaxHeight" binding-path="grassMaxHeight" name="grassMaxHeight" />
     <uie:PropertyField label="grassMaxTilt" binding-path="grassMaxTilt" name="grassMaxTilt" />
     <uie:PropertyField label="grassSeed" binding-path="grassSeed" name="grassSeed" />
+    <uie:PropertyField label="ShadeFlat" binding-path="ShadeFlat" name="ShadeFlat" />
 </ui:UXML>
