@@ -109,6 +109,23 @@ namespace Env.Runtime
             return Noise.perlin_noise_derivative(pos, scale) * height;
         }
     }
+
+    [Serializable]
+    public class LinearCompiled : AbstractNoiseCompiled
+    {
+        [SerializeField]
+        float2 scale, height;
+        public LinearCompiled(Vector2 scale, Vector2 height, int positionXArg, int positionZArg, int outputGradientsArg) : base(positionXArg, positionZArg, outputGradientsArg)
+        {
+            this.scale = new float2(scale);
+            this.height = new float2(height);
+        }
+        internal override float3 EvalNoise(float2 pos)
+        {
+            Vector2 y = pos * scale + height;
+            return new float3(scale, y.x+y.y);
+        }
+    }
     [Serializable]
     public class ErosionNoiseCompiled : AbstractNoiseCompiled
     {
@@ -129,7 +146,44 @@ namespace Env.Runtime
             return Noise.morenoise(position, scale, pointiness, scalingPowerBase, iterations) * height;
         }
     }
-    
+    /*
+    [Serializable]
+    public class SplitCompiled : EnvCompiledFunction
+    {
+        [SerializeField]
+        int outputGradientsArg, positionXArg, positionZArg;
+        public SplitCompiled(int outputGradientsArg, int positionXArg, int positionZArg)
+        {
+            this.outputGradientsArg = outputGradientsArg;
+            this.positionXArg= positionXArg;
+            this.positionZArg= positionZArg;
+        }
+
+        public void run(Blackboard bb)
+        {
+            float3[] grad;
+            if (positionXArg == -1 || positionZArg == -1)
+            {
+                grad = ProcMesh.forEachPosition2D(bb.offset.xz, bb.resX, bb.resZ, bb.size, bb.size, (idx, pos) => new float3(1,1,pos.x+pos.y));
+                
+            }
+            else
+            {
+                grad = bb.getFloat3(outputGradientsArg);
+                
+            }
+            float3[] x = bb.makeFloat3(positionXArg, Mathf.Min(grad.Length));
+            float3[] z = bb.makeFloat3(positionZArg, Mathf.Min(grad.Length));
+            for (int i = 0; i < grad.Length; i++)
+            {
+                float3 g = grad[i];
+                
+                x[i] = new float3(g.x, der_EvalNoise_wrt_Z, posY.z);
+            }
+        }
+
+    }
+    */
     [Serializable]
     public class LandscapeCompiled : EnvCompiledFunction
     {
@@ -173,13 +227,13 @@ namespace Env.Runtime
         private readonly InstanceableObject Object;
         [SerializeField]
         private readonly int inputDensityArg, inputLandscapeArg, outputInstancesArg;
-        public DistributeCompiled(uint seed, bool alignToNormal, float minTilt, float maxTilt, InstanceableObject Object, int inputLandscapeArg, int inputDensityArg, int outputInstancesArg)
+        public DistributeCompiled(uint seed, bool alignToNormal, float minTilt, float maxTilt, MeshRenderer Object, int inputLandscapeArg, int inputDensityArg, int outputInstancesArg)
         {
             this.seed = seed;
             this.alignToNormal = alignToNormal;
             this.minTilt = minTilt;
             this.maxTilt = maxTilt;
-            this.Object = Object;
+            this.Object = InstanceableObject.From(Object);
             this.inputLandscapeArg = inputLandscapeArg;
             this.inputDensityArg = inputDensityArg;
             this.outputInstancesArg = outputInstancesArg;
@@ -189,6 +243,43 @@ namespace Env.Runtime
             ProcMesh landscape = bb.getMesh(inputLandscapeArg);
             float[] density = bb.getFloat(inputDensityArg);
             ProcInstances m = landscape.distributePoints(density, seed,alignToNormal,minTilt,maxTilt);
+            m.Object = Object;
+            bb.setInsatnceSet(outputInstancesArg, m);
+        }
+    }
+    [Serializable]
+    public class DistributeUniformCompiled : EnvCompiledFunction
+    {
+        [SerializeField]
+        private readonly uint seed;
+        [SerializeField]
+        private readonly bool alignToNormal;
+        [SerializeField]
+        private readonly float minTilt;
+        [SerializeField]
+        private readonly float maxTilt;
+        [SerializeField]
+        private readonly float desnityUniform;
+        [SerializeField]
+        private readonly InstanceableObject Object;
+        [SerializeField]
+        private readonly int inputLandscapeArg, outputInstancesArg;
+        public DistributeUniformCompiled(uint seed, bool alignToNormal, float minTilt, float maxTilt, MeshRenderer Object, int inputLandscapeArg, float desnityUniform, int outputInstancesArg)
+        {
+            this.seed = seed;
+            this.alignToNormal = alignToNormal;
+            this.minTilt = minTilt;
+            this.maxTilt = maxTilt;
+            this.Object = InstanceableObject.From(Object);
+            this.inputLandscapeArg = inputLandscapeArg;
+            this.desnityUniform = desnityUniform;
+            this.outputInstancesArg = outputInstancesArg;
+        }
+        public void run(Blackboard bb)
+        {
+            ProcMesh landscape = bb.getMesh(inputLandscapeArg);
+            
+            ProcInstances m = landscape.distributePointsUniform(desnityUniform, seed, alignToNormal, minTilt, maxTilt);
             m.Object = Object;
             bb.setInsatnceSet(outputInstancesArg, m);
         }

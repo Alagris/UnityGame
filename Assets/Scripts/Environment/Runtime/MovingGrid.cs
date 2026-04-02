@@ -114,10 +114,8 @@ public class MovingGrid : ProcSectionSpawner
 	public override void Clear()
 	{
 		UnloadAll();
-		while (unusedSections.Count > 0)
-		{
-			unusedSections.Pop().DestroyImmediate();
-		}
+        unusedSections.Clear();
+        base.Clear();
 	}
 
 

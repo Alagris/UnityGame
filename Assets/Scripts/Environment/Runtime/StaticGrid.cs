@@ -21,17 +21,10 @@ public class StaticGrid : ProcSectionSpawner
     }
     public override void Clear()
     {
-        if (sections != null)
-        {
-            for (int i = 0; i < sections.Length; i++)
-            {
-                if (sections[i] != null)
-                {
-                    sections[i].DestroyImmediate();
-                }
-            }
-            sections = null;
-        }
+        base.Clear();
+        sections = null;
+       
+
     }
     public override void UnloadAll()
     {

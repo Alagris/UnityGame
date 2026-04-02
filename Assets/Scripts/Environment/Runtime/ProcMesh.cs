@@ -75,6 +75,22 @@ public class ProcMesh
         Noise.distribute_points_on_faces(vertices, normals, triangles, (pos, idx) => density[idx], action, seed);
         return i;
     }
+    public ProcInstances distributePointsUniform(float density, uint seed, bool alignToNormal, float minTilt, float maxTilt)
+    {
+        ProcInstances i = new ProcInstances();
+        RandomNumberGenerator r = new RandomNumberGenerator(seed);
+        Action<float3, float3, int> action;
+        if (alignToNormal)
+        {
+            action = (vert, nor, idx) => i.Add(vert, r.RandomRot(nor, minTilt, maxTilt));
+        }
+        else
+        {
+            action = (vert, nor, idx) => i.Add(vert, r.RandomRot(minTilt, maxTilt));
+        }
+        Noise.distribute_points_on_faces(vertices, normals, triangles, (pos, idx) => density, action, seed);
+        return i;
+    }
     public List<Tuple<float3, float3>> distributePoints(Func<float3, int, float> densityFunction, uint seed) {
         List<Tuple<float3,float3>> points = new List<Tuple<float3, float3>> ();
         Noise.distribute_points_on_faces(vertices, normals, triangles, densityFunction,(vert, nor, idx)=>points.Add(Tuple.Create(vert, nor)), seed);

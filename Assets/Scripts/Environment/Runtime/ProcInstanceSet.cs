@@ -7,14 +7,22 @@ namespace Env.Runtime
     public class ProcInstanceSet
     {
         Dictionary<InstanceableObject, ProcInstances> Instances = new Dictionary<InstanceableObject, ProcInstances>();
-
+        ProcInstances unassigned;
         public ProcInstanceSet() { }
         public ProcInstanceSet(ProcInstances instances)
         {
-            Instances.Add(instances.Object, instances);
+            if (instances.Object == null)
+            { 
+                unassigned = instances;
+            }
+            else
+            {
+                Instances.Add(instances.Object, instances);
+            }
         }
         internal ProcInstances join(ProcInstanceSet b)
         {
+            
             ProcInstances output = new ProcInstances();
             foreach (var e in Instances)
             {

@@ -33,7 +33,14 @@ namespace Env.Editor
         {
             return Val(opt, dflt);
         }
-        
+        internal static Vector3 Float3(INodeOption opt, Vector3 dflt)
+        {
+            return Val(opt, dflt);
+        }
+        internal static Vector2 Float2(INodeOption opt, Vector2 dflt)
+        {
+            return Val(opt, dflt);
+        }
     }
 
 
@@ -150,7 +157,51 @@ namespace Env.Editor
     }
 
 
+    [Serializable]
+    public class Linear : AnyNoise
+    {
+        INodeOption ScaleOpt;
+        INodeOption HeightOpt;
 
+        public override EnvCompiledFunction compile(int xArg, int zArg, int outGrad)
+        {
+            return new LinearCompiled(
+                scale: Float2(ScaleOpt, new Vector2(1,1)),
+                height: Float2(HeightOpt, new Vector2(0,0)),
+                positionXArg: xArg,
+                positionZArg: zArg,
+                outputGradientsArg: outGrad
+           );
+        }
+        protected override void OnDefineOptions(IOptionDefinitionContext ctx)
+        {
+            ScaleOpt = ctx.AddOption<Vector2>("Scale").WithDefaultValue(new Vector2(1, 1)).Build();
+            HeightOpt = ctx.AddOption<Vector2>("Height").WithDefaultValue(new Vector2(0,0)).Build();
+        }
+
+    }
+    /*
+    [Serializable]
+    public class Split : EnvNode
+    {
+        IPort gPort;
+        IPort xPort;
+        IPort zPort;
+        
+        protected override void OnDefinePorts(IPortDefinitionContext ctx)
+        {
+            xPort = ctx.AddOutputPort<Vector3>("X").Build();
+            zPort = ctx.AddOutputPort<Vector3>("Z").Build();
+            gPort = ctx.AddInputPort<Vector3>("Gradient").Build();
+        }
+        
+        public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
+        {
+            return new SplitCompiled(variables.GetValueOrDefault(gPort, -1), variables.GetValueOrDefault(xPort, -1), variables.GetValueOrDefault(zPort, -1));
+        }
+
+    }
+    */
     [Serializable]
     public class LandscapeMesh : EnvNode
     {
@@ -192,22 +243,49 @@ namespace Env.Editor
 
         public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
         {
-            return new DistributeCompiled(
-                seed: UInt(SeedOpt,4645785),
-                alignToNormal: Bool(AlignToNormalOpt, true),
-                minTilt: Float(MinTiltOpt, 0),
-                maxTilt: Float(MaxTiltOpt, 0),
-                Object: Val<InstanceableObject>(ObjectOpt,null),
-                inputLandscapeArg: variables.GetValueOrDefault(LandscapePort, -1),
-                inputDensityArg: variables.GetValueOrDefault(DensityPort, -1),
-                outputInstancesArg:variables.GetValueOrDefault(InstancesPort, -1)
-            );
+            int inputDensityArg = variables.GetValueOrDefault(DensityPort, -1);
+            uint seed = UInt(SeedOpt, 4645785);
+            bool alignToNormal = Bool(AlignToNormalOpt, true);
+            float minTilt = Float(MinTiltOpt, 0);
+            float maxTilt = Float(MaxTiltOpt, 0);
+            MeshRenderer Object = Val<MeshRenderer>(ObjectOpt, null);
+            int inputLandscapeArg = variables.GetValueOrDefault(LandscapePort, -1);
+            int outputInstancesArg = variables.GetValueOrDefault(InstancesPort, -1);
+            if (inputDensityArg == -1)
+            {
+                Vector3 uniformDensity = new Vector3(0, 0, 0);
+                DensityPort.TryGetValue(out uniformDensity);
+                return new DistributeUniformCompiled(
+                    seed: seed,
+                    alignToNormal: alignToNormal,
+                    minTilt: minTilt,
+                    maxTilt: maxTilt,
+                    Object: Object,
+                    inputLandscapeArg: inputLandscapeArg,
+                    desnityUniform: uniformDensity.magnitude,
+                    outputInstancesArg: outputInstancesArg
+                );
+            }
+            else
+            {
+                return new DistributeCompiled(
+                    seed: seed,
+                    alignToNormal: alignToNormal,
+                    minTilt: minTilt,
+                    maxTilt: maxTilt,
+                    Object: Object,
+                    inputLandscapeArg: inputLandscapeArg,
+                    inputDensityArg: inputDensityArg,
+                    outputInstancesArg: outputInstancesArg
+                );
+            }
+            
         }
 
         protected override void OnDefineOptions(IOptionDefinitionContext ctx)
         {
             SeedOpt = ctx.AddOption<uint>("Seed").WithDefaultValue(4645785).Build();
-            ObjectOpt = ctx.AddOption<InstanceableObject>("Object").WithDefaultValue(null).Build();
+            ObjectOpt = ctx.AddOption<MeshRenderer>("Object").WithDefaultValue(null).Build();
             AlignToNormalOpt = ctx.AddOption<bool>("AlignToNormal").WithDefaultValue(true).Build();
             MinTiltOpt = ctx.AddOption<float>("MinTilt").WithDefaultValue(0).Build();
             MaxTiltOpt = ctx.AddOption<float>("MaxTilt").WithDefaultValue(0).Build();

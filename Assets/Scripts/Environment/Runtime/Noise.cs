@@ -84,7 +84,7 @@ public class Noise
     }
     public static uint hash(int kx, int ky)
     {
-        return hash(int_to_uint(kx), int_to_uint(kx));
+        return hash(int_to_uint(kx), int_to_uint(ky));
     }
     public static uint hash(uint kx, uint ky, uint kz)
     {

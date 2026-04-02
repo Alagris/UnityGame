@@ -42,5 +42,11 @@ public abstract class ProcSectionSpawner : MonoBehaviour
     public abstract void Refresh();
     public abstract void UnloadAll();
 
-    public abstract void Clear();
+    public virtual void Clear()
+    {
+        foreach (Transform child in gameObject.transform)
+        {
+            DestroyImmediate(child.gameObject);
+        }
+    }
 }
