@@ -28,8 +28,6 @@ public class ProcSection : MonoBehaviour, Section
         terrainMeshRenderer.SetSharedMaterials(mats);
     }
 
-
- 
     public string GetDebugStr()
     {
         string a = idx.ToString();
@@ -44,7 +42,6 @@ public class ProcSection : MonoBehaviour, Section
 
     public void OnExit()
     {
-        Destroy(gameObject);
     }
 
     public void OnLoad(float distance, int2 absolutePosition)
@@ -68,9 +65,19 @@ public class ProcSection : MonoBehaviour, Section
 
     public void OnUnload()
     {
-        grassMeshFilter.mesh = null;
-        terrainMeshFilter.mesh = null;
-        terrainMeshCollision.sharedMesh = null;
-        
+        if (grassMeshFilter != null)
+        {
+            grassMeshFilter.mesh = null;
+            terrainMeshFilter.mesh = null;
+            terrainMeshCollision.sharedMesh = null;
+        }
+    }
+
+    public void DestroyImmediate()
+    {
+        if (spawner != null)
+        {
+            DestroyImmediate(gameObject);
+        }
     }
 }

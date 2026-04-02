@@ -4,16 +4,6 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
-public interface Section  {
-	void OnLoad(float distance, int2 absolutePosition);
-    void OnDistanceChanged(float distance);
-    void OnUnload();
-	void OnExit();
-	void Refresh();
-
-
-    string GetDebugStr();
-}
 
 struct Chunk
 {
@@ -120,10 +110,18 @@ public class MovingGrid : ProcSectionSpawner
 	public int getArea() {
 		return diameter * diameter;
 	}
-	
-	
-	
-	public void UnloadAll()
+
+	public override void Clear()
+	{
+		UnloadAll();
+		while (unusedSections.Count > 0)
+		{
+			unusedSections.Pop().DestroyImmediate();
+		}
+	}
+
+
+    public override void UnloadAll() 
 	{
 		if (chunks != null)
 		{
@@ -143,7 +141,7 @@ public class MovingGrid : ProcSectionSpawner
         }
         while (unusedSections.Count > area)
         {
-            unusedSections.Pop().OnExit();
+            unusedSections.Pop().DestroyImmediate();
 
         }
     }

@@ -9,7 +9,7 @@ namespace Env.Editor
     [Graph(AssetExtension)]
     public class EnvGraph : Graph
     {
-        internal const string AssetExtension = "enveditor";
+        internal const string AssetExtension = "terrain";
 
         [MenuItem("Assets/Create/Proc Env/Graph")]
         static void CreateAssetFile()
@@ -21,5 +21,7 @@ namespace Env.Editor
         {
             base.OnGraphChanged(infos);
         }
+
+        
     }
 }

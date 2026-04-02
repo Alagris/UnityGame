@@ -38,7 +38,7 @@ namespace Env.Editor
 
 
     [Serializable]
-    public abstract class AnyNoiseNoise : EnvNode
+    public abstract class AnyNoise : EnvNode
     {
         IPort xPort;
         IPort zPort;
@@ -58,7 +58,7 @@ namespace Env.Editor
 
     
     [Serializable]
-    public class ErosionNoise : AnyNoiseNoise
+    public class ErosionNoise : AnyNoise
     {
 
         INodeOption IterationsOpt;
@@ -93,7 +93,7 @@ namespace Env.Editor
 
 
     [Serializable]
-    public class PerlinFbmNoise : AnyNoiseNoise
+    public class PerlinFbmNoise : AnyNoise
     {
         INodeOption IterationsOpt;
         INodeOption ScaleOpt;
@@ -126,7 +126,7 @@ namespace Env.Editor
     }
 
     [Serializable]
-    public class PerlinNoise : AnyNoiseNoise
+    public class PerlinNoise : AnyNoise
     {
         INodeOption ScaleOpt;
         INodeOption HeightOpt;

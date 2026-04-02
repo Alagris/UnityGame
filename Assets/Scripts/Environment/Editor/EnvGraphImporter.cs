@@ -25,7 +25,7 @@ namespace Env.Editor
                 Debug.LogError($"No Return node is present in EnvGraph: {ctx.assetPath}");
                 return;
             }
-            if (!finalNode.LandscapePort.isConnected)
+            if (!finalNode.LandscapePort.IsConnected)
             {
                 Debug.LogError($"No landscape is returned in EnvGraph: {ctx.assetPath}");
                 return;
@@ -47,8 +47,8 @@ namespace Env.Editor
                 compiledGraph.functions[i] = node.compile(variables);
             }
             
-            compiledGraph.returnedLandscape = variables[finalNode.LandscapePort.firstConnectedPort];
-            compiledGraph.returnedInstances = finalNode.InstancesPort.isConnected ? variables[finalNode.InstancesPort.firstConnectedPort] : -1;
+            compiledGraph.returnedLandscape = variables[finalNode.LandscapePort.FirstConnectedPort];
+            compiledGraph.returnedInstances = finalNode.InstancesPort.IsConnected ? variables[finalNode.InstancesPort.FirstConnectedPort] : -1;
             ctx.AddObjectToAsset("RuntimeAsset", compiledGraph);
             ctx.SetMainObject(compiledGraph);
         }
@@ -57,9 +57,9 @@ namespace Env.Editor
             
             foreach (var inPort in node.GetInputPorts())
             {
-                if (inPort.isConnected)
+                if (inPort.IsConnected)
                 {
-                    IPort srcPort = inPort.firstConnectedPort;
+                    IPort srcPort = inPort.FirstConnectedPort;
                     EnvNode srcNode = (EnvNode)srcPort.GetNode();
                     int srcIdx = sortedNodes.IndexOf(srcNode);
                     if (srcIdx >= i)
@@ -74,7 +74,7 @@ namespace Env.Editor
                     }
                     else
                     {
-                        switch (srcPort.dataType)
+                        switch (srcPort.DataType)
                         {
                             case System.Type x when x == typeof(int):
                                 idx = compiledGraph.intArraysCount++;
@@ -118,9 +118,9 @@ namespace Env.Editor
         {
             foreach (IPort port in node.GetInputPorts())
             {
-                if (port.isConnected)
+                if (port.IsConnected)
                 {
-                    IPort source = port.firstConnectedPort;
+                    IPort source = port.FirstConnectedPort;
                     INode next = source.GetNode();
                     if (next is EnvNode)
                     {

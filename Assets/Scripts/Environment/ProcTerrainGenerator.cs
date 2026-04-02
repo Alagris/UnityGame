@@ -63,7 +63,7 @@ public class ProcTerrainGenerator : MonoBehaviour
     {
         if (Player == null)
         {
-            Player = FindFirstObjectByType<PlayerController>();
+            Player = FindAnyObjectByType<PlayerController>();
         }
 
        

@@ -11,5 +11,9 @@ public class StaticGridInspector : Editor
         {
             ((StaticGrid)target).Refresh();
         }
+        if (GUILayout.Button("Clear"))
+        {
+            ((StaticGrid)target).Clear();
+        }
     }
 }

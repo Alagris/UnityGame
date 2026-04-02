@@ -28,6 +28,8 @@ public abstract class ProcSectionSpawner : MonoBehaviour
     {
         
     }
+
+   
     public ProcSection SpawnSection(int id)
     {
         GameObject sectionObj = new GameObject();
@@ -38,4 +40,7 @@ public abstract class ProcSectionSpawner : MonoBehaviour
         return section;
     }
     public abstract void Refresh();
+    public abstract void UnloadAll();
+
+    public abstract void Clear();
 }
