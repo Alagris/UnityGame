@@ -1,3 +1,4 @@
+using System;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -14,6 +15,7 @@ namespace Env.Runtime
         private readonly float3[][] float3Arrays;
         private readonly ProcMesh[] procMeshes;
         private readonly ProcInstanceSet[] procInstanceSets;
+        private readonly InstanceableObject[] objArrays;
         public readonly int resX, resZ;
         public readonly float size;
         public readonly float3 offset;
@@ -28,7 +30,8 @@ namespace Env.Runtime
             int int3ArraysCount,
             int float3ArraysCount,
             int procMeshesCount,
-            int procInstanceSetsCount
+            int procInstanceSetsCount,
+            int objectCount
             )
         {
             this.intArrays = new int[intArraysCount][];
@@ -39,6 +42,7 @@ namespace Env.Runtime
             this.float3Arrays = new float3[float3ArraysCount][];
             this.procMeshes = new ProcMesh[procMeshesCount];
             this.procInstanceSets = new ProcInstanceSet[procInstanceSetsCount];
+            this.objArrays = new InstanceableObject[objectCount];
             this.resX = resX;
             this.resZ = resZ;
             this.size = size;
@@ -105,6 +109,12 @@ namespace Env.Runtime
             return intArrays[idx] = array;
         }
 
+        internal InstanceableObject setObject(int idx, InstanceableObject o)
+        {
+            if (idx < 0) return null;
+            Debug.Assert(objArrays[idx] == null);
+            return objArrays[idx] = o;
+        }
         public float3[] makeFloat3(int idx, int length)
         {
             return setFloat3(idx, new float3[length]);
@@ -177,5 +187,13 @@ namespace Env.Runtime
             Debug.Assert(e != null);
             return e;
         }
+
+        internal InstanceableObject getObject(int idx)
+        {
+            InstanceableObject e = objArrays[idx];
+            Debug.Assert(e != null);
+            return e;
+        }
+
     }
 }

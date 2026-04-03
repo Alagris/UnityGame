@@ -76,6 +76,16 @@ public struct RandomNumberGenerator
         return get_float()*(max-min)+min;
     }
 
+
+    public float3 get_float3_in(float3 min, float3 max)
+    {
+        return get_float3() * (max - min) + min;
+    }
+    public float3 get_uniform_float3_in(float3 min, float3 max)
+    {
+        return get_float() * (max - min) + min;
+    }
+
     public float2 get_float2()
     {
         return new float2(get_float(), get_float());

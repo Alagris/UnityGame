@@ -44,8 +44,9 @@ public abstract class ProcSectionSpawner : MonoBehaviour
 
     public virtual void Clear()
     {
-        foreach (Transform child in gameObject.transform)
+        while(gameObject.transform.childCount>0)
         {
+            var child = gameObject.transform.GetChild(0);
             DestroyImmediate(child.gameObject);
         }
     }

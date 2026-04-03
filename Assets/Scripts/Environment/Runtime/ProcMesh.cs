@@ -57,39 +57,47 @@ public class ProcMesh
         }
         return flat;
     }
-
+    
     /**minTilt, maxTilt is in radians*/
-    public ProcInstances distributePoints(float[] density, uint seed, bool alignToNormal, float minTilt, float maxTilt)
+    public ProcInstances distributePoints(ProcInstances i, Func<float3, int, float> densityFunction, uint seed, bool alignToNormal, float minTilt, float maxTilt, float3 minScale, float3 maxScale, bool scaleUniformly)
     {
-        ProcInstances i = new ProcInstances();
+        
         RandomNumberGenerator r = new RandomNumberGenerator(seed);
         Action<float3, float3, int> action;
         if (alignToNormal)
         {
-            action = (vert, nor, idx) => i.Add(vert, r.RandomRot(nor, minTilt, maxTilt));
+            if (scaleUniformly)
+            {
+                action = (vert, nor, idx) => i.Add(vert, r.RandomRot(nor, minTilt, maxTilt), r.get_uniform_float3_in(minScale, maxScale));
+            }
+            else
+            {
+                action = (vert, nor, idx) => i.Add(vert, r.RandomRot(nor, minTilt, maxTilt), r.get_float3_in(minScale, maxScale));
+            }
+            
         }
         else
         {
-            action = (vert, nor, idx) => i.Add(vert, r.RandomRot(minTilt, maxTilt));
+            if (scaleUniformly)
+            {
+                action = (vert, nor, idx) => i.Add(vert, r.RandomRot(minTilt, maxTilt), r.get_uniform_float3_in(minScale, maxScale));
+            }
+            else
+            {
+                action = (vert, nor, idx) => i.Add(vert, r.RandomRot(minTilt, maxTilt), r.get_float3_in(minScale, maxScale));
+            }
+            
         }
-        Noise.distribute_points_on_faces(vertices, normals, triangles, (pos, idx) => density[idx], action, seed);
+        Noise.distribute_points_on_faces(vertices, normals, triangles, densityFunction, action, seed);
         return i;
     }
-    public ProcInstances distributePointsUniform(float density, uint seed, bool alignToNormal, float minTilt, float maxTilt)
+    public ProcInstances distributePoints(ProcInstances i, float[] density, uint seed, bool alignToNormal, float minTilt, float maxTilt, float3 minScale, float3 maxScale, bool scaleUniformly)
     {
-        ProcInstances i = new ProcInstances();
-        RandomNumberGenerator r = new RandomNumberGenerator(seed);
-        Action<float3, float3, int> action;
-        if (alignToNormal)
-        {
-            action = (vert, nor, idx) => i.Add(vert, r.RandomRot(nor, minTilt, maxTilt));
-        }
-        else
-        {
-            action = (vert, nor, idx) => i.Add(vert, r.RandomRot(minTilt, maxTilt));
-        }
-        Noise.distribute_points_on_faces(vertices, normals, triangles, (pos, idx) => density, action, seed);
-        return i;
+        return distributePoints(i,(pos, idx) => density[idx], seed, alignToNormal, minTilt, maxTilt, minScale, maxScale, scaleUniformly);
+    }
+    public ProcInstances distributePointsUniform(ProcInstances i, float density, uint seed, bool alignToNormal, float minTilt, float maxTilt, float3 minScale, float3 maxScale, bool scaleUniformly)
+    {
+        return distributePoints(i,(pos, idx) => density, seed,alignToNormal,minTilt,maxTilt,minScale,maxScale,scaleUniformly);
     }
     public List<Tuple<float3, float3>> distributePoints(Func<float3, int, float> densityFunction, uint seed) {
         List<Tuple<float3,float3>> points = new List<Tuple<float3, float3>> ();

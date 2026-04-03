@@ -1,33 +1,33 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 namespace Env.Runtime
 {
-    public class ProcInstanceSet
+    public class ProcInstanceSet: List<ProcInstances>
     {
-        Dictionary<InstanceableObject, ProcInstances> Instances = new Dictionary<InstanceableObject, ProcInstances>();
-        ProcInstances unassigned;
+        
+        
         public ProcInstanceSet() { }
+        public ProcInstanceSet(IEnumerable<ProcInstances> e) :base(e){ }
         public ProcInstanceSet(ProcInstances instances)
         {
-            if (instances.Object == null)
-            { 
-                unassigned = instances;
-            }
-            else
-            {
-                Instances.Add(instances.Object, instances);
-            }
+            Add(instances);
         }
-        internal ProcInstances join(ProcInstanceSet b)
+        internal ProcInstanceSet join(ProcInstanceSet b)
         {
-            
-            ProcInstances output = new ProcInstances();
-            foreach (var e in Instances)
-            {
-                //var myInstances = e.Value;
-                // = b.Instances.GetValueOrDefault(e.Key, null);
+            return new ProcInstanceSet(this.Concat(b));
+        }
+
+        internal ProcInstanceSet SetMaterials(List<Material> mats)
+        {
+            ProcInstanceSet output = new ProcInstanceSet();
+            Material[] a = mats.ToArray();
+            foreach (ProcInstances p in this){
+                ProcInstances newP = new ProcInstances(p);
+                newP.SetMaterials(mats);
+                output.Add(newP);
             }
             return output;
         }

@@ -100,6 +100,9 @@ namespace Env.Editor
                             case System.Type x when x == typeof(Transform):
                                 idx = compiledGraph.procInstanceSetsCount++;
                                 break;
+                            case System.Type x when x == typeof(InstanceableObject):
+                                idx = compiledGraph.objectCount++;
+                                break;
                             default:
                                 Debug.Assert(false);
                                 idx = -1;

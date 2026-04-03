@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -211,84 +212,92 @@ namespace Env.Runtime
             bb.setMesh(outputLandscapeArg, m);
         }
     }
-
     [Serializable]
-    public class DistributeCompiled : EnvCompiledFunction
+    public abstract class DistributeBaseCompiled : EnvCompiledFunction
     {
         [SerializeField]
-        private readonly uint seed;
+        protected uint seed;
         [SerializeField]
-        private readonly bool alignToNormal;
+        protected bool alignToNormal;
         [SerializeField]
-        private readonly float minTilt;
+        protected float minTilt;
         [SerializeField]
-        private readonly float maxTilt;
+        protected float maxTilt;
         [SerializeField]
-        private readonly InstanceableObject Object;
+        protected float3 minScale;
         [SerializeField]
-        private readonly int inputDensityArg, inputLandscapeArg, outputInstancesArg;
-        public DistributeCompiled(uint seed, bool alignToNormal, float minTilt, float maxTilt, MeshRenderer Object, int inputLandscapeArg, int inputDensityArg, int outputInstancesArg)
+        protected float3 maxScale;
+        [SerializeField]
+        protected bool scaleUniformly;
+        [SerializeField]
+        protected int objectArg;
+        [SerializeField]
+        protected int inputLandscapeArg, outputInstancesArg;
+        public DistributeBaseCompiled(uint seed, bool alignToNormal, float minTilt, float maxTilt, Vector3 minScale, Vector3 maxScale, bool scaleUniformly, int objectArg, int inputLandscapeArg, int outputInstancesArg)
         {
             this.seed = seed;
             this.alignToNormal = alignToNormal;
             this.minTilt = minTilt;
             this.maxTilt = maxTilt;
-            this.Object = InstanceableObject.From(Object);
+            this.minScale = minScale;
+            this.maxScale = maxScale;
+            this.scaleUniformly = scaleUniformly;
+            this.objectArg = objectArg; // Object = InstanceableObject.From(Object);
             this.inputLandscapeArg = inputLandscapeArg;
-            this.inputDensityArg = inputDensityArg;
             this.outputInstancesArg = outputInstancesArg;
         }
+        protected abstract ProcInstances run(Blackboard bb, ProcInstances m, ProcMesh landscape);
         public void run(Blackboard bb)
         {
             ProcMesh landscape = bb.getMesh(inputLandscapeArg);
-            float[] density = bb.getFloat(inputDensityArg);
-            ProcInstances m = landscape.distributePoints(density, seed,alignToNormal,minTilt,maxTilt);
-            m.Object = Object;
+            InstanceableObject o = bb.getObject(objectArg);
+            ProcInstances m = new ProcInstances(o);
+            run(bb, m, landscape);
             bb.setInsatnceSet(outputInstancesArg, m);
         }
     }
     [Serializable]
-    public class DistributeUniformCompiled : EnvCompiledFunction
+    public class DistributeCompiled : DistributeBaseCompiled
+    {
+        
+        [SerializeField]
+        int inputDensityArg;
+        public DistributeCompiled(uint seed, bool alignToNormal, float minTilt, float maxTilt, Vector3 minScale, Vector3 maxScale, bool scaleUniformly, int objectArg, int inputLandscapeArg, int inputDensityArg, int outputInstancesArg):base(seed,alignToNormal,minTilt,maxTilt,minScale,maxScale, scaleUniformly,objectArg, inputLandscapeArg,outputInstancesArg)
+        {
+            this.inputDensityArg = inputDensityArg;
+            
+        }
+        protected override ProcInstances run(Blackboard bb, ProcInstances m,ProcMesh landscape)
+        {
+            float[] density = bb.getFloat(inputDensityArg);
+            return landscape.distributePoints(m, density, seed,alignToNormal,minTilt,maxTilt,minScale,maxScale, scaleUniformly);
+        }
+    }
+    [Serializable]
+    public class DistributeUniformCompiled : DistributeBaseCompiled
     {
         [SerializeField]
-        private readonly uint seed;
-        [SerializeField]
-        private readonly bool alignToNormal;
-        [SerializeField]
-        private readonly float minTilt;
-        [SerializeField]
-        private readonly float maxTilt;
-        [SerializeField]
-        private readonly float desnityUniform;
-        [SerializeField]
-        private readonly InstanceableObject Object;
-        [SerializeField]
-        private readonly int inputLandscapeArg, outputInstancesArg;
-        public DistributeUniformCompiled(uint seed, bool alignToNormal, float minTilt, float maxTilt, MeshRenderer Object, int inputLandscapeArg, float desnityUniform, int outputInstancesArg)
+        float desnityUniform;
+        public DistributeUniformCompiled(uint seed, bool alignToNormal, float minTilt, float maxTilt, Vector3 minScale, Vector3 maxScale, bool scaleUniformly, int objectArg, int inputLandscapeArg, float desnityUniform, int outputInstancesArg) : base(seed, alignToNormal, minTilt, maxTilt, minScale, maxScale, scaleUniformly, objectArg, inputLandscapeArg, outputInstancesArg)
         {
-            this.seed = seed;
-            this.alignToNormal = alignToNormal;
-            this.minTilt = minTilt;
-            this.maxTilt = maxTilt;
-            this.Object = InstanceableObject.From(Object);
-            this.inputLandscapeArg = inputLandscapeArg;
-            this.desnityUniform = desnityUniform;
-            this.outputInstancesArg = outputInstancesArg;
-        }
-        public void run(Blackboard bb)
-        {
-            ProcMesh landscape = bb.getMesh(inputLandscapeArg);
             
-            ProcInstances m = landscape.distributePointsUniform(desnityUniform, seed, alignToNormal, minTilt, maxTilt);
-            m.Object = Object;
-            bb.setInsatnceSet(outputInstancesArg, m);
+            this.desnityUniform = desnityUniform;
+            
+        }
+        protected override ProcInstances run(Blackboard bb, ProcInstances m, ProcMesh landscape)
+        {
+            return landscape.distributePointsUniform(m, desnityUniform, seed, alignToNormal, minTilt, maxTilt,minScale,maxScale, scaleUniformly);
         }
     }
     [Serializable]
     public class JoinInstancesCompiled : EnvCompiledFunction
     {
-        
-        private readonly int aArg, bArg, outArg;
+        [SerializeField]
+        int aArg;
+        [SerializeField]
+        int bArg;
+        [SerializeField]
+        int outArg;
         public JoinInstancesCompiled(int aArg, int bArg, int outArg)
         {
             this.aArg = aArg;
@@ -302,5 +311,90 @@ namespace Env.Runtime
             bb.setInsatnceSet(outArg, a.join(b));
         }
     }
+    [Serializable]
+    public class OverrideMaterialsCompiled : EnvCompiledFunction
+    {
+        [SerializeField]
+        List<Material> mats;
+        [SerializeField]
+        int inArg;
+        [SerializeField]
+        int outArg;
+        public OverrideMaterialsCompiled(int inArg, int outArg, List<Material> mats)
+        {
+            this.inArg = inArg;
+            this.mats = mats;
+            this.outArg = outArg;
+        }
+        public void run(Blackboard bb)
+        {
+            ProcInstanceSet a = bb.getInsatnceSet(inArg);
+            bb.setInsatnceSet(outArg, a.SetMaterials(mats));
+        }
+    }
+    
+    [Serializable]
+    public class LoadInstanceableObjectAssetCompiled : EnvCompiledFunction
+    {
+        
+        [SerializeField]
+        InstanceableObjectAsset asset;
+        [SerializeField]
+        int outArg;
+        public LoadInstanceableObjectAssetCompiled(int outArg, InstanceableObjectAsset asset)
+        {
+            this.asset = asset;
+            this.outArg = outArg;
+        }
+        public void run(Blackboard bb)
+        {
+            InstanceableObject o = new InstanceableObject(asset);
+            bb.setObject(outArg, o);
+        }
+    }
+    [Serializable]
+    public class LoadLODGroupCompiled : EnvCompiledFunction
+    {
+        [SerializeField]
+        List<Material> mats;
+        [SerializeField]
+        LODGroup mesh;
+        [SerializeField]
+        int outArg;
+        public LoadLODGroupCompiled(int outArg, List<Material> mats, LODGroup mesh)
+        {
+            this.mesh = mesh;
+            this.mats = mats;
+            this.outArg = outArg;
+        }
+        public void run(Blackboard bb)
+        {
+            InstanceableObject o = new InstanceableObject(mesh);
+            o.SetMaterials(mats);
+            bb.setObject(outArg, o);
+        }
+    }
 
+    [Serializable]
+    public class LoadStaticMeshCompiled : EnvCompiledFunction
+    {
+        [SerializeField]
+        List<Material> mats;
+        [SerializeField]
+        MeshRenderer mesh;
+        [SerializeField]
+        int outArg;
+        public LoadStaticMeshCompiled(int outArg, List<Material> mats, MeshRenderer mesh)
+        {
+            this.mesh = mesh;
+            this.mats = mats;
+            this.outArg = outArg;
+        }
+        public void run(Blackboard bb)
+        {
+            InstanceableObject o = new InstanceableObject(mesh);
+            o.SetMaterials(mats);
+            bb.setObject(outArg, o);
+        }
+    }
 }

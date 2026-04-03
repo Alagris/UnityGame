@@ -231,24 +231,99 @@ namespace Env.Editor
             LandscapePort = ctx.AddOutputPort<Mesh>("Landscape").Build();
         }
     }
+    [Serializable]
+    public class LoadStaticMesh : EnvNode
+    {
+        IPort ObjectPort;
+        INodeOption OverrideMaterialsOpt, ObjectOpt;
+        
+            
+        public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
+        {
+            MeshRenderer mesh = Val<MeshRenderer>(ObjectOpt, null);
+            List<Material> mats = Val<List<Material>>(OverrideMaterialsOpt, null);
+            int objArg = variables.GetValueOrDefault(ObjectPort, -1);
+            return new LoadStaticMeshCompiled(objArg, mats, mesh);
+        }
+        protected override void OnDefineOptions(IOptionDefinitionContext ctx)
+        {
+            ObjectOpt = ctx.AddOption<MeshRenderer>("Object").WithDefaultValue(null).Build();
+            OverrideMaterialsOpt = ctx.AddOption<List<Material>>("OverrideMaterials").Build();
+        }
+        protected override void OnDefinePorts(IPortDefinitionContext ctx)
+        {
+            ObjectPort = ctx.AddOutputPort<InstanceableObject>("Object").Build();
+        }
+    }
+   
+    [Serializable]
+    public class LoadLODGroup : EnvNode
+    {
+        IPort ObjectPort;
+        INodeOption OverrideMaterialsOpt, ObjectOpt;
 
 
+        public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
+        {
+            LODGroup mesh = Val<LODGroup>(ObjectOpt, null);
+            List<Material> mats = Val<List<Material>>(OverrideMaterialsOpt, null);
+            int objArg = variables.GetValueOrDefault(ObjectPort, -1);
+            return new LoadLODGroupCompiled(objArg, mats, mesh);
+        }
+        protected override void OnDefineOptions(IOptionDefinitionContext ctx)
+        {
+            ObjectOpt = ctx.AddOption<LODGroup>("Object").WithDefaultValue(null).Build();
+            OverrideMaterialsOpt = ctx.AddOption<List<Material>>("OverrideMaterials").Build();
+        }
+        protected override void OnDefinePorts(IPortDefinitionContext ctx)
+        {
+            ObjectPort = ctx.AddOutputPort<InstanceableObject>("Object").Build();
+        }
+    }
+
+    [Serializable]
+    public class LoadInstanceableObjectAsset : EnvNode
+    {
+        IPort ObjectPort;
+        INodeOption ObjectOpt;
+
+
+        public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
+        {
+            InstanceableObjectAsset mesh = Val<InstanceableObjectAsset>(ObjectOpt, null);
+            
+            int objArg = variables.GetValueOrDefault(ObjectPort, -1);
+            return new LoadInstanceableObjectAssetCompiled(objArg, mesh);
+        }
+        protected override void OnDefineOptions(IOptionDefinitionContext ctx)
+        {
+            ObjectOpt = ctx.AddOption<InstanceableObjectAsset>("Asset").WithDefaultValue(null).Build();
+        }
+        protected override void OnDefinePorts(IPortDefinitionContext ctx)
+        {
+            ObjectPort = ctx.AddOutputPort<InstanceableObject>("Object").Build();
+        }
+    }
     [Serializable]
     public class Distribute : EnvNode
     {
         IPort LandscapePort;
         IPort DensityPort;
         IPort InstancesPort;
-        INodeOption SeedOpt, AlignToNormalOpt, MinTiltOpt, MaxTiltOpt, ObjectOpt;
+        IPort ObjectPort;
+        INodeOption SeedOpt, AlignToNormalOpt, MinTiltOpt, MaxTiltOpt, MinScaleOpt, MaxScaleOpt, ScaleUniformlyOpt;
 
         public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
         {
             int inputDensityArg = variables.GetValueOrDefault(DensityPort, -1);
             uint seed = UInt(SeedOpt, 4645785);
             bool alignToNormal = Bool(AlignToNormalOpt, true);
-            float minTilt = Float(MinTiltOpt, 0);
-            float maxTilt = Float(MaxTiltOpt, 0);
-            MeshRenderer Object = Val<MeshRenderer>(ObjectOpt, null);
+            float minTilt = Mathf.Deg2Rad * Float(MinTiltOpt, 0);
+            float maxTilt = Mathf.Deg2Rad * Float(MaxTiltOpt, 0);
+            bool scaleUniformly = Bool(ScaleUniformlyOpt, true);
+            Vector3 minScale = Float3(MinScaleOpt, new Vector3(1,1,1));
+            Vector3 maxScale = Float3(MaxScaleOpt, new Vector3(1, 1, 1));
+            int objectArg = variables.GetValueOrDefault(ObjectPort, -1); 
             int inputLandscapeArg = variables.GetValueOrDefault(LandscapePort, -1);
             int outputInstancesArg = variables.GetValueOrDefault(InstancesPort, -1);
             if (inputDensityArg == -1)
@@ -260,7 +335,10 @@ namespace Env.Editor
                     alignToNormal: alignToNormal,
                     minTilt: minTilt,
                     maxTilt: maxTilt,
-                    Object: Object,
+                    minScale: minScale,
+                    maxScale: maxScale,
+                    scaleUniformly: scaleUniformly,
+                    objectArg: objectArg,
                     inputLandscapeArg: inputLandscapeArg,
                     desnityUniform: uniformDensity.magnitude,
                     outputInstancesArg: outputInstancesArg
@@ -273,7 +351,10 @@ namespace Env.Editor
                     alignToNormal: alignToNormal,
                     minTilt: minTilt,
                     maxTilt: maxTilt,
-                    Object: Object,
+                    minScale: minScale,
+                    maxScale: maxScale,
+                    scaleUniformly: scaleUniformly,
+                    objectArg: objectArg,
                     inputLandscapeArg: inputLandscapeArg,
                     inputDensityArg: inputDensityArg,
                     outputInstancesArg: outputInstancesArg
@@ -285,16 +366,48 @@ namespace Env.Editor
         protected override void OnDefineOptions(IOptionDefinitionContext ctx)
         {
             SeedOpt = ctx.AddOption<uint>("Seed").WithDefaultValue(4645785).Build();
-            ObjectOpt = ctx.AddOption<MeshRenderer>("Object").WithDefaultValue(null).Build();
+            
             AlignToNormalOpt = ctx.AddOption<bool>("AlignToNormal").WithDefaultValue(true).Build();
             MinTiltOpt = ctx.AddOption<float>("MinTilt").WithDefaultValue(0).Build();
             MaxTiltOpt = ctx.AddOption<float>("MaxTilt").WithDefaultValue(0).Build();
+            ScaleUniformlyOpt = ctx.AddOption<bool>("Scale Uniformly").WithDefaultValue(true).Build();
+            MinScaleOpt = ctx.AddOption<Vector3>("MinScale").WithDefaultValue(new Vector3(1,1,1)).Build();
+            MaxScaleOpt = ctx.AddOption<Vector3>("MaxScale").WithDefaultValue(new Vector3(1, 1, 1)).Build();
         }
         protected override void OnDefinePorts(IPortDefinitionContext ctx)
         {
+            ObjectPort = ctx.AddInputPort<InstanceableObject>("Object").Build();
             LandscapePort = ctx.AddInputPort<Mesh>("Landscape").Build();
             DensityPort = ctx.AddInputPort<Vector3>("Density").Build();
             InstancesPort = ctx.AddOutputPort<Transform>("Instances").Build();
+            
+        }
+    }
+
+    [Serializable]
+    public class OverrideMaterials : EnvNode
+    {
+        IPort InstancesPort, OverridenInstancesPort;
+        INodeOption MaterialsOpt;
+        public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
+        {
+            List<Material> mats;
+            MaterialsOpt.TryGetValue(out mats);
+            return new OverrideMaterialsCompiled(
+                inArg: variables.GetValueOrDefault(InstancesPort, -1),
+                outArg: variables.GetValueOrDefault(OverridenInstancesPort, -1),
+                mats: mats
+            );
+        }
+
+        protected override void OnDefineOptions(IOptionDefinitionContext ctx)
+        {
+            MaterialsOpt = ctx.AddOption<List<Material>>("Materials").Build();
+        }
+        protected override void OnDefinePorts(IPortDefinitionContext ctx)
+        {
+            InstancesPort = ctx.AddInputPort<Transform>("Instances").Build();
+            OverridenInstancesPort = ctx.AddInputPort<Transform>("Instances").Build();
         }
     }
 
@@ -340,7 +453,7 @@ namespace Env.Editor
         protected override void OnDefinePorts(IPortDefinitionContext ctx)
         {
             ctx.AddInputPort<Transform>("Instances").Build();
-            ctx.AddInputPort<InstanceableObject>("Object").WithDefaultValue(null).Build();
+            ctx.AddInputPort<MeshRenderer>("Object").WithDefaultValue(null).Build();
         }
     }
 
