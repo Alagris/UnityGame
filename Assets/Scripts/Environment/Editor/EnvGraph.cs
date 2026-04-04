@@ -12,7 +12,7 @@ namespace Env.Editor
         internal const string AssetExtension = "terrain";
 
         [MenuItem("Assets/Create/Proc Env/Graph")]
-        static void CreateAssetFile()
+        static void CreateAssetFile() 
         {
             GraphDatabase.PromptInProjectBrowserToCreateNewAsset<EnvGraph>("Procedural environemnt graph");
         }

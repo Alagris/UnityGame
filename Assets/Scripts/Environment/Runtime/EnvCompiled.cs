@@ -14,11 +14,11 @@ namespace Env.Runtime
     }
 
     [Serializable]
-    public abstract class AbstractNoiseCompiled : EnvCompiledFunction
+    public abstract class AbstractNoiseGradCompiled : EnvCompiledFunction
     {
         [SerializeField]
         int positionXArg, positionZArg, outputGradientsArg;
-        public AbstractNoiseCompiled( int positionXArg, int positionZArg, int outputGradientsArg)
+        public AbstractNoiseGradCompiled( int positionXArg, int positionZArg, int outputGradientsArg)
         {
             this.positionXArg = positionXArg;
             this.positionZArg = positionZArg;
@@ -74,6 +74,39 @@ namespace Env.Runtime
             
         }
     }
+
+    [Serializable]
+    public abstract class AbstractNoiseCompiled : EnvCompiledFunction
+    {
+        [SerializeField]
+        int positionXArg, positionZArg, outputHeightsArg;
+        public AbstractNoiseCompiled(int positionXArg, int positionZArg, int outputHeightsArg)
+        {
+            this.positionXArg = positionXArg;
+            this.positionZArg = positionZArg;
+            this.outputHeightsArg = outputHeightsArg;
+        }
+        internal abstract float EvalNoise(float2 position);
+        public void run(Blackboard bb)
+        {
+            if (positionXArg == -1 || positionZArg == -1)
+            {
+                float[] o = ProcMesh.forEachPosition2D(bb.offset.xz, bb.resX, bb.resZ, 1, bb.size, bb.size, (idx, pos) => EvalNoise(pos));
+                bb.setFloat(outputHeightsArg, o);
+            }
+            else
+            {
+                float[] posX = bb.getFloat(positionXArg);
+                float[] posZ = bb.getFloat(positionZArg);
+                float[] o = bb.makeFloat(outputHeightsArg, Mathf.Min(posX.Length, posZ.Length));
+                for (int i = 0; i < o.Length; i++)
+                {  
+                    float posY = EvalNoise(new float2(posX[i], posZ[i]));
+                    o[i] = posY;
+                }
+            }
+        }
+    }
     [Serializable]
     public class PerlinFbmCompiled : AbstractNoiseCompiled
     {
@@ -90,9 +123,9 @@ namespace Env.Runtime
             this.height = height;
 
         }
-        internal override float3 EvalNoise(float2 pos)
+        internal override float EvalNoise(float2 pos)
         {
-            return Noise.perlin_fbm_derivative(pos, scale, height, heightPowerBase, scalePowerBase, iterations);
+            return Noise.perlin_fbm(pos, scale, height, heightPowerBase, scalePowerBase, iterations);
         }
     }
     [Serializable]
@@ -105,12 +138,27 @@ namespace Env.Runtime
             this.scale = scale;
             this.height = height;
         }
-        internal override float3 EvalNoise(float2 pos)
+        internal override float EvalNoise(float2 pos)
         {
-            return Noise.perlin_noise_derivative(pos, scale) * height;
+            return Noise.perlin_noise(pos, scale) * height;
         }
     }
-
+    [Serializable]
+    public class LinearGradCompiled : AbstractNoiseGradCompiled
+    {
+        [SerializeField]
+        float2 scale, height;
+        public LinearGradCompiled(Vector2 scale, Vector2 height, int positionXArg, int positionZArg, int outputGradientsArg) : base(positionXArg, positionZArg, outputGradientsArg)
+        {
+            this.scale = new float2(scale);
+            this.height = new float2(height);
+        }
+        internal override float3 EvalNoise(float2 pos)
+        {
+            Vector2 y = pos * scale + height;
+            return new float3(scale, y.x + y.y);
+        }
+    }
     [Serializable]
     public class LinearCompiled : AbstractNoiseCompiled
     {
@@ -121,12 +169,84 @@ namespace Env.Runtime
             this.scale = new float2(scale);
             this.height = new float2(height);
         }
-        internal override float3 EvalNoise(float2 pos)
+        internal override float EvalNoise(float2 pos)
         {
             Vector2 y = pos * scale + height;
-            return new float3(scale, y.x+y.y);
+            return y.x+y.y;
         }
     }
+
+    [Serializable]
+    public abstract class AbstractBinaryCompiled : EnvCompiledFunction
+    {
+        [SerializeField]
+        int aArg, bArg, outputArg;
+        public AbstractBinaryCompiled(int aArg, int bArg, int outputArg) 
+        {
+            this.aArg = aArg;
+            this.bArg = bArg;
+            this.outputArg = outputArg;
+        }
+        public abstract void Eval(float[] a, float[] b, float[] c);
+        public void run(Blackboard bb)
+        {
+            
+             float[] a = bb.getFloat(aArg);
+             float[] b = bb.getFloat(bArg);
+             float[] o = bb.makeFloat(outputArg, Mathf.Min(a.Length, b.Length));
+             Eval(a, b, o);
+            
+        }
+    }
+    [Serializable]
+    public class MultiplyCompiled : AbstractBinaryCompiled
+    {
+        
+        public MultiplyCompiled(int aArg, int bArg, int outputArg) : base(aArg, bArg, outputArg) { }
+        
+       
+
+        public override void Eval(float[] a, float[] b, float[] c)
+        {
+            for (int i = 0; i < c.Length; i++)
+            {
+                c[i] = a[i]*b[i];
+            }
+        }
+    }
+    [Serializable]
+    public class AddCompiled : AbstractBinaryCompiled
+    {
+
+        public AddCompiled(int aArg, int bArg, int outputArg) : base(aArg, bArg, outputArg) { }
+
+
+
+        public override void Eval(float[] a, float[] b, float[] c)
+        {
+            for (int i = 0; i < c.Length; i++)
+            {
+                c[i] = a[i] + b[i];
+            }
+        }
+    }
+    [Serializable]
+    public class SubCompiled : AbstractBinaryCompiled
+    {
+
+        public SubCompiled(int aArg, int bArg, int outputArg) : base(aArg, bArg, outputArg) { }
+
+
+
+        public override void Eval(float[] a, float[] b, float[] c)
+        {
+            for (int i = 0; i < c.Length; i++)
+            {
+                c[i] = a[i] - b[i];
+            }
+        }
+    }
+
     [Serializable]
     public class ErosionNoiseCompiled : AbstractNoiseCompiled
     {
@@ -142,49 +262,11 @@ namespace Env.Runtime
             this.iterations = iterations;
             this.height = height;
         }
-        internal override float3 EvalNoise(float2 position)
+        internal override float EvalNoise(float2 position)
         {
             return Noise.morenoise(position, scale, pointiness, scalingPowerBase, iterations) * height;
         }
     }
-    /*
-    [Serializable]
-    public class SplitCompiled : EnvCompiledFunction
-    {
-        [SerializeField]
-        int outputGradientsArg, positionXArg, positionZArg;
-        public SplitCompiled(int outputGradientsArg, int positionXArg, int positionZArg)
-        {
-            this.outputGradientsArg = outputGradientsArg;
-            this.positionXArg= positionXArg;
-            this.positionZArg= positionZArg;
-        }
-
-        public void run(Blackboard bb)
-        {
-            float3[] grad;
-            if (positionXArg == -1 || positionZArg == -1)
-            {
-                grad = ProcMesh.forEachPosition2D(bb.offset.xz, bb.resX, bb.resZ, bb.size, bb.size, (idx, pos) => new float3(1,1,pos.x+pos.y));
-                
-            }
-            else
-            {
-                grad = bb.getFloat3(outputGradientsArg);
-                
-            }
-            float3[] x = bb.makeFloat3(positionXArg, Mathf.Min(grad.Length));
-            float3[] z = bb.makeFloat3(positionZArg, Mathf.Min(grad.Length));
-            for (int i = 0; i < grad.Length; i++)
-            {
-                float3 g = grad[i];
-                
-                x[i] = new float3(g.x, der_EvalNoise_wrt_Z, posY.z);
-            }
-        }
-
-    }
-    */
     [Serializable]
     public class LandscapeCompiled : EnvCompiledFunction
     {
@@ -193,23 +275,54 @@ namespace Env.Runtime
         [SerializeField]
         float uvScaling;
         [SerializeField]
-        int gradientArg, outputLandscapeArg;
-        public LandscapeCompiled(bool shadeFlat, float uvScaling, int gradientArg, int outputLandscapeArg)
+        int heightArg, outputLandscapeArg;
+        public LandscapeCompiled(bool shadeFlat, float uvScaling, int heightArg, int outputLandscapeArg)
         {
             this.uvScaling = uvScaling;
             this.shadeFlat = shadeFlat;
-            this.gradientArg = gradientArg;
+            this.heightArg = heightArg;
             this.outputLandscapeArg = outputLandscapeArg;
         }
         public void run(Blackboard bb)
         {
-            float3[] gradients = bb.getFloat3(gradientArg);
-            ProcMesh m = ProcMesh.gridPrecomputed(bb.offset, bb.resX, bb.resZ, bb.size, bb.size, gradients, uvScaling);
+            float[] heights = bb.getFloat(heightArg);
+            ProcMesh m = ProcMesh.gridPrecomputed(bb.offset, bb.resX, bb.resZ, bb.size, bb.size, heights, uvScaling);
+            
             if (shadeFlat)
             {
                 m = m.ShadeFlat();
             }
             bb.setMesh(outputLandscapeArg, m);
+        }
+    }
+
+    [Serializable]
+    public class PaintCompiled : EnvCompiledFunction
+    {
+        [SerializeField]
+        int[] layersWeightArgs;
+        [SerializeField]
+        TerrainLayer[] layerMaterials;
+        int outputArg;
+
+        public PaintCompiled(int outputArg, int[] layersWeightArgs, TerrainLayer[] layerMaterials)
+        {
+            this.outputArg = outputArg;
+            this.layersWeightArgs = layersWeightArgs;
+            this.layerMaterials = layerMaterials;
+        }
+
+        public void run(Blackboard bb)
+        {
+            TerrainLayers layers = new TerrainLayers();
+            for(int i=0;i<layerMaterials.Length;i++){
+                int idx = layersWeightArgs[i];
+                float[] weight =  idx < 0 ? null : bb.getFloat(idx);
+                TerrainLayer layer = layerMaterials[i];
+                layers.Add(weight, layer);
+            }
+            layers.Normalize();
+            bb.setLayers(layers, outputArg);
         }
     }
     [Serializable]
@@ -293,22 +406,30 @@ namespace Env.Runtime
     public class JoinInstancesCompiled : EnvCompiledFunction
     {
         [SerializeField]
-        int aArg;
-        [SerializeField]
-        int bArg;
+        int[] inputArgs;
         [SerializeField]
         int outArg;
-        public JoinInstancesCompiled(int aArg, int bArg, int outArg)
+        public JoinInstancesCompiled(int[] inputArgs, int outArg)
         {
-            this.aArg = aArg;
-            this.bArg = bArg;
+            this.inputArgs = inputArgs;
             this.outArg = outArg;
         }
         public void run(Blackboard bb)
         {
-            ProcInstanceSet a = bb.getInsatnceSet(aArg);
-            ProcInstanceSet b = bb.getInsatnceSet(aArg);
-            bb.setInsatnceSet(outArg, a.join(b));
+            if (inputArgs.Length == 1)
+            {
+                bb.setInsatnceSet(outArg, bb.getInsatnceSet(inputArgs[0]));
+            }
+            else
+            {
+                ProcInstanceSet output = new ProcInstanceSet();
+                foreach (int i in inputArgs)
+                {
+                    ProcInstanceSet input = bb.getInsatnceSet(i);
+                    output.AddRange(input);
+                }
+                bb.setInsatnceSet(outArg, output);
+            }
         }
     }
     [Serializable]

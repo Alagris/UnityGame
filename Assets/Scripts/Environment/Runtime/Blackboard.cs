@@ -16,11 +16,13 @@ namespace Env.Runtime
         private readonly ProcMesh[] procMeshes;
         private readonly ProcInstanceSet[] procInstanceSets;
         private readonly InstanceableObject[] objArrays;
+        private readonly TerrainLayers[] layersArrays;
+        
         public readonly int resX, resZ;
         public readonly float size;
         public readonly float3 offset;
 
-        public int returnedInstances, returnedLandscape;
+        public int returnedInstances, returnedLandscape, returnedLayers;
 
         public Blackboard(int resX, int resZ, float size, float3 offset,
             int intArraysCount,
@@ -31,7 +33,8 @@ namespace Env.Runtime
             int float3ArraysCount,
             int procMeshesCount,
             int procInstanceSetsCount,
-            int objectCount
+            int objectCount,
+            int layersCount
             )
         {
             this.intArrays = new int[intArraysCount][];
@@ -43,6 +46,7 @@ namespace Env.Runtime
             this.procMeshes = new ProcMesh[procMeshesCount];
             this.procInstanceSets = new ProcInstanceSet[procInstanceSetsCount];
             this.objArrays = new InstanceableObject[objectCount];
+            this.layersArrays = new TerrainLayers[layersCount];
             this.resX = resX;
             this.resZ = resZ;
             this.size = size;
@@ -109,11 +113,17 @@ namespace Env.Runtime
             return intArrays[idx] = array;
         }
 
-        internal InstanceableObject setObject(int idx, InstanceableObject o)
+        public InstanceableObject setObject(int idx, InstanceableObject o)
         {
             if (idx < 0) return null;
             Debug.Assert(objArrays[idx] == null);
             return objArrays[idx] = o;
+        }
+        public TerrainLayers setLayers(TerrainLayers o, int idx)
+        {
+            if (idx < 0) return null;
+            Debug.Assert(layersArrays[idx] == null);
+            return layersArrays[idx] = o;
         }
         public float3[] makeFloat3(int idx, int length)
         {
@@ -187,8 +197,13 @@ namespace Env.Runtime
             Debug.Assert(e != null);
             return e;
         }
-
-        internal InstanceableObject getObject(int idx)
+        public TerrainLayers getLayers(int idx)
+        {
+            TerrainLayers e = layersArrays[idx];
+            Debug.Assert(e != null);
+            return e;
+        }
+        public InstanceableObject getObject(int idx)
         {
             InstanceableObject e = objArrays[idx];
             Debug.Assert(e != null);

@@ -1,15 +1,18 @@
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(MovingGrid))] 
-public class MovingGridInspector : Editor
+namespace Env.Runtime
 {
-    public override void OnInspectorGUI()
+    [CustomEditor(typeof(MovingGrid))]
+    public class MovingGridInspector : Editor
     {
-        DrawDefaultInspector();
-        if (GUILayout.Button("Refresh"))
+        public override void OnInspectorGUI()
         {
-            ((MovingGrid)target).Refresh();
+            DrawDefaultInspector();
+            if (GUILayout.Button("Refresh"))
+            {
+                ((MovingGrid)target).Refresh();
+            }
         }
     }
 }

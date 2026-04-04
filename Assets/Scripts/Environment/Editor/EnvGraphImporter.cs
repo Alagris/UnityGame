@@ -38,7 +38,7 @@ namespace Env.Editor
             { 
                 EnvNode node = sortedNodes[i];
                 AddInputs(node, i,sortedNodes,variables,compiledGraph, ctx);
-                compiledGraph.functions[i] = node.compile(variables);
+                //compiledGraph.functions[i] = node.compile(variables);
             }
             AddInputs(finalNode, sortedNodes.Count, sortedNodes, variables, compiledGraph, ctx);
             for (int i = 0; i < sortedNodes.Count; i++)
@@ -46,7 +46,8 @@ namespace Env.Editor
                 EnvNode node = sortedNodes[i];
                 compiledGraph.functions[i] = node.compile(variables);
             }
-            
+
+            compiledGraph.returnedLayers = variables[finalNode.LayersPort.FirstConnectedPort];
             compiledGraph.returnedLandscape = variables[finalNode.LandscapePort.FirstConnectedPort];
             compiledGraph.returnedInstances = finalNode.InstancesPort.IsConnected ? variables[finalNode.InstancesPort.FirstConnectedPort] : -1;
             ctx.AddObjectToAsset("RuntimeAsset", compiledGraph);
@@ -102,6 +103,9 @@ namespace Env.Editor
                                 break;
                             case System.Type x when x == typeof(InstanceableObject):
                                 idx = compiledGraph.objectCount++;
+                                break;
+                            case System.Type x when x == typeof(TerrainLayers):
+                                idx = compiledGraph.layersCount++;
                                 break;
                             default:
                                 Debug.Assert(false);

@@ -5,6 +5,7 @@ using System.IO;
 using Unity.GraphToolkit.Editor;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.XR;
 
 
 namespace Env.Runtime
@@ -49,7 +50,8 @@ namespace Env.Runtime
     public class InstanceableObject : List<InstanceableLOD>
     {
         public InstanceableObject() { }
-        public InstanceableObject(InstanceableObjectAsset asset) : base(asset.LODs){}
+        public InstanceableObject(Mesh mesh) : this(mesh, null) { }
+        public InstanceableObject(InstanceableObjectAsset asset) : base(asset.LODs){} 
         public InstanceableObject(IEnumerable<InstanceableLOD> lods) : base(lods) { } 
         public InstanceableObject(Mesh StaticMesh, Material[] Materials) : this(new InstanceableLOD(StaticMesh, Materials)) { }
         public InstanceableObject(InstanceableLOD lod)
@@ -109,27 +111,29 @@ namespace Env.Runtime
         {
             InstanceableObjectAsset asset = ScriptableObject.CreateInstance<InstanceableObjectAsset>();
 
-            InstanceableObject io = null;
-            if (Selection.activeObject is GameObject)
-            {   
+            
+            if (Selection.activeObject is Mesh)
+            {
+                Mesh m = (Mesh)Selection.activeObject;
+                asset.LODs = new InstanceableObject(m);
+            }
+            else if (Selection.activeObject is GameObject)
+            {
                 GameObject go = (GameObject)Selection.activeObject;
                 MeshRenderer mesh = go.GetComponent<MeshRenderer>();
                 if (mesh != null)
                 {
-                    io = new InstanceableObject(mesh);
+                    asset.LODs = new InstanceableObject(mesh);
                 }
-                else {
+                else
+                {
                     LODGroup lods = go.GetComponent<LODGroup>();
                     if (lods != null)
                     {
-                        io = new InstanceableObject(lods);
+                        asset.LODs = new InstanceableObject(lods);
                     }
                 }
-                
-            }
-            if (io != null)
-            {
-                asset.LODs = io;
+
             }
 
             String path = AssetDatabase.GetAssetPath(Selection.activeObject);

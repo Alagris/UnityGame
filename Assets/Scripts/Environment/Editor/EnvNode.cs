@@ -41,6 +41,30 @@ namespace Env.Editor
         {
             return Val(opt, dflt);
         }
+
+
+        internal void Redirect(Dictionary<IPort, int> variables, IPort inPort, IPort outPort)
+        {
+            Debug.Assert(inPort.Direction == PortDirection.Input);
+            Debug.Assert(outPort.Direction == PortDirection.Output);
+            int inIdx = variables.GetValueOrDefault(inPort, -1);
+            List<IPort> neighbours = new List<IPort>();
+            outPort.GetConnectedPorts(neighbours);
+            foreach (IPort i in neighbours)
+            {
+                variables.Add(i, inIdx);
+            }
+        }
+        internal void Disconnect(Dictionary<IPort, int> variables, IPort outPort)
+        {
+            Debug.Assert(outPort.Direction == PortDirection.Output);
+            List<IPort> neighbours = new List<IPort>();
+            outPort.GetConnectedPorts(neighbours);
+            foreach (IPort i in neighbours)
+            {
+                variables.Add(i, -1);
+            }
+        }
     }
 
 
@@ -52,9 +76,9 @@ namespace Env.Editor
         IPort gPort;
         protected override void OnDefinePorts(IPortDefinitionContext ctx)
         {
-            xPort = ctx.AddInputPort<Vector3>("X").Build();
-            zPort = ctx.AddInputPort<Vector3>("Z").Build();
-            gPort = ctx.AddOutputPort<Vector3>("Gradient").Build();
+            xPort = ctx.AddInputPort<float>("X").Build();
+            zPort = ctx.AddInputPort<float>("Z").Build();
+            gPort = ctx.AddOutputPort<float>("Height").Build();
         }
         public abstract EnvCompiledFunction compile(int xArg, int zArg, int outGrad);
         public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
@@ -180,33 +204,93 @@ namespace Env.Editor
         }
 
     }
-    /*
+    
     [Serializable]
-    public class Split : EnvNode
+    public abstract class AbstractBinary : EnvNode
     {
-        IPort gPort;
-        IPort xPort;
-        IPort zPort;
+        IPort aPort;
+        IPort bPort;
+        IPort cPort;
         
         protected override void OnDefinePorts(IPortDefinitionContext ctx)
         {
-            xPort = ctx.AddOutputPort<Vector3>("X").Build();
-            zPort = ctx.AddOutputPort<Vector3>("Z").Build();
-            gPort = ctx.AddInputPort<Vector3>("Gradient").Build();
+            aPort = ctx.AddInputPort<float>("A").Build();
+            bPort = ctx.AddInputPort<float>("B").Build();
+            cPort = ctx.AddOutputPort<float>("C").Build();
         }
         
         public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
         {
-            return new SplitCompiled(variables.GetValueOrDefault(gPort, -1), variables.GetValueOrDefault(xPort, -1), variables.GetValueOrDefault(zPort, -1));
+            int a = variables.GetValueOrDefault(aPort, -1);
+            int b = variables.GetValueOrDefault(bPort, -1);
+            if (a == -1)
+            {
+                if(b == -1)
+                {
+                    Disconnect(variables, cPort);
+                    return null;
+                }
+                else
+                {
+                    Redirect(variables, bPort, cPort);
+                    return null;
+                }
+
+            }
+            else
+            {
+                if (b == -1)
+                {
+                    Redirect(variables, aPort, cPort);
+                    return null;
+                }
+                else
+                {
+                    return compile(variables, a, b, variables.GetValueOrDefault(cPort, -1));
+                }
+            }
+            
+        }
+
+        protected abstract EnvCompiledFunction compile(Dictionary<IPort, int> variables, int a, int b, int output);
+    }
+
+    [Serializable]
+    public class Multiply : AbstractBinary
+    {
+
+        protected override EnvCompiledFunction compile(Dictionary<IPort, int> variables, int a, int b, int output)
+        {
+            return new MultiplyCompiled(a,b,output);
         }
 
     }
-    */
+
+    [Serializable]
+    public class Add : AbstractBinary
+    {
+
+        protected override EnvCompiledFunction compile(Dictionary<IPort, int> variables, int a, int b, int output)
+        {
+            return new AddCompiled(a, b, output);
+        }
+
+    }
+    [Serializable]
+    public class Subtract : AbstractBinary
+    {
+
+        protected override EnvCompiledFunction compile(Dictionary<IPort, int> variables, int a, int b, int output)
+        {
+            return new SubCompiled(a, b, output);
+        }
+
+    }
     [Serializable]
     public class LandscapeMesh : EnvNode
     {
         
-        IPort GradientPort;
+        IPort HeightPort;
         IPort LandscapePort;
         INodeOption ShadeFlatOpt;
         INodeOption UVScalingOpt;
@@ -215,11 +299,12 @@ namespace Env.Editor
             return new LandscapeCompiled(
                 shadeFlat:Bool(ShadeFlatOpt, false),
                 uvScaling:Float(UVScalingOpt, 1),
-                gradientArg: variables.GetValueOrDefault(GradientPort, -1),
+                heightArg: variables.GetValueOrDefault(HeightPort, -1),
                 outputLandscapeArg: variables.GetValueOrDefault(LandscapePort, -1)
+                
                 );
         }
-
+        
         protected override void OnDefineOptions(IOptionDefinitionContext ctx)
         {
             ShadeFlatOpt = ctx.AddOption<bool>("ShadeFlat").WithDefaultValue(false).Build();
@@ -227,8 +312,51 @@ namespace Env.Editor
         }
         protected override void OnDefinePorts(IPortDefinitionContext ctx)
         {
-            GradientPort = ctx.AddInputPort<Vector3>("Gradient").Build();
+            HeightPort = ctx.AddInputPort<float>("Height").Build();
             LandscapePort = ctx.AddOutputPort<Mesh>("Landscape").Build();
+            
+        }
+    }
+
+    [Serializable]
+    public class Paint : EnvNode
+    {
+        IPort OutputLayersPort;
+        List<(IPort, IPort)> WeightLayerPorts = new List<(IPort, IPort)>();
+
+        public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
+        {
+            
+            TerrainLayer[] layerMaterials = new TerrainLayer[WeightLayerPorts.Count];
+            int[] layerWeightsArgs = new int[WeightLayerPorts.Count];
+            for (int i=0;i< WeightLayerPorts.Count;i++)
+            {
+
+                layerWeightsArgs[i] = variables.GetValueOrDefault(WeightLayerPorts[i].Item1, -1);
+                WeightLayerPorts[i].Item2.TryGetValue(out layerMaterials[i]);
+            }
+            return new PaintCompiled(variables.GetValueOrDefault(OutputLayersPort, -1), layerWeightsArgs, layerMaterials);
+        }
+
+        protected override void OnDefineOptions(IOptionDefinitionContext ctx)
+        {
+            
+            ctx.AddOption<int>("Layer Count").WithDefaultValue(1).Delayed();
+        }
+        protected override void OnDefinePorts(IPortDefinitionContext ctx)
+        {
+            int layerCount=1;
+            GetNodeOptionByName("Layer Count").TryGetValue<int>(out layerCount);
+            WeightLayerPorts.Clear();
+            for (int i = 1; i <= layerCount; i++) {
+                
+                IPort layerPort = ctx.AddInputPort<TerrainLayer>("Layer "+i).Build();
+                IPort weightPort = ctx.AddInputPort<float>("Weight "+i).Build();
+                WeightLayerPorts.Add((weightPort, layerPort));
+            }
+            OutputLayersPort = ctx.AddOutputPort<TerrainLayers>("Layers").Build();
+
+
         }
     }
     [Serializable]
@@ -328,7 +456,7 @@ namespace Env.Editor
             int outputInstancesArg = variables.GetValueOrDefault(InstancesPort, -1);
             if (inputDensityArg == -1)
             {
-                Vector3 uniformDensity = new Vector3(0, 0, 0);
+                float uniformDensity = 0;
                 DensityPort.TryGetValue(out uniformDensity);
                 return new DistributeUniformCompiled(
                     seed: seed,
@@ -340,7 +468,7 @@ namespace Env.Editor
                     scaleUniformly: scaleUniformly,
                     objectArg: objectArg,
                     inputLandscapeArg: inputLandscapeArg,
-                    desnityUniform: uniformDensity.magnitude,
+                    desnityUniform: uniformDensity,
                     outputInstancesArg: outputInstancesArg
                 );
             }
@@ -378,7 +506,7 @@ namespace Env.Editor
         {
             ObjectPort = ctx.AddInputPort<InstanceableObject>("Object").Build();
             LandscapePort = ctx.AddInputPort<Mesh>("Landscape").Build();
-            DensityPort = ctx.AddInputPort<Vector3>("Density").Build();
+            DensityPort = ctx.AddInputPort<float>("Density").Build();
             InstancesPort = ctx.AddOutputPort<Transform>("Instances").Build();
             
         }
@@ -407,7 +535,7 @@ namespace Env.Editor
         protected override void OnDefinePorts(IPortDefinitionContext ctx)
         {
             InstancesPort = ctx.AddInputPort<Transform>("Instances").Build();
-            OverridenInstancesPort = ctx.AddInputPort<Transform>("Instances").Build();
+            OverridenInstancesPort = ctx.AddInputPort<Transform>("Output Instances").Build();
         }
     }
 
@@ -415,25 +543,34 @@ namespace Env.Editor
     [Serializable]
     public class JoinInstances : EnvNode
     {
-        IPort InstancesPort,MoreInstancesPort,JoinedInstancesPort;
+        List<IPort> InstancesPort = new List<IPort>();
+        IPort JoinedInstancesPort;
 
         public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
         {
-            return new JoinInstancesCompiled(
-                aArg: variables.GetValueOrDefault(InstancesPort,-1),
-                bArg: variables.GetValueOrDefault(MoreInstancesPort, -1),
-                outArg: variables.GetValueOrDefault(JoinedInstancesPort, -1)
-                );
+            int[] inputs = new int[InstancesPort.Count];
+            for (int i = 0; i < InstancesPort.Count; i++)
+            {
+                inputs[i] = variables.GetValueOrDefault(InstancesPort[i], -1);
+            }
+            return new JoinInstancesCompiled(inputArgs: inputs, outArg: variables.GetValueOrDefault(JoinedInstancesPort, -1));
         }
 
         protected override void OnDefineOptions(IOptionDefinitionContext ctx)
         {
-            
+            ctx.AddOption<int>("Count").WithDefaultValue(2).Delayed();
         }
         protected override void OnDefinePorts(IPortDefinitionContext ctx)
         {
-            InstancesPort = ctx.AddInputPort<Transform>("Instances").Build();
-            MoreInstancesPort = ctx.AddInputPort<Transform>("More Instances").Build();
+            int count = 2;
+            if(!GetNodeOptionByName("Count").TryGetValue(out count))
+            {
+                count = 2;
+            }
+            for (int i = 0; i < count; i++)
+            {
+                InstancesPort.Add(ctx.AddInputPort<Transform>("Instances "+(i+1)).Build());
+            }
             JoinedInstancesPort = ctx.AddOutputPort<Transform>("Joined Instances").Build();
         }
     }
@@ -462,6 +599,7 @@ namespace Env.Editor
     {
         internal IPort InstancesPort;
         internal IPort LandscapePort;
+        internal IPort LayersPort;
         public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
         {
             return null;
@@ -475,6 +613,7 @@ namespace Env.Editor
         {
             InstancesPort = ctx.AddInputPort<Transform>("Instances").Build();
             LandscapePort = ctx.AddInputPort<Mesh>("Landscape").Build();
+            LayersPort = ctx.AddInputPort<TerrainLayers>("Layers").Build();
         }
     }
 

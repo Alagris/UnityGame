@@ -1,80 +1,84 @@
 using Unity.Mathematics;
 using UnityEngine;
 
-public class StaticGrid : ProcSectionSpawner
+namespace Env.Runtime
 {
-    [SerializeField]
-    internal int Rows = 3;
-    [SerializeField]
-    internal int Columns = 3;
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-
-    ProcSection[] sections;
-    
-
-
-    private void Start()
+    public class StaticGrid : ProcSectionSpawner
     {
-        Refresh();
+        [SerializeField]
+        internal int Rows = 3;
+        [SerializeField]
+        internal int Columns = 3;
 
-    }
-    public override void Clear()
-    {
-        base.Clear();
-        sections = null;
-       
+        // Start is called once before the first execution of Update after the MonoBehaviour is created
 
-    }
-    public override void UnloadAll()
-    {
-        if (sections != null)
+        ProcSection[] sections;
+
+
+
+        private void Start()
         {
-            for (int i = 0; i < sections.Length; i++)
+            Refresh();
+
+        }
+        public override void Clear()
+        {
+            base.Clear();
+            sections = null;
+
+
+        }
+        public override void UnloadAll()
+        {
+            if (sections != null)
             {
-                sections[i].OnUnload();
+                for (int i = 0; i < sections.Length; i++)
+                {
+                    sections[i].OnUnload();
+                }
             }
         }
-    }
-    public override void Refresh()
-    {
-
-        UnloadAll();
-        if (sections == null) {
-            sections = new ProcSection[Rows * Columns];
-        }
-        else
+        public override void Refresh()
         {
-            if(sections.Length != Rows * Columns)
+
+            UnloadAll();
+            if (sections == null)
             {
-                ProcSection[] old = sections;
                 sections = new ProcSection[Rows * Columns];
-                int common = Mathf.Min(old.Length, sections.Length);
-                for (int i = 0; i < common; i++)
-                {
-                    sections[i] = old[i];
-
-                }
-                
-                for (int i = common; i < old.Length; i++)
-                {
-                    old[i].DestroyImmediate();
-                }
             }
-        }
-        int2 offset = new int2(Columns / 2, Rows / 2);
-        for (int x = 0, i = 0; x < Columns; x++)
-        {
-            for (int y = 0; y < Rows; y++, i++)
+            else
             {
-                if (sections[i] == null)
+                if (sections.Length != Rows * Columns)
                 {
-                    sections[i] = SpawnSection(i);
+                    ProcSection[] old = sections;
+                    sections = new ProcSection[Rows * Columns];
+                    int common = Mathf.Min(old.Length, sections.Length);
+                    for (int i = 0; i < common; i++)
+                    {
+                        sections[i] = old[i];
+
+                    }
+
+                    for (int i = common; i < old.Length; i++)
+                    {
+                        old[i].DestroyImmediate();
+                    }
                 }
-                sections[i].OnLoad(0, new int2(x, y) - offset);
+            }
+            int2 offset = new int2(Columns / 2, Rows / 2);
+            for (int x = 0, i = 0; x < Columns; x++)
+            {
+                for (int y = 0; y < Rows; y++, i++)
+                {
+                    if (sections[i] == null)
+                    {
+                        sections[i] = SpawnSection(i);
+                    }
+                    sections[i].OnLoad(0, new int2(x, y) - offset);
+                }
             }
         }
-    }
 
-    
+
+    }
 }

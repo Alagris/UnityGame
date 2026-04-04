@@ -50,7 +50,7 @@ public class ProcTerrainGenerator : MonoBehaviour
     [SerializeField]
     internal PlayerController Player;
     [SerializeField]
-    ProcSection SectionPrefab;
+    Env.Runtime.ProcSection SectionPrefab;
     [SerializeField]
     internal bool ShadeFlat = false;
 

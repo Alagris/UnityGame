@@ -19,8 +19,10 @@ namespace Env.Runtime
         public int procMeshesCount;
         public int procInstanceSetsCount;
         public int returnedLandscape;
+        public int returnedLayers;
         public int returnedInstances;
         public int objectCount;
+        public int layersCount;
 
         Blackboard makeNewBB(int resX, int resZ, float size, float3 offset)
         {
@@ -33,7 +35,8 @@ namespace Env.Runtime
                 float3ArraysCount: float3ArraysCount,
                 procMeshesCount: procMeshesCount,
                 procInstanceSetsCount: procInstanceSetsCount,
-                objectCount: objectCount
+                objectCount: objectCount,
+                layersCount: layersCount
             );
         }
         public Blackboard Run(int resX, int resZ, float size, float3 offset)
@@ -42,6 +45,7 @@ namespace Env.Runtime
             Run(bb);
             bb.returnedInstances = returnedInstances;
             bb.returnedLandscape = returnedLandscape;
+            bb.returnedLayers = returnedLayers;
             return bb;
         }
         void Run(Blackboard bb)

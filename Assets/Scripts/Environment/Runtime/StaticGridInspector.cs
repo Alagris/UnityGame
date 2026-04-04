@@ -1,19 +1,22 @@
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(StaticGrid))] 
-public class StaticGridInspector : Editor
+namespace Env.Runtime
 {
-    public override void OnInspectorGUI()
+    [CustomEditor(typeof(StaticGrid))]
+    public class StaticGridInspector : Editor
     {
-        DrawDefaultInspector();
-        if (GUILayout.Button("Refresh"))
+        public override void OnInspectorGUI()
         {
-            ((StaticGrid)target).Refresh();
-        }
-        if (GUILayout.Button("Clear"))
-        {
-            ((StaticGrid)target).Clear();
+            DrawDefaultInspector();
+            if (GUILayout.Button("Refresh"))
+            {
+                ((StaticGrid)target).Refresh();
+            }
+            if (GUILayout.Button("Clear"))
+            {
+                ((StaticGrid)target).Clear();
+            }
         }
     }
 }

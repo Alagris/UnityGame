@@ -4,57 +4,61 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
-[ExecuteInEditMode]
-public class InstancedLODGroup : MonoBehaviour
+namespace Env.Runtime
 {
-
-    [SerializeField]
-    List<InstanceableLOD> LODs;
-
-    [SerializeField]
-    List<Matrix4x4> Transforms;
-
-    int currentLOD=0;
-    bool Visible = true;
-
-    public void SetVisible(bool visible)
-    {
-        Visible = visible;
-    }
-    public void Set(List<InstanceableLOD> LODs, List<Matrix4x4> transforms)
+    [ExecuteInEditMode]
+    public class InstancedLODGroup : MonoBehaviour
     {
 
-        this.LODs = LODs;
-        this.Transforms = transforms;
-    }
+        [SerializeField]
+        List<InstanceableLOD> LODs;
 
-    private void Update()
-    {
-        if (Visible && currentLOD < LODs.Count)
+        [SerializeField]
+        List<Matrix4x4> Transforms;
+
+        int currentLOD = 0;
+        bool Visible = true;
+
+        public void SetVisible(bool visible)
         {
-            Mesh mesh = LODs[currentLOD].StaticMesh;
-            Material[] mats = LODs[currentLOD].Materials;
-            int submeshes = Mathf.Min(mesh.subMeshCount, mats.Length);
-            for (int i = 0; i < submeshes; i++)
+            Visible = visible;
+        }
+        public void Set(List<InstanceableLOD> LODs, List<Matrix4x4> transforms)
+        {
+
+            this.LODs = LODs;
+            this.Transforms = transforms;
+        }
+
+        private void Update()
+        {
+            if (Visible && currentLOD < LODs.Count)
             {
-                if (mats[i]!=null && mats[i].enableInstancing)
+                Mesh mesh = LODs[currentLOD].StaticMesh;
+                Material[] mats = LODs[currentLOD].Materials;
+                int submeshes = Mathf.Min(mesh.subMeshCount, mats.Length);
+                for (int i = 0; i < submeshes; i++)
                 {
-                    Graphics.DrawMeshInstanced(mesh, i, mats[i], Transforms);
+                    if (mats[i] != null && mats[i].enableInstancing)
+                    {
+                        Graphics.DrawMeshInstanced(mesh, i, mats[i], Transforms);
+                    }
+                }
+            }
+        }
+
+        public void SetLOD(float distance)
+        {
+            for (int i = 0; i < LODs.Count; i++)
+            {
+                if (distance < LODs[i].chunkDistance)
+                {
+                    currentLOD = i;
+                    return;
                 }
             }
         }
     }
 
-    public void SetLOD(float distance)
-    {
-        for(int i = 0; i < LODs.Count; i++)
-        {
-            if (distance < LODs[i].chunkDistance)
-            {
-                currentLOD = i;
-                return;
-            }
-        }
-    }
-}
 
+}
