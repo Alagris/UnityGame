@@ -11,6 +11,7 @@ namespace Env.Runtime
             DrawDefaultInspector();
             if (GUILayout.Button("Refresh"))
             {
+                ((StaticGrid)target).Clear();
                 ((StaticGrid)target).Refresh();
             }
             if (GUILayout.Button("Clear"))

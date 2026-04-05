@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace Env.Runtime
 {
@@ -297,32 +299,105 @@ namespace Env.Runtime
     }
 
     [Serializable]
-    public class PaintCompiled : EnvCompiledFunction
+    public class NormalizeCompiled : EnvCompiledFunction
     {
         [SerializeField]
-        int[] layersWeightArgs;
+        int[] inputArgs;
         [SerializeField]
-        TerrainLayer[] layerMaterials;
-        int outputArg;
+        int[] outputArgs;
 
-        public PaintCompiled(int outputArg, int[] layersWeightArgs, TerrainLayer[] layerMaterials)
+        public NormalizeCompiled(int[] outputArgs, int[] inputArgs)
         {
-            this.outputArg = outputArg;
-            this.layersWeightArgs = layersWeightArgs;
-            this.layerMaterials = layerMaterials;
+            this.outputArgs = outputArgs;
+            this.inputArgs = inputArgs;
         }
 
         public void run(Blackboard bb)
         {
-            TerrainLayers layers = new TerrainLayers();
-            for(int i=0;i<layerMaterials.Length;i++){
-                int idx = layersWeightArgs[i];
-                float[] weight =  idx < 0 ? null : bb.getFloat(idx);
-                TerrainLayer layer = layerMaterials[i];
-                layers.Add(weight, layer);
+            int Count = inputArgs.Length;
+            float[][] weights = new float[Count][];
+            for (int i = 0; i < Count; i++)
+            {
+                int idx = inputArgs[i];
+                weights[i] = idx < 0 ? null : bb.getFloat(idx);
             }
-            layers.Normalize();
-            bb.setLayers(layers, outputArg);
+            if (Count > 0)
+            {
+                int len = weights[0].Length;
+                float[] sum = new float[len];
+                int firstWithoutWeights = -1;
+                for (int j = 0; j < Count; j++)
+                {
+                    float[] weight = weights[j];
+                    if (weight == null)
+                    {
+                        if (firstWithoutWeights == -1)
+                        {
+                            firstWithoutWeights = j;
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < len; i++)
+                        {
+                            sum[i] += weight[i];
+                        }
+                    }
+                }
+                if (firstWithoutWeights >= 0)
+                {
+                    if (Count == 1)
+                    {
+                        float[] missingWeight = new float[len];
+                        for (int i = 0; i < len; i++)
+                        {
+                            missingWeight[i] = 1;
+                        }
+                        weights[firstWithoutWeights] = missingWeight;
+                    }
+                    else
+                    {
+                        float[] missingWeight = new float[len];
+                        weights[firstWithoutWeights] = missingWeight;
+                        float max = sum.Max();
+                        for (int i = 0; i < len; i++)
+                        {
+                            missingWeight[i] = max - sum[i];
+                        }
+                        for (int j = 0; j < Count; j++)
+                        {
+                            float[] weight = weights[j];
+                            if (weight != null)
+                            {
+                                for (int i = 0; i < len; i++)
+                                {
+                                    weight[i] /= max;
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    for (int j = 0; j < Count; j++)
+                    {
+                        float[] weight = weights[j];
+                        if (weight != null)
+                        {
+                            for (int i = 0; i < len; i++)
+                            {
+                                weight[i] /= sum[i];
+                            }
+                        }
+                    }
+                }
+                
+            }
+            for (int j = 0; j < Count; j++)
+            {
+                bb.setFloat(outputArgs[j], weights[j]);
+            }
+                
         }
     }
     [Serializable]

@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using Unity.GraphToolkit.Editor;
 using UnityEditor;
+using System.Collections.Generic;
 
 namespace Env.Editor
 {
@@ -10,6 +11,9 @@ namespace Env.Editor
     public class EnvGraph : Graph
     {
         internal const string AssetExtension = "terrain";
+
+        //[SerializeField] 
+        //List<TerrainLayer> Layers;
 
         [MenuItem("Assets/Create/Proc Env/Graph")]
         static void CreateAssetFile() 

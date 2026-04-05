@@ -74,9 +74,12 @@ namespace Env.Runtime
         }
         public void AddInstances(ProcInstanceSet instances)
         {
-            foreach (ProcInstances i in instances)
+            if (instances != null)
             {
-                AddInstances(i);
+                foreach (ProcInstances i in instances)
+                {
+                    AddInstances(i);
+                }
             }
         }
         public void AddInstances(ProcInstances instances)

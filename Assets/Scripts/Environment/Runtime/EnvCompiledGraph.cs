@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -22,7 +23,9 @@ namespace Env.Runtime
         public int returnedLayers;
         public int returnedInstances;
         public int objectCount;
-        public int layersCount;
+        public int colorCount;
+        public TerrainLayer[] TerrainLayers;
+        public Texture2DArray TerrainLayersTextureArray;
 
         Blackboard makeNewBB(int resX, int resZ, float size, float3 offset)
         {
@@ -36,7 +39,7 @@ namespace Env.Runtime
                 procMeshesCount: procMeshesCount,
                 procInstanceSetsCount: procInstanceSetsCount,
                 objectCount: objectCount,
-                layersCount: layersCount
+                colorCount: colorCount
             );
         }
         public Blackboard Run(int resX, int resZ, float size, float3 offset)
@@ -45,7 +48,6 @@ namespace Env.Runtime
             Run(bb);
             bb.returnedInstances = returnedInstances;
             bb.returnedLandscape = returnedLandscape;
-            bb.returnedLayers = returnedLayers;
             return bb;
         }
         void Run(Blackboard bb)

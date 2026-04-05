@@ -147,11 +147,11 @@ namespace Env.Editor
         }
         protected override void OnDefineOptions(IOptionDefinitionContext ctx)
         {
-            IterationsOpt = ctx.AddOption<int>("Iterations").WithDefaultValue(1).Build();
-            ScaleOpt = ctx.AddOption<float>("Scale").WithDefaultValue(1).Build();
+            IterationsOpt = ctx.AddOption<int>("Iterations").WithDefaultValue(3).Build();
+            ScaleOpt = ctx.AddOption<float>("Scale").WithDefaultValue(0.02f).Build();
             HeightPowerBaseOpt = ctx.AddOption<float>("HeightPowerBase").WithDefaultValue(0.5f).Build();
-            ScalePowerBaseOpt = ctx.AddOption<float>("ScalePowerBase").WithDefaultValue(0.5f).Build();
-            HeightOpt = ctx.AddOption<float>("Height").WithDefaultValue(30).Build();
+            ScalePowerBaseOpt = ctx.AddOption<float>("ScalePowerBase").WithDefaultValue(3f).Build();
+            HeightOpt = ctx.AddOption<float>("Height").WithDefaultValue(5).Build();
         }
         
     }
@@ -319,42 +319,44 @@ namespace Env.Editor
     }
 
     [Serializable]
-    public class Paint : EnvNode
+    public class Normalize : EnvNode
     {
-        IPort OutputLayersPort;
-        List<(IPort, IPort)> WeightLayerPorts = new List<(IPort, IPort)>();
-
+        List<IPort> InputPorts = new List<IPort>();
+        List<IPort> OutputPorts = new List<IPort>();
         public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
         {
             
-            TerrainLayer[] layerMaterials = new TerrainLayer[WeightLayerPorts.Count];
-            int[] layerWeightsArgs = new int[WeightLayerPorts.Count];
-            for (int i=0;i< WeightLayerPorts.Count;i++)
+            int[] inputs = new int[InputPorts.Count];
+            int[] outputs = new int[OutputPorts.Count];
+            for (int i=0;i< inputs.Length;i++)
             {
-
-                layerWeightsArgs[i] = variables.GetValueOrDefault(WeightLayerPorts[i].Item1, -1);
-                WeightLayerPorts[i].Item2.TryGetValue(out layerMaterials[i]);
+                inputs[i] = variables.GetValueOrDefault(InputPorts[i], -1);
             }
-            return new PaintCompiled(variables.GetValueOrDefault(OutputLayersPort, -1), layerWeightsArgs, layerMaterials);
+            for (int i = 0; i < outputs.Length; i++)
+            {
+                outputs[i] = variables.GetValueOrDefault(OutputPorts[i], -1);
+            }
+            return new NormalizeCompiled(outputs, inputs);
         }
 
         protected override void OnDefineOptions(IOptionDefinitionContext ctx)
         {
             
-            ctx.AddOption<int>("Layer Count").WithDefaultValue(1).Delayed();
+            ctx.AddOption<int>("Count").WithDefaultValue(2).Delayed();
         }
         protected override void OnDefinePorts(IPortDefinitionContext ctx)
         {
-            int layerCount=1;
+            int layerCount=0;
             GetNodeOptionByName("Layer Count").TryGetValue<int>(out layerCount);
-            WeightLayerPorts.Clear();
+            InputPorts.Clear();
+            OutputPorts.Clear();
             for (int i = 1; i <= layerCount; i++) {
                 
-                IPort layerPort = ctx.AddInputPort<TerrainLayer>("Layer "+i).Build();
-                IPort weightPort = ctx.AddInputPort<float>("Weight "+i).Build();
-                WeightLayerPorts.Add((weightPort, layerPort));
+                IPort inPort = ctx.AddInputPort<float>("Input "+i).Build();
+                IPort outPort = ctx.AddInputPort<float>("Output "+i).Build();
+                InputPorts.Add(inPort);
+                OutputPorts.Add(outPort);
             }
-            OutputLayersPort = ctx.AddOutputPort<TerrainLayers>("Layers").Build();
 
 
         }
@@ -599,7 +601,8 @@ namespace Env.Editor
     {
         internal IPort InstancesPort;
         internal IPort LandscapePort;
-        internal IPort LayersPort;
+        List<IPort> LayerPorts = new List<IPort>();
+
         public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
         {
             return null;
@@ -607,14 +610,34 @@ namespace Env.Editor
 
         protected override void OnDefineOptions(IOptionDefinitionContext ctx)
         {
-            //ctx.AddOption<Vector2Int>("Resolution");
+
+            ctx.AddOption<int>("Layer Count").WithDefaultValue(1).Delayed();
         }
         protected override void OnDefinePorts(IPortDefinitionContext ctx)
         {
             InstancesPort = ctx.AddInputPort<Transform>("Instances").Build();
             LandscapePort = ctx.AddInputPort<Mesh>("Landscape").Build();
-            LayersPort = ctx.AddInputPort<TerrainLayers>("Layers").Build();
+            int layerCount = 0;
+            GetNodeOptionByName("Layer Count").TryGetValue<int>(out layerCount);
+            LayerPorts.Clear();
+            for (int i = 1; i <= layerCount; i++)
+            {
+                IPort layerPort = ctx.AddInputPort<TerrainLayer>("Layer " + i).Build();
+                LayerPorts.Add(layerPort);
+            }
+            
         }
+
+        public TerrainLayer[] getLayers()
+        {
+            TerrainLayer[] layers = new TerrainLayer[LayerPorts.Count];
+            for (int i = 0; i < LayerPorts.Count; i++)
+            {
+                LayerPorts[i].TryGetValue(out layers[i]);
+            }
+            return layers;
+        }
+
     }
 
 

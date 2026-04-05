@@ -47,7 +47,7 @@ namespace Env.Editor
                 compiledGraph.functions[i] = node.compile(variables);
             }
 
-            compiledGraph.returnedLayers = variables[finalNode.LayersPort.FirstConnectedPort];
+            //compiledGraph.TerrainLayers = finalNode.getLayers();
             compiledGraph.returnedLandscape = variables[finalNode.LandscapePort.FirstConnectedPort];
             compiledGraph.returnedInstances = finalNode.InstancesPort.IsConnected ? variables[finalNode.InstancesPort.FirstConnectedPort] : -1;
             ctx.AddObjectToAsset("RuntimeAsset", compiledGraph);
@@ -104,8 +104,8 @@ namespace Env.Editor
                             case System.Type x when x == typeof(InstanceableObject):
                                 idx = compiledGraph.objectCount++;
                                 break;
-                            case System.Type x when x == typeof(TerrainLayers):
-                                idx = compiledGraph.layersCount++;
+                            case System.Type x when x == typeof(Color):
+                                idx = compiledGraph.colorCount++;
                                 break;
                             default:
                                 Debug.Assert(false);

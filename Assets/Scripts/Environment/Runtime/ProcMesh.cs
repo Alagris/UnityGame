@@ -16,6 +16,7 @@ namespace Env.Runtime
         public Vector3[] vertices;
         public Vector2[] uvs;
         public Vector3[] normals;
+        public Color[] colors;
         public int[] triangles;
         
 

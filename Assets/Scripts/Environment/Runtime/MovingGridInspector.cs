@@ -11,7 +11,12 @@ namespace Env.Runtime
             DrawDefaultInspector();
             if (GUILayout.Button("Refresh"))
             {
+                ((MovingGrid)target).Clear();
                 ((MovingGrid)target).Refresh();
+            }
+            if (GUILayout.Button("Clear"))
+            {
+                ((MovingGrid)target).Clear();
             }
         }
     }

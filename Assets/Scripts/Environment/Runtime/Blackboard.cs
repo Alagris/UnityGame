@@ -16,13 +16,13 @@ namespace Env.Runtime
         private readonly ProcMesh[] procMeshes;
         private readonly ProcInstanceSet[] procInstanceSets;
         private readonly InstanceableObject[] objArrays;
-        private readonly TerrainLayers[] layersArrays;
+        private readonly Color[][] colorArrays;
         
         public readonly int resX, resZ;
         public readonly float size;
         public readonly float3 offset;
 
-        public int returnedInstances, returnedLandscape, returnedLayers;
+        public int returnedInstances, returnedLandscape;
 
         public Blackboard(int resX, int resZ, float size, float3 offset,
             int intArraysCount,
@@ -34,7 +34,7 @@ namespace Env.Runtime
             int procMeshesCount,
             int procInstanceSetsCount,
             int objectCount,
-            int layersCount
+            int colorCount
             )
         {
             this.intArrays = new int[intArraysCount][];
@@ -46,7 +46,7 @@ namespace Env.Runtime
             this.procMeshes = new ProcMesh[procMeshesCount];
             this.procInstanceSets = new ProcInstanceSet[procInstanceSetsCount];
             this.objArrays = new InstanceableObject[objectCount];
-            this.layersArrays = new TerrainLayers[layersCount];
+            this.colorArrays = new Color[colorCount][];
             this.resX = resX;
             this.resZ = resZ;
             this.size = size;
@@ -58,7 +58,7 @@ namespace Env.Runtime
         }
         public ProcInstanceSet GetReturnedInstances()
         {
-            return getInsatnceSet(returnedInstances);
+            return returnedInstances<0 ? null : getInsatnceSet(returnedInstances);
         }
         public ProcMesh setMesh(int idx, ProcMesh m)
         {
@@ -119,11 +119,11 @@ namespace Env.Runtime
             Debug.Assert(objArrays[idx] == null);
             return objArrays[idx] = o;
         }
-        public TerrainLayers setLayers(TerrainLayers o, int idx)
+        public Color[] setColor(Color[] o, int idx)
         {
             if (idx < 0) return null;
-            Debug.Assert(layersArrays[idx] == null);
-            return layersArrays[idx] = o;
+            Debug.Assert(colorArrays[idx] == null);
+            return colorArrays[idx] = o;
         }
         public float3[] makeFloat3(int idx, int length)
         {
@@ -151,60 +151,70 @@ namespace Env.Runtime
         }
         public ProcMesh getMesh(int idx)
         {
+            Debug.Assert(idx >= 0);
             ProcMesh e = procMeshes[idx];
             Debug.Assert(e != null);
             return e;
         }
         public ProcInstanceSet getInsatnceSet(int idx)
         {
+            Debug.Assert(idx >= 0);
             ProcInstanceSet e = procInstanceSets[idx];
             Debug.Assert(e != null);
             return e;
         }
         public float3[] getFloat3(int idx)
         {
+            Debug.Assert(idx >= 0);
             float3[] e = float3Arrays[idx];
             Debug.Assert(e != null);
             return e;
         }
         public float2[] getFloat2(int idx)
         {
+            Debug.Assert(idx >= 0);
             float2[] e = float2Arrays[idx];
             Debug.Assert(e != null);
             return e;
         }
         public float[] getFloat(int idx)
         {
+            Debug.Assert(idx >= 0);
             float[] e = floatArrays[idx];
             Debug.Assert(e != null);
             return e;
         }
         public int3[] getInt3(int idx)
         {
+            Debug.Assert(idx >= 0);
             int3[] e = int3Arrays[idx];
             Debug.Assert(e != null);
             return e;
         }
         public int2[] getInt2(int idx)
         {
+            Debug.Assert(idx >= 0);
             int2[] e = int2Arrays[idx];
             Debug.Assert(e != null);
             return e;
         }
         public int[] getInt(int idx)
         {
+            Debug.Assert(idx >= 0);
             int[] e = intArrays[idx];
             Debug.Assert(e != null);
             return e;
         }
-        public TerrainLayers getLayers(int idx)
+        public Color[] getColor(int idx)
         {
-            TerrainLayers e = layersArrays[idx];
+            Debug.Assert(idx >= 0);
+            Color[] e = colorArrays[idx];
             Debug.Assert(e != null);
             return e;
         }
         public InstanceableObject getObject(int idx)
         {
+            Debug.Assert(idx >= 0);
             InstanceableObject e = objArrays[idx];
             Debug.Assert(e != null);
             return e;
