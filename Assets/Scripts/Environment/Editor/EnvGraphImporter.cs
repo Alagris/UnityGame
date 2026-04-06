@@ -1,7 +1,10 @@
 using Env.Runtime;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
+using System.IO;
 using System.Linq;
 using Unity.GraphToolkit.Editor;
+using UnityEditor;
 using UnityEditor.AssetImporters;
 using UnityEngine;
 
@@ -32,24 +35,21 @@ namespace Env.Editor
             }
             List<EnvNode> sortedNodes = new List<EnvNode>();
             TopologicalSort(finalNode, sortedNodes, new HashSet<EnvNode>());
+            sortedNodes.Add(finalNode);
             compiledGraph.functions = new EnvCompiledFunction[sortedNodes.Count];   
             Dictionary<IPort, int> variables = new Dictionary<IPort, int>();
             for(int i=0;i<sortedNodes.Count;i++)
             { 
                 EnvNode node = sortedNodes[i];
                 AddInputs(node, i,sortedNodes,variables,compiledGraph, ctx);
-                //compiledGraph.functions[i] = node.compile(variables);
             }
-            AddInputs(finalNode, sortedNodes.Count, sortedNodes, variables, compiledGraph, ctx);
             for (int i = 0; i < sortedNodes.Count; i++)
             {
                 EnvNode node = sortedNodes[i];
-                compiledGraph.functions[i] = node.compile(variables);
+                compiledGraph.functions[i] = node.compile(compiledGraph, variables);
             }
-
-            //compiledGraph.TerrainLayers = finalNode.getLayers();
-            compiledGraph.returnedLandscape = variables[finalNode.LandscapePort.FirstConnectedPort];
-            compiledGraph.returnedInstances = finalNode.InstancesPort.IsConnected ? variables[finalNode.InstancesPort.FirstConnectedPort] : -1;
+            compiledGraph.returnedLandscape = finalNode.landscapeIdx;
+            compiledGraph.returnedInstances = finalNode.instancesIdx;
             ctx.AddObjectToAsset("RuntimeAsset", compiledGraph);
             ctx.SetMainObject(compiledGraph);
         }
@@ -75,37 +75,45 @@ namespace Env.Editor
                     }
                     else
                     {
+                        static int push(List<int> l, IPort srcPort)
+                        {
+                            int idx = l.Count;
+                            //List<IPort> dstPorts = new List<IPort>();
+                            //srcPort.GetConnectedPorts(dstPorts);
+                            l.Add(0);
+                            return idx;
+                        }
                         switch (srcPort.DataType)
                         {
                             case System.Type x when x == typeof(int):
-                                idx = compiledGraph.intArraysCount++;
+                                idx = push(compiledGraph.intArraysCount, srcPort);
                                 break;
                             case System.Type x when x == typeof(float):
-                                idx = compiledGraph.floatArraysCount++;
+                                idx = push(compiledGraph.floatArraysCount, srcPort);
                                 break;
                             case System.Type x when x == typeof(Vector2Int):
-                                idx = compiledGraph.int2ArraysCount++;
+                                idx = push(compiledGraph.int2ArraysCount, srcPort);
                                 break;
                             case System.Type x when x == typeof(Vector2):
-                                idx = compiledGraph.float2ArraysCount++;
+                                idx = push(compiledGraph.float2ArraysCount, srcPort);
                                 break;
                             case System.Type x when x == typeof(Vector3Int):
-                                idx = compiledGraph.int3ArraysCount++;
+                                idx = push(compiledGraph.int3ArraysCount, srcPort);
                                 break;
                             case System.Type x when x == typeof(Vector3):
-                                idx = compiledGraph.float3ArraysCount++;
+                                idx = push(compiledGraph.float3ArraysCount, srcPort);
                                 break;
                             case System.Type x when x == typeof(Mesh):
-                                idx = compiledGraph.procMeshesCount++;
+                                idx = push(compiledGraph.procMeshesCount, srcPort);
                                 break;
                             case System.Type x when x == typeof(Transform):
-                                idx = compiledGraph.procInstanceSetsCount++;
+                                idx = push(compiledGraph.procInstanceSetsCount, srcPort);
                                 break;
                             case System.Type x when x == typeof(InstanceableObject):
-                                idx = compiledGraph.objectCount++;
+                                idx = push(compiledGraph.objectCount, srcPort);
                                 break;
                             case System.Type x when x == typeof(Color):
-                                idx = compiledGraph.colorCount++;
+                                idx = push(compiledGraph.colorCount, srcPort);
                                 break;
                             default:
                                 Debug.Assert(false);

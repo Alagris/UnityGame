@@ -179,6 +179,29 @@ namespace Env.Runtime
     }
 
     [Serializable]
+    public abstract class AbstractMutableBinaryCompiled : EnvCompiledFunction
+    {
+        [SerializeField]
+        int aArg, bArg, outputArg;
+        public AbstractMutableBinaryCompiled(int aArg, int bArg, int outputArg)
+        {
+            this.aArg = aArg;
+            this.bArg = bArg;
+            this.outputArg = outputArg;
+        }
+        public abstract void Eval(float[] a, float[] b);
+        public void run(Blackboard bb)
+        {
+
+            float[] a = bb.getMutableFloat(aArg);
+            float[] b = bb.getFloat(bArg);
+            Eval(a, b);
+            bb.setFloat(outputArg, a);
+
+        }
+    }
+
+    [Serializable]
     public abstract class AbstractBinaryCompiled : EnvCompiledFunction
     {
         [SerializeField]
@@ -201,50 +224,50 @@ namespace Env.Runtime
         }
     }
     [Serializable]
-    public class MultiplyCompiled : AbstractBinaryCompiled
+    public class MultiplyCompiled : AbstractMutableBinaryCompiled
     {
         
         public MultiplyCompiled(int aArg, int bArg, int outputArg) : base(aArg, bArg, outputArg) { }
         
        
 
-        public override void Eval(float[] a, float[] b, float[] c)
+        public override void Eval(float[] a, float[] b)
         {
-            for (int i = 0; i < c.Length; i++)
+            for (int i = 0; i < a.Length; i++)
             {
-                c[i] = a[i]*b[i];
+                a[i]*=b[i];
             }
         }
     }
     [Serializable]
-    public class AddCompiled : AbstractBinaryCompiled
+    public class AddCompiled : AbstractMutableBinaryCompiled
     {
 
         public AddCompiled(int aArg, int bArg, int outputArg) : base(aArg, bArg, outputArg) { }
 
 
 
-        public override void Eval(float[] a, float[] b, float[] c)
+        public override void Eval(float[] a, float[] b)
         {
-            for (int i = 0; i < c.Length; i++)
+            for (int i = 0; i < a.Length; i++)
             {
-                c[i] = a[i] + b[i];
+                a[i] += b[i];
             }
         }
     }
     [Serializable]
-    public class SubCompiled : AbstractBinaryCompiled
+    public class SubCompiled : AbstractMutableBinaryCompiled
     {
 
         public SubCompiled(int aArg, int bArg, int outputArg) : base(aArg, bArg, outputArg) { }
 
 
 
-        public override void Eval(float[] a, float[] b, float[] c)
+        public override void Eval(float[] a, float[] b)
         {
-            for (int i = 0; i < c.Length; i++)
+            for (int i = 0; i < a.Length; i++)
             {
-                c[i] = a[i] - b[i];
+                a[i] -= b[i];
             }
         }
     }
@@ -270,6 +293,11 @@ namespace Env.Runtime
         }
     }
     [Serializable]
+    public enum UVMode
+    {
+        NONE, REPEATING, GLOBAL
+    }
+    [Serializable]
     public class LandscapeCompiled : EnvCompiledFunction
     {
         [SerializeField]
@@ -278,9 +306,12 @@ namespace Env.Runtime
         float uvScaling;
         [SerializeField]
         int heightArg, outputLandscapeArg;
-        public LandscapeCompiled(bool shadeFlat, float uvScaling, int heightArg, int outputLandscapeArg)
+        [SerializeField]
+        UVMode uvMode;
+        public LandscapeCompiled(bool shadeFlat, UVMode uvMode, float uvScaling, int heightArg, int outputLandscapeArg)
         {
             this.uvScaling = uvScaling;
+            this.uvMode = uvMode;
             this.shadeFlat = shadeFlat;
             this.heightArg = heightArg;
             this.outputLandscapeArg = outputLandscapeArg;
@@ -288,7 +319,7 @@ namespace Env.Runtime
         public void run(Blackboard bb)
         {
             float[] heights = bb.getFloat(heightArg);
-            ProcMesh m = ProcMesh.gridPrecomputed(bb.offset, bb.resX, bb.resZ, bb.size, bb.size, heights, uvScaling);
+            ProcMesh m = ProcMesh.gridPrecomputed(bb.offset, bb.resX, bb.resZ, bb.size, bb.size, heights, uvScaling, uvMode);
             
             if (shadeFlat)
             {
@@ -319,7 +350,7 @@ namespace Env.Runtime
             for (int i = 0; i < Count; i++)
             {
                 int idx = inputArgs[i];
-                weights[i] = idx < 0 ? null : bb.getFloat(idx);
+                weights[i] = idx < 0 ? null : bb.getMutableFloat(idx);
             }
             if (Count > 0)
             {
@@ -349,10 +380,7 @@ namespace Env.Runtime
                     if (Count == 1)
                     {
                         float[] missingWeight = new float[len];
-                        for (int i = 0; i < len; i++)
-                        {
-                            missingWeight[i] = 1;
-                        }
+                        Array.Fill(missingWeight, 1);
                         weights[firstWithoutWeights] = missingWeight;
                     }
                     else
@@ -593,4 +621,79 @@ namespace Env.Runtime
             bb.setObject(outArg, o);
         }
     }
+
+
+    [Serializable]
+    public class ReturnCompiled : EnvCompiledFunction
+    {
+        [SerializeField]
+        int[] weightArgs;
+        public ReturnCompiled(int[] weightArgs)
+        {
+            this.weightArgs = weightArgs;
+        }
+        public void run(Blackboard bb)
+        {
+            List<float[]> weights = new List<float[]>(weightArgs.Length);
+            List<int> idxMapping = new List<int>(weightArgs.Length);
+            const int padding = 1;
+            for (int i = 0; i < weightArgs.Length; i++)
+            {
+                if (weightArgs[i] >= 0)
+                {
+                    idxMapping.Add(i);
+                    weights.Add(bb.getFloat(weightArgs[i]));
+                    Debug.Assert((bb.resX + 2 * padding) * (bb.resZ + 2 * padding) == weights[i].Length);
+                }
+            }
+            if (weights.Count > 1)
+            {
+                bb.returnedTerrainWeights = new Texture2D(bb.resX, bb.resZ, TextureFormat.RGBA32, false, true, true);
+                
+
+                for (int z = 0, j = 0; z < bb.resZ + 2; z++)
+                {
+                    for (int x = 0; x < bb.resZ + 2; j++, x++)
+                    {
+
+                        int maxIdx, secondMaxIdx;
+                        if (weights[0][j] > weights[1][j])
+                        {
+                            maxIdx = 0;
+                            secondMaxIdx = 1;
+                        }
+                        else
+                        {
+                            maxIdx = 1;
+                            secondMaxIdx = 0;
+                        }
+                        for (int i = 2; i < weights.Count; i++)
+                        {
+                            if (weights[i][j] > weights[secondMaxIdx][j])
+                            {
+                                if (weights[i][j] > weights[maxIdx][j])
+                                {
+                                    secondMaxIdx = maxIdx;
+                                    maxIdx = i;
+                                }
+                                else
+                                {
+                                    secondMaxIdx = i;
+                                }
+                            }
+                        }
+                        float maxValue = weights[maxIdx][j];
+                        float secondMaxValue = weights[secondMaxIdx][j];
+                        float sum = maxValue + secondMaxValue;
+                        maxValue = maxValue / sum;
+                        secondMaxValue = secondMaxValue / sum;
+                        byte maxI = (byte)idxMapping[maxIdx];
+                        byte secondMaxI = (byte)idxMapping[secondMaxIdx];
+                        bb.returnedTerrainWeights.SetPixel(x, z, new Color32(maxI, secondMaxI, (byte)(255 * maxValue), (byte)(255 * secondMaxValue)));
+                    }
+                }
+            }
+        }
+    }
+    
 }

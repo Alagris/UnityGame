@@ -9,23 +9,25 @@ namespace Env.Runtime
     [Serializable]
     public class EnvCompiledGraph : ScriptableObject
     {
+       
         [SerializeReference]
         public EnvCompiledFunction[] functions;
-        public int intArraysCount;
-        public int floatArraysCount;
-        public int int2ArraysCount;
-        public int float2ArraysCount;
-        public int int3ArraysCount;
-        public int float3ArraysCount;
-        public int procMeshesCount;
-        public int procInstanceSetsCount;
+        public List<int> intArraysCount = new List<int>();
+        public List<int> floatArraysCount = new List<int>();
+        public List<int> int2ArraysCount = new List<int>();
+        public List<int> float2ArraysCount = new List<int>();
+        public List<int> int3ArraysCount = new List<int>();
+        public List<int> float3ArraysCount = new List<int>();
+        public List<int> procMeshesCount = new List<int>();
+        public List<int> procInstanceSetsCount = new List<int>();
+        public List<int> objectCount = new List<int>();
+        public List<int> colorCount = new List<int>();
         public int returnedLandscape;
-        public int returnedLayers;
         public int returnedInstances;
-        public int objectCount;
-        public int colorCount;
-        public TerrainLayer[] TerrainLayers;
-        public Texture2DArray TerrainLayersTextureArray;
+
+
+
+
 
         Blackboard makeNewBB(int resX, int resZ, float size, float3 offset)
         {

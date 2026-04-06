@@ -1,16 +1,22 @@
-using System;
-using UnityEngine;
-using Unity.GraphToolkit.Editor;
+using Codice.Client.BaseCommands;
 using Env.Runtime;
-using UnityEngine.UIElements;
+using Microsoft.SqlServer.Server;
+using System;
 using System.Collections.Generic;
+using Unity.GraphToolkit.Editor;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.UIElements;
+using static System.Net.Mime.MediaTypeNames;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace Env.Editor
 {
     [Serializable]
     public abstract class EnvNode : Node
     {
-        public abstract EnvCompiledFunction compile(Dictionary<IPort, int> variables);
+        public abstract EnvCompiledFunction compile(EnvCompiledGraph compiledGraph, Dictionary<IPort, int> variables);
 
         internal static T Val<T>(INodeOption opt, T dflt)
         {
@@ -43,6 +49,168 @@ namespace Env.Editor
         }
 
 
+
+        public int readIntArrays(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port, bool mutable)
+        {
+            Debug.Assert(port.DataType == typeof(int));
+            Debug.Assert(port.Direction == PortDirection.Input);
+            int idx = variables.GetValueOrDefault(port, -1);
+            if (idx >= 0)
+            {
+                g.intArraysCount[idx]++;
+            }
+            return idx;
+        }
+        public int readFloatArrays(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port, bool mutable)
+        {
+            Debug.Assert(port.DataType == typeof(float));
+            Debug.Assert(port.Direction == PortDirection.Input);
+            int idx = variables.GetValueOrDefault(port, -1);
+            if (idx >= 0)
+            {
+                g.floatArraysCount[idx]++;
+            }
+            return idx;
+        }
+        public int readInt2Arrays(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port, bool mutable)
+        {
+            Debug.Assert(port.DataType == typeof(Vector2Int));
+            Debug.Assert(port.Direction == PortDirection.Input);
+            int idx = variables.GetValueOrDefault(port, -1);
+            if (idx >= 0)
+            {
+                g.int2ArraysCount[idx]++;
+            }
+            return idx;
+        }
+        public int readFloat2Arrays(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port, bool mutable)
+        {
+            Debug.Assert(port.DataType == typeof(Vector2));
+            Debug.Assert(port.Direction == PortDirection.Input);
+            int idx = variables.GetValueOrDefault(port, -1);
+            if (idx >= 0)
+            {
+                g.float2ArraysCount[idx]++;
+            }
+            return idx;
+        }
+        public int readInt3Arrays(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port, bool mutable)
+        {
+            Debug.Assert(port.DataType == typeof(Vector3Int));
+            Debug.Assert(port.Direction == PortDirection.Input);
+            int idx = variables.GetValueOrDefault(port, -1);
+            if (idx >= 0)
+            {
+                g.int3ArraysCount[idx]++;
+            }
+            return idx;
+        }
+        public int readFloat3Arrays(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port, bool mutable)
+        {
+            Debug.Assert(port.DataType == typeof(Vector3));
+            Debug.Assert(port.Direction == PortDirection.Input);
+            int idx = variables.GetValueOrDefault(port, -1);
+            if (idx >= 0)
+            {
+                g.float3ArraysCount[idx]++;
+            }
+            return idx;
+        }
+        public int readProcMeshes(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port, bool mutable)
+        {
+            Debug.Assert(port.DataType==typeof(Mesh));
+            Debug.Assert(port.Direction == PortDirection.Input);
+            int idx = variables.GetValueOrDefault(port, -1);
+            if (idx >= 0)
+            {
+                g.procMeshesCount[idx]++;
+            }
+            return idx;
+        }
+        public int readProcInstanceSets(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port, bool mutable)
+        {
+            Debug.Assert(port.DataType == typeof(Transform));
+            Debug.Assert(port.Direction == PortDirection.Input);
+            int idx = variables.GetValueOrDefault(port, -1);
+            if (idx >= 0)
+            {
+                g.procInstanceSetsCount[idx]++;
+            }
+            return idx;
+        }
+        public int readObject(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port, bool mutable)
+        {
+            Debug.Assert(port.DataType == typeof(InstanceableObject));
+            Debug.Assert(port.Direction == PortDirection.Input);
+            int idx = variables.GetValueOrDefault(port, -1);
+            if (idx >= 0)
+            {
+                g.objectCount[idx]++;
+            }
+            return idx;
+        }
+        public int readColor(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port, bool mutable)
+        {
+            Debug.Assert(port.DataType == typeof(Color));
+            Debug.Assert(port.Direction == PortDirection.Input);
+            int idx = variables.GetValueOrDefault(port, -1);
+            if (idx >= 0)
+            {
+                g.colorCount[idx]++;
+            }
+            return idx;
+        }
+
+        public int writeIntArrays(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port) {
+            Debug.Assert(port.DataType == typeof(int));
+            Debug.Assert(port.Direction==PortDirection.Output);
+            return variables.GetValueOrDefault(port, -1);
+        }
+        public int writeFloatArrays(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port) {
+            Debug.Assert(port.DataType == typeof(float));
+            Debug.Assert(port.Direction==PortDirection.Output);
+            return variables.GetValueOrDefault(port, -1);
+        }
+        public int writeInt2Arrays(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port) {
+            Debug.Assert(port.DataType == typeof(Vector2Int));
+            Debug.Assert(port.Direction==PortDirection.Output);
+            return variables.GetValueOrDefault(port, -1);
+        }
+        public int writeFloat2Arrays(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port) {
+            Debug.Assert(port.DataType == typeof(Vector2));
+            Debug.Assert(port.Direction==PortDirection.Output);
+            return variables.GetValueOrDefault(port, -1);
+        }
+        public int writeInt3Arrays(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port) {
+            Debug.Assert(port.DataType == typeof(Vector3Int));
+            Debug.Assert(port.Direction==PortDirection.Output);
+            return variables.GetValueOrDefault(port, -1);
+        }
+        public int writeFloat3Arrays(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port) {
+            Debug.Assert(port.DataType == typeof(Vector3));
+            Debug.Assert(port.Direction==PortDirection.Output);
+            return variables.GetValueOrDefault(port, -1);
+        }
+        public int writeProcMeshes(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port) {
+            Debug.Assert(port.DataType == typeof(Mesh));
+            Debug.Assert(port.Direction==PortDirection.Output);
+            return variables.GetValueOrDefault(port, -1);
+        }
+        public int writeProcInstanceSets(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port) {
+            Debug.Assert(port.DataType == typeof(Transform));
+            Debug.Assert(port.Direction==PortDirection.Output);
+            return variables.GetValueOrDefault(port, -1);
+        }
+        public int writeObject(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port) {
+            Debug.Assert(port.DataType == typeof(InstanceableObject));
+            Debug.Assert(port.Direction==PortDirection.Output);
+            return variables.GetValueOrDefault(port, -1);
+        }
+        public int writeColor(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port) {
+            Debug.Assert(port.DataType == typeof(Color));
+            Debug.Assert(port.Direction == PortDirection.Output);
+            return variables.GetValueOrDefault(port, -1);
+        }
         internal void Redirect(Dictionary<IPort, int> variables, IPort inPort, IPort outPort)
         {
             Debug.Assert(inPort.Direction == PortDirection.Input);
@@ -81,9 +249,13 @@ namespace Env.Editor
             gPort = ctx.AddOutputPort<float>("Height").Build();
         }
         public abstract EnvCompiledFunction compile(int xArg, int zArg, int outGrad);
-        public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
+        public override EnvCompiledFunction compile(EnvCompiledGraph compiledGraph, Dictionary<IPort, int> variables)
         {
-             return compile(variables.GetValueOrDefault(xPort,-1), variables.GetValueOrDefault(zPort, -1), variables.GetValueOrDefault(gPort, -1));
+             return compile(
+                 xArg:readFloatArrays(compiledGraph, variables, xPort, false), 
+                 zArg:readFloatArrays(compiledGraph, variables, zPort, false),
+                 outGrad:writeFloatArrays(compiledGraph, variables, gPort)
+             );
         }
     }
 
@@ -219,10 +391,10 @@ namespace Env.Editor
             cPort = ctx.AddOutputPort<float>("C").Build();
         }
         
-        public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
+        public override EnvCompiledFunction compile(EnvCompiledGraph compiledGraph, Dictionary<IPort, int> variables)
         {
-            int a = variables.GetValueOrDefault(aPort, -1);
-            int b = variables.GetValueOrDefault(bPort, -1);
+            int a = readFloatArrays(compiledGraph, variables, aPort, false);
+            int b = readFloatArrays(compiledGraph, variables, bPort, false);
             if (a == -1)
             {
                 if(b == -1)
@@ -246,7 +418,7 @@ namespace Env.Editor
                 }
                 else
                 {
-                    return compile(variables, a, b, variables.GetValueOrDefault(cPort, -1));
+                    return compile(variables, a, b, writeFloatArrays(compiledGraph, variables, cPort));
                 }
             }
             
@@ -292,15 +464,17 @@ namespace Env.Editor
         
         IPort HeightPort;
         IPort LandscapePort;
-        INodeOption ShadeFlatOpt;
+        INodeOption ShadeFlatOpt, UV_Mode;
         INodeOption UVScalingOpt;
-        public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
+        public override EnvCompiledFunction compile(EnvCompiledGraph compiledGraph, Dictionary<IPort, int> variables)
         {
+            
             return new LandscapeCompiled(
                 shadeFlat:Bool(ShadeFlatOpt, false),
                 uvScaling:Float(UVScalingOpt, 1),
-                heightArg: variables.GetValueOrDefault(HeightPort, -1),
-                outputLandscapeArg: variables.GetValueOrDefault(LandscapePort, -1)
+                uvMode: Val(UV_Mode, UVMode.GLOBAL),
+                heightArg: readFloatArrays(compiledGraph, variables, HeightPort, false),
+                outputLandscapeArg: writeProcMeshes(compiledGraph, variables, LandscapePort)
                 
                 );
         }
@@ -308,6 +482,7 @@ namespace Env.Editor
         protected override void OnDefineOptions(IOptionDefinitionContext ctx)
         {
             ShadeFlatOpt = ctx.AddOption<bool>("ShadeFlat").WithDefaultValue(false).Build();
+            UV_Mode = ctx.AddOption<UVMode>("UV Mode").WithDefaultValue(UVMode.GLOBAL).Build();
             UVScalingOpt = ctx.AddOption<float>("UV Scaling").WithDefaultValue(1).Build();
         }
         protected override void OnDefinePorts(IPortDefinitionContext ctx)
@@ -323,18 +498,18 @@ namespace Env.Editor
     {
         List<IPort> InputPorts = new List<IPort>();
         List<IPort> OutputPorts = new List<IPort>();
-        public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
+        public override EnvCompiledFunction compile(EnvCompiledGraph compiledGraph, Dictionary<IPort, int> variables)
         {
             
             int[] inputs = new int[InputPorts.Count];
             int[] outputs = new int[OutputPorts.Count];
             for (int i=0;i< inputs.Length;i++)
             {
-                inputs[i] = variables.GetValueOrDefault(InputPorts[i], -1);
+                inputs[i] = readFloatArrays(compiledGraph, variables, InputPorts[i], true);
             }
             for (int i = 0; i < outputs.Length; i++)
             {
-                outputs[i] = variables.GetValueOrDefault(OutputPorts[i], -1);
+                outputs[i] = writeFloatArrays(compiledGraph, variables, OutputPorts[i]);
             }
             return new NormalizeCompiled(outputs, inputs);
         }
@@ -347,13 +522,13 @@ namespace Env.Editor
         protected override void OnDefinePorts(IPortDefinitionContext ctx)
         {
             int layerCount=0;
-            GetNodeOptionByName("Layer Count").TryGetValue<int>(out layerCount);
+            GetNodeOptionByName("Count").TryGetValue<int>(out layerCount);
             InputPorts.Clear();
             OutputPorts.Clear();
             for (int i = 1; i <= layerCount; i++) {
                 
                 IPort inPort = ctx.AddInputPort<float>("Input "+i).Build();
-                IPort outPort = ctx.AddInputPort<float>("Output "+i).Build();
+                IPort outPort = ctx.AddOutputPort<float>("Output "+i).Build();
                 InputPorts.Add(inPort);
                 OutputPorts.Add(outPort);
             }
@@ -368,11 +543,11 @@ namespace Env.Editor
         INodeOption OverrideMaterialsOpt, ObjectOpt;
         
             
-        public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
+        public override EnvCompiledFunction compile(EnvCompiledGraph compiledGraph, Dictionary<IPort, int> variables)
         {
             MeshRenderer mesh = Val<MeshRenderer>(ObjectOpt, null);
             List<Material> mats = Val<List<Material>>(OverrideMaterialsOpt, null);
-            int objArg = variables.GetValueOrDefault(ObjectPort, -1);
+            int objArg = writeObject(compiledGraph, variables, ObjectPort);
             return new LoadStaticMeshCompiled(objArg, mats, mesh);
         }
         protected override void OnDefineOptions(IOptionDefinitionContext ctx)
@@ -393,11 +568,11 @@ namespace Env.Editor
         INodeOption OverrideMaterialsOpt, ObjectOpt;
 
 
-        public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
+        public override EnvCompiledFunction compile(EnvCompiledGraph compiledGraph, Dictionary<IPort, int> variables)
         {
             LODGroup mesh = Val<LODGroup>(ObjectOpt, null);
             List<Material> mats = Val<List<Material>>(OverrideMaterialsOpt, null);
-            int objArg = variables.GetValueOrDefault(ObjectPort, -1);
+            int objArg = writeObject(compiledGraph, variables, ObjectPort);
             return new LoadLODGroupCompiled(objArg, mats, mesh);
         }
         protected override void OnDefineOptions(IOptionDefinitionContext ctx)
@@ -418,11 +593,11 @@ namespace Env.Editor
         INodeOption ObjectOpt;
 
 
-        public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
+        public override EnvCompiledFunction compile(EnvCompiledGraph compiledGraph, Dictionary<IPort, int> variables)
         {
             InstanceableObjectAsset mesh = Val<InstanceableObjectAsset>(ObjectOpt, null);
             
-            int objArg = variables.GetValueOrDefault(ObjectPort, -1);
+            int objArg = writeObject(compiledGraph, variables, ObjectPort);
             return new LoadInstanceableObjectAssetCompiled(objArg, mesh);
         }
         protected override void OnDefineOptions(IOptionDefinitionContext ctx)
@@ -443,9 +618,9 @@ namespace Env.Editor
         IPort ObjectPort;
         INodeOption SeedOpt, AlignToNormalOpt, MinTiltOpt, MaxTiltOpt, MinScaleOpt, MaxScaleOpt, ScaleUniformlyOpt;
 
-        public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
+        public override EnvCompiledFunction compile(EnvCompiledGraph compiledGraph, Dictionary<IPort, int> variables)
         {
-            int inputDensityArg = variables.GetValueOrDefault(DensityPort, -1);
+            int inputDensityArg = readFloatArrays(compiledGraph, variables, DensityPort, false);
             uint seed = UInt(SeedOpt, 4645785);
             bool alignToNormal = Bool(AlignToNormalOpt, true);
             float minTilt = Mathf.Deg2Rad * Float(MinTiltOpt, 0);
@@ -453,9 +628,9 @@ namespace Env.Editor
             bool scaleUniformly = Bool(ScaleUniformlyOpt, true);
             Vector3 minScale = Float3(MinScaleOpt, new Vector3(1,1,1));
             Vector3 maxScale = Float3(MaxScaleOpt, new Vector3(1, 1, 1));
-            int objectArg = variables.GetValueOrDefault(ObjectPort, -1); 
-            int inputLandscapeArg = variables.GetValueOrDefault(LandscapePort, -1);
-            int outputInstancesArg = variables.GetValueOrDefault(InstancesPort, -1);
+            int objectArg = readObject(compiledGraph, variables, ObjectPort, false); 
+            int inputLandscapeArg = readProcMeshes(compiledGraph, variables, LandscapePort, false);
+            int outputInstancesArg = writeProcInstanceSets(compiledGraph, variables, InstancesPort);
             if (inputDensityArg == -1)
             {
                 float uniformDensity = 0;
@@ -519,13 +694,13 @@ namespace Env.Editor
     {
         IPort InstancesPort, OverridenInstancesPort;
         INodeOption MaterialsOpt;
-        public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
+        public override EnvCompiledFunction compile(EnvCompiledGraph compiledGraph, Dictionary<IPort, int> variables)
         {
             List<Material> mats;
             MaterialsOpt.TryGetValue(out mats);
             return new OverrideMaterialsCompiled(
-                inArg: variables.GetValueOrDefault(InstancesPort, -1),
-                outArg: variables.GetValueOrDefault(OverridenInstancesPort, -1),
+                inArg: readProcInstanceSets(compiledGraph, variables, InstancesPort, true),
+                outArg: writeProcInstanceSets(compiledGraph, variables, OverridenInstancesPort),
                 mats: mats
             );
         }
@@ -548,14 +723,14 @@ namespace Env.Editor
         List<IPort> InstancesPort = new List<IPort>();
         IPort JoinedInstancesPort;
 
-        public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
+        public override EnvCompiledFunction compile(EnvCompiledGraph compiledGraph, Dictionary<IPort, int> variables)
         {
             int[] inputs = new int[InstancesPort.Count];
             for (int i = 0; i < InstancesPort.Count; i++)
             {
-                inputs[i] = variables.GetValueOrDefault(InstancesPort[i], -1);
+                inputs[i] = readProcInstanceSets(compiledGraph, variables, InstancesPort[i], false);
             }
-            return new JoinInstancesCompiled(inputArgs: inputs, outArg: variables.GetValueOrDefault(JoinedInstancesPort, -1));
+            return new JoinInstancesCompiled(inputArgs: inputs, outArg: writeProcInstanceSets(compiledGraph, variables, JoinedInstancesPort));
         }
 
         protected override void OnDefineOptions(IOptionDefinitionContext ctx)
@@ -580,7 +755,7 @@ namespace Env.Editor
     [Serializable]
     public class SetInstancedObject : EnvNode
     {
-        public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
+        public override EnvCompiledFunction compile(EnvCompiledGraph compiledGraph, Dictionary<IPort, int> variables)
         {
             throw new NotImplementedException();
         }
@@ -601,109 +776,48 @@ namespace Env.Editor
     {
         internal IPort InstancesPort;
         internal IPort LandscapePort;
-        List<IPort> LayerPorts = new List<IPort>();
-
-        public override EnvCompiledFunction compile(Dictionary<IPort, int> variables)
+        public int instancesIdx;
+        public int landscapeIdx;
+        List<IPort> WeightPorts = new List<IPort>();
+        public override EnvCompiledFunction compile(EnvCompiledGraph compiledGraph, Dictionary<IPort, int> variables)
         {
-            return null;
+            instancesIdx = readProcInstanceSets(compiledGraph, variables, InstancesPort, false);
+            landscapeIdx = readProcMeshes(compiledGraph, variables, LandscapePort, false);
+            int[] weightsArgs = new int[WeightPorts.Count];
+            for (int i=0;i< WeightPorts.Count; i++)
+            {
+                weightsArgs[i]= readFloatArrays(compiledGraph, variables, WeightPorts[i], false);
+            }
+            return new ReturnCompiled(weightsArgs);
         }
 
         protected override void OnDefineOptions(IOptionDefinitionContext ctx)
         {
-
-            ctx.AddOption<int>("Layer Count").WithDefaultValue(1).Delayed();
+            
+            ctx.AddOption<TerrainLayers>("Layers").Delayed();
+            
         }
         protected override void OnDefinePorts(IPortDefinitionContext ctx)
         {
             InstancesPort = ctx.AddInputPort<Transform>("Instances").Build();
             LandscapePort = ctx.AddInputPort<Mesh>("Landscape").Build();
-            int layerCount = 0;
-            GetNodeOptionByName("Layer Count").TryGetValue<int>(out layerCount);
-            LayerPorts.Clear();
-            for (int i = 1; i <= layerCount; i++)
+
+            TerrainLayers layers = null;
+            GetNodeOptionByName("Layers").TryGetValue(out layers);
+            WeightPorts.Clear();
+            if (layers != null)
             {
-                IPort layerPort = ctx.AddInputPort<TerrainLayer>("Layer " + i).Build();
-                LayerPorts.Add(layerPort);
+                for (int i = 1; i <= layers.diffuse.depth; i++)
+                {
+                    string name = "Weights " +  (layers.names == null || layers.names.Length <= i || layers.names[i] == null ? i : layers.names[i]);
+                    IPort weightsPort = ctx.AddInputPort<float>(name).Build();
+                    WeightPorts.Add(weightsPort);
+                }
             }
             
         }
 
-        public TerrainLayer[] getLayers()
-        {
-            TerrainLayer[] layers = new TerrainLayer[LayerPorts.Count];
-            for (int i = 0; i < LayerPorts.Count; i++)
-            {
-                LayerPorts[i].TryGetValue(out layers[i]);
-            }
-            return layers;
-        }
 
     }
 
-
-    /*
-      if (world.spawnGrass)
-        {
-            var grassPoints = mesh.distributePoints((vert, loop) => 1f, world.seed);
-            RandomNumberGenerator rng = new RandomNumberGenerator(world.grassSeed);
-            Vector3[] verts = new Vector3[grassPoints.Count * 4];
-            int[] indices = new int[grassPoints.Count * 6];
-            //grassVertices = new GraphicsBuffer(GraphicsBuffer.Target.Structured, grassPoints.Count, 3 * sizeof(float));
-            //Array.
-            // grassVertices.SetData
-            float grassMaxTiltRadians = Mathf.Deg2Rad * world.grassMaxTilt;
-            for (int j = 0; j < grassPoints.Count; j++)
-            {
-                Tuple<float3, float3> t = grassPoints[j];
-                float width = rng.get_float_in(world.grassMinWidth, world.grassMaxWidth);
-                float height = rng.get_float_in(world.grassMinWidth, world.grassMaxHeight);
-                float rotationAboutY = rng.get_float_in(0, Mathf.PI * 2f);
-
-                float rotationAboutX = rng.get_float_in(-grassMaxTiltRadians, grassMaxTiltRadians);
-                float3 normal = t.Item2;
-                float2 yawPitch = BMath.normalToYawPitch(normal);
-                float tiltedZ = -height * Mathf.Sin(rotationAboutX);
-                float tiltedY = height * Mathf.Cos(rotationAboutX);
-                float3[] quadVerts = new float3[] {
-                    new float3(-0.5f*width,0, 0),
-                    new float3(0.5f*width, 0, 0) ,
-                    //new float3(0.5f*width, height, 0),
-                    //new float3(-0.5f*width, height, 0),
-                    new float3(0.5f*width, tiltedY, tiltedZ),
-                    new float3(-0.5f*width, tiltedY, tiltedZ)
-                };
-
-                //Quaternion rotateAboutXY = Quaternion.EulerAngles(rotationAboutX, rotationAboutY, 0);
-                //Quaternion rotate = alignToNormal * rotateAboutXY;
-                float3x3 rotationMatrix = BMath.rotationByEulerYXY(rotationAboutY, yawPitch.x, yawPitch.y);
-                float3 normal_ = math.mul(rotationMatrix, Vector3.up);
-                int jVertsOffset = j * 4;
-                for (int i = 0; i < quadVerts.Length; i++)
-                {
-                    float3 rotated = math.mul(rotationMatrix, quadVerts[i]);
-                    float3 translated = t.Item1 + rotated;
-                    verts[jVertsOffset + i] = translated;
-                }
-
-                indices[j * 6 + 0] = jVertsOffset + 0;
-                indices[j * 6 + 1] = jVertsOffset + 1;
-                indices[j * 6 + 2] = jVertsOffset + 2;
-                indices[j * 6 + 3] = jVertsOffset + 0;
-                indices[j * 6 + 4] = jVertsOffset + 2;
-                indices[j * 6 + 5] = jVertsOffset + 3;
-
-
-            }
-            //grassEulerAngles = new GraphicsBuffer(GraphicsBuffer.Target.Structured, vertsNormals.Count, 3 * sizeof(float));
-            //meshNormals.SetData(mesh.triangles);
-
-            Mesh grassMesh = new Mesh();
-            
-            grassMesh.vertices = verts;
-            grassMesh.triangles = indices;
-            grassMeshFilter.mesh = grassMesh;
-            
-        }
-     
-     */
 }

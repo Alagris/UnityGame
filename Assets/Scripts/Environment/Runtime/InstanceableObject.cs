@@ -51,7 +51,7 @@ namespace Env.Runtime
     {
         public InstanceableObject() { }
         public InstanceableObject(Mesh mesh) : this(mesh, null) { }
-        public InstanceableObject(InstanceableObjectAsset asset) : base(asset.LODs){} 
+        public InstanceableObject(InstanceableObjectAsset asset) : base(asset.LODs){}  
         public InstanceableObject(IEnumerable<InstanceableLOD> lods) : base(lods) { } 
         public InstanceableObject(Mesh StaticMesh, Material[] Materials) : this(new InstanceableLOD(StaticMesh, Materials)) { }
         public InstanceableObject(InstanceableLOD lod)

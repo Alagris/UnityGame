@@ -1,8 +1,7 @@
+
 using System;
-using UnityEngine;
 using Unity.GraphToolkit.Editor;
 using UnityEditor;
-using System.Collections.Generic;
 
 namespace Env.Editor
 {
@@ -20,6 +19,7 @@ namespace Env.Editor
         {
             GraphDatabase.PromptInProjectBrowserToCreateNewAsset<EnvGraph>("Procedural environemnt graph");
         }
+
 
         public override void OnGraphChanged(GraphLogger infos)
         {

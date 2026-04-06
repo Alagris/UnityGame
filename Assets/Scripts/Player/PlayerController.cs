@@ -50,6 +50,17 @@ public class PlayerController : AnyCharacterController
             Attack();
         }
     }
+    public void OnJump(InputAction.CallbackContext c)
+    {
+        if (c.performed)
+        {
+            Jump();
+        }
+        else if(c.canceled)
+        {
+            StopJump();
+        }
+    }
     public void OnMove(InputAction.CallbackContext c)
     {
         movementDirection = c.ReadValue<Vector2>();

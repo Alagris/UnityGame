@@ -90,7 +90,7 @@ public abstract class AnyCharacterController : MonoBehaviour
     protected bool canAttack = true;
     protected bool bufferAttackRequests = true;
     protected bool wantsToAttack = false;
-
+    protected bool wantsToJump = false;
 
     static string b(bool b) => b ? "T" : "F";
     void DebugLog(string msg)
@@ -106,6 +106,16 @@ public abstract class AnyCharacterController : MonoBehaviour
         );
     }
     
+    public void Jump()
+    {
+        wantsToJump = true;
+    }
+
+    public void StopJump()
+    {
+        wantsToJump = false;
+    }
+
     public void Attack()
     {
         if (canAttack) // if in stage 3
@@ -240,7 +250,18 @@ public abstract class AnyCharacterController : MonoBehaviour
 
                 if (CharacterInstance.characterController.isGrounded)
                 {
-                    velocity.y = Mathf.Max(velocity.y, 0);
+                    if (wantsToJump)
+                    {
+                        velocity.y += jumpForce;
+                    }
+                    if (velocity.y <= 0)
+                    {
+                       
+                       
+                            velocity.y = 0;
+                        
+                    }
+                    
                 }
                 else
                 {

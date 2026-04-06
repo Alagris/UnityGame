@@ -200,13 +200,13 @@ namespace Env.Runtime
             return o;
         }
 
-        public static ProcMesh gridPrecomputed(float3 offset, int resX, int resZ, float widthX, float heightZ, float[] heights, float uvScaling)
+        public static ProcMesh gridPrecomputed(float3 offset, int resX, int resZ, float widthX, float heightZ, float[] heights, float uvScaling, UVMode mode)
         {
             float spacingX = widthX / (resX - 1);
             float spacingZ = heightZ / (resZ - 1);
             ProcMesh o = new ProcMesh();
             Vector3[] vertices = new Vector3[resZ * resX];
-            Vector2[] uvs = new Vector2[resZ * resX];
+            Vector2[] uvs = mode==UVMode.NONE ? null : new Vector2[resZ * resX];
             Vector3[] normals = new Vector3[resZ * resX];
             const int padding = 1;
             int resXPadded = resX + 2 * padding;
@@ -228,7 +228,12 @@ namespace Env.Runtime
                     float downH = heights[down];
                     float3 vertex = offset + new float3(vx * spacingX, centerH, vz * spacingZ);
                     vertices[i] = vertex;
-                    uvs[i] = vertex.xz * uvScaling;
+                    if (mode != UVMode.NONE)
+                    {
+
+                        float2 uv = mode == UVMode.REPEATING ? new float2(vx / (resX - 1), vz / (resZ - 1)): vertex.xz;
+                        uvs[i] = uv * uvScaling;
+                    }
                     // differential to the left:
                     //   (centerH-leftH)/spacingX
                     // differential to the right:
@@ -244,7 +249,10 @@ namespace Env.Runtime
                 }
             }
             o.vertices = vertices;
-            o.uvs = uvs;
+            if (mode != UVMode.NONE)
+            {
+                o.uvs = uvs;
+            }
             o.normals = normals;
             o.triangles = gridTriangles(resX, resZ);
             return o;

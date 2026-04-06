@@ -4,8 +4,8 @@ Shader "Proc Env/Terrain"
 {
     Properties
     {
-        _MyArr ("Tex", 2DArray) = "" {}
-        _SliceRange ("Slices", Range(0,16)) = 6
+        _TerrainLayers ("Layers", 2DArray) = "" {}
+        _LayerWeights("Weight Map", 2D) = "white" {}
         _UVScale ("UVScale", Float) = 1.0
     }
     SubShader
