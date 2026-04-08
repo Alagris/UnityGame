@@ -37,3 +37,4 @@ MonoBehaviour:
     Materials:
     - {fileID: 2100000, guid: abc00000000013609532518856332474, type: 2}
     chunkDistance: 0.01
+  Prefab: {fileID: 613456649793339877, guid: 7840d3e62536bfd4f8743af7a61514ed, type: 3}

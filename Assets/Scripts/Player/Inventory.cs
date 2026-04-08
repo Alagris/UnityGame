@@ -11,7 +11,7 @@ public class Inventory : InteractableCharacter
     public Loot Loot;
 
     [SerializeField]
-    public ItemInstance EquippedInHand;
+    public ItemInstance EquippedInHand=null;
 
     [SerializeField]
     protected Dictionary<Item, ItemInstance> Items = new Dictionary<Item, ItemInstance>();
@@ -117,4 +117,6 @@ public class Inventory : InteractableCharacter
         RemoveAllItems();
         DrawLoot();
     }
+
+    public bool hasEquippedInHand() => EquippedInHand != null && EquippedInHand.IsValid();
 }

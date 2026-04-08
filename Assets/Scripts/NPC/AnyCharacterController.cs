@@ -122,11 +122,8 @@ public abstract class AnyCharacterController : MonoBehaviour
     {
         if (canAttack) // if in stage 3
         {
-            if(inventory == null || inventory.EquippedInHand==null)
-            {
-                CharacterInstance.TriggerAttack();
-            }
-            else
+            CharacterInstance.TriggerAttack();
+            if (inventory != null && inventory.hasEquippedInHand())
             {
                 inventory.EquippedInHand.OnAttack(this);
             }
@@ -240,13 +237,13 @@ public abstract class AnyCharacterController : MonoBehaviour
     public IInteractable InteractWithTool()
     {
 
-        if (inventory == null || inventory.EquippedInHand == null)
+        if (inventory != null && inventory.hasEquippedInHand())
         {
-            return Interact(null);
+            return inventory.EquippedInHand.OnInteract(this); 
         }
         else
         {
-            return inventory.EquippedInHand.OnInteract(this);
+            return Interact(null);
         }
         
     }

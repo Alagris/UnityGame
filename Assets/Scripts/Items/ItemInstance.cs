@@ -97,4 +97,6 @@ public class ItemInstance
         }
         Owner = null;
     }
+
+    public bool IsValid() => Type != null;
 }

@@ -156,6 +156,7 @@ public class ClothingInventory : Inventory
         if (weaponInstance != null)
         {
             EquippedInHand = weapon;
+            Debug.Assert(EquippedInHand.Type != null);
             weapon.CurrentMeshInstance = weaponInstance;
         }
         return weaponInstance;

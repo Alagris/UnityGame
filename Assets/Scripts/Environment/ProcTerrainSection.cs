@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.Environment;
+﻿
 using Env.Runtime;
 using System;
 using System.Collections.Generic;
@@ -8,8 +8,8 @@ public class ProcTerrainSection : ProcSection, IInteractable
 {
     
     public void Interact(GameObject interactor, ItemInstance tool, RaycastHit hit)
-    {
-        
+    { 
+        Debug.Log("Interacted ");
     }
 
     public override GameObject SpawnInstance(GameObject prefab, Matrix4x4 transform)

@@ -20,7 +20,7 @@ public class Item : Loot
     [DoNotSerialize]
     public byte SlotRaw { get => (byte) Slot; }
 
-    public virtual IInteractable OnInteract(AnyCharacterController user, ItemInstance inst) { return null; }
+    public virtual IInteractable OnInteract(AnyCharacterController user, ItemInstance inst) { return user.Interact(inst); }
 
     public virtual void OnAttack(AnyCharacterController user, ItemInstance inst) { }
 
