@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24feb8e4951698e49bd9672b776c4c23, type: 3}
   m_Name: katana
   m_EditorClassIdentifier: Assembly-CSharp::ItemWeapon
-  ItemName: 
-  ItemID: 13
+  ItemName: Katana
   Mesh: {fileID: 3804050427014384921, guid: 5fbd2d77e10a67b409ca1c28ecd7781c, type: 3}
+  Weight: 0
+  Slot: 0
   CharacterID: 1
   ParentBone: weapon

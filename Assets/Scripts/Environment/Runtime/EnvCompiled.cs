@@ -462,13 +462,14 @@ namespace Env.Runtime
             this.inputLandscapeArg = inputLandscapeArg;
             this.outputInstancesArg = outputInstancesArg;
         }
-        protected abstract ProcInstances run(Blackboard bb, ProcInstances m, ProcMesh landscape);
+        protected abstract ProcInstances run(Blackboard bb, ProcInstances m, ProcMesh landscape, uint seed);
         public void run(Blackboard bb)
         {
             ProcMesh landscape = bb.getMesh(inputLandscapeArg);
             InstanceableObject o = bb.getObject(objectArg);
             ProcInstances m = new ProcInstances(o);
-            run(bb, m, landscape);
+            uint s = Noise.hash_float(new float2(bb.offset.x, bb.offset.z), seed);
+            run(bb, m, landscape, s);
             bb.setInsatnceSet(outputInstancesArg, m);
         }
     }
@@ -483,9 +484,10 @@ namespace Env.Runtime
             this.inputDensityArg = inputDensityArg;
             
         }
-        protected override ProcInstances run(Blackboard bb, ProcInstances m,ProcMesh landscape)
+        protected override ProcInstances run(Blackboard bb, ProcInstances m,ProcMesh landscape, uint seed)
         {
             float[] density = bb.getFloat(inputDensityArg);
+            
             return landscape.distributePoints(m, density, seed,alignToNormal,minTilt,maxTilt,minScale,maxScale, scaleUniformly);
         }
     }
@@ -500,7 +502,7 @@ namespace Env.Runtime
             this.desnityUniform = desnityUniform;
             
         }
-        protected override ProcInstances run(Blackboard bb, ProcInstances m, ProcMesh landscape)
+        protected override ProcInstances run(Blackboard bb, ProcInstances m, ProcMesh landscape, uint seed)
         {
             return landscape.distributePointsUniform(m, desnityUniform, seed, alignToNormal, minTilt, maxTilt,minScale,maxScale, scaleUniformly);
         }

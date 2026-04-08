@@ -1,9 +1,11 @@
-using System;
-using Unity.Mathematics;
-using UnityEngine;
 using Env.Runtime;
 using NUnit.Framework;
+using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
+using Unity.VectorGraphics;
+using UnityEngine;
+using static UnityEngine.UI.Image;
 
 namespace Env.Runtime
 {
@@ -89,9 +91,25 @@ namespace Env.Runtime
                 InstancedLODGroup im = gameObject.AddComponent<InstancedLODGroup>();
                 im.Set(instances.Mesh, instances.Transforms);
                 this.instances.Add(im);
-
+                GameObject prefab = instances.Mesh.Prefab;
+                if (prefab != null)
+                {
+                    foreach (Matrix4x4 transform in instances.Transforms)
+                    {
+                        SpawnInstance(prefab, transform);
+                    }
+                }
             }
         }
+
+        public virtual GameObject SpawnInstance(GameObject prefab , Matrix4x4 transform)
+        {
+            GameObject copy = Instantiate(prefab);
+            copy.transform.SetParent(gameObject.transform, true);
+            ProcInstances.AssignTransform(copy.transform, transform);
+            return copy;
+        }
+
         public void ClearInstances()
         {
             foreach (InstancedLODGroup i in GetComponents<InstancedLODGroup>())

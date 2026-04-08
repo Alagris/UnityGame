@@ -49,14 +49,14 @@ public abstract class AnyCharacterController : MonoBehaviour
             GameObject i = Instantiate(CharacterType.Prefab, transform);
             CharacterPrefabController newCharacterInstance = i.GetComponent<CharacterPrefabController>();
             newCharacterInstance.Owner = this;
-            inventory.SetBody(CharacterType.CharacterID, newCharacterInstance.Body);
+            inventory.SetBody(CharacterType, newCharacterInstance);
             walkSpeed = CharacterType.SlowWalkSpeed;
             return newCharacterInstance;
         }
         return null;
     }
 
-    
+    [SerializeField]
     public Inventory inventory;
     
     [SerializeField]
@@ -106,6 +106,8 @@ public abstract class AnyCharacterController : MonoBehaviour
         );
     }
     
+    
+
     public void Jump()
     {
         wantsToJump = true;
@@ -120,7 +122,14 @@ public abstract class AnyCharacterController : MonoBehaviour
     {
         if (canAttack) // if in stage 3
         {
-            CharacterInstance.TriggerAttack();
+            if(inventory == null || inventory.EquippedInHand==null)
+            {
+                CharacterInstance.TriggerAttack();
+            }
+            else
+            {
+                inventory.EquippedInHand.OnAttack(this);
+            }
             bufferAttackRequests = false;
             canAttack = false;
             canMove = false;
@@ -202,8 +211,68 @@ public abstract class AnyCharacterController : MonoBehaviour
         
     }
 
+    [SerializeField]
+    public float ReachDistance=7;
+    [SerializeField]
+    public Transform EyeTransform;
 
+    public bool LineTrace(out RaycastHit hit)
+    {
+        if (EyeTransform != null)
+        {
+            Ray r = new Ray(EyeTransform.position, EyeTransform.forward);
 
+            return Physics.Raycast(r, out hit, ReachDistance);
+
+        }
+        else
+        {
+            hit = default;
+        }
+        return false;
+        
+    }
+    public IInteractable InteractWithoutTool()
+    {
+        return Interact(null);
+        
+    }
+    public IInteractable InteractWithTool()
+    {
+
+        if (inventory == null || inventory.EquippedInHand == null)
+        {
+            return Interact(null);
+        }
+        else
+        {
+            return inventory.EquippedInHand.OnInteract(this);
+        }
+        
+    }
+    public IInteractable Interact(ItemInstance tool)
+    {
+        if (LineTrace(out RaycastHit hit))
+        {
+            if (hit.collider.gameObject.TryGetComponent(out IInteractable interactable))
+            {
+                interactable.Interact(gameObject, tool, hit);
+            }
+        }
+        return null;
+    }
+
+    public IAttackable InteractAttack(ItemInstance weapon)
+    {
+        if (LineTrace(out RaycastHit hit))
+        {
+            if (hit.collider.gameObject.TryGetComponent(out IAttackable attackable))
+            {
+                attackable.Attack(gameObject, weapon, hit);
+            }
+        }
+        return null;
+    }
 
     protected virtual void Start()
     {
@@ -214,6 +283,7 @@ public abstract class AnyCharacterController : MonoBehaviour
         }
         
         UpdateCharacterType();
+
     }
 
     public void OnLeftFootInFront(bool leftInFront) // enters stage 3

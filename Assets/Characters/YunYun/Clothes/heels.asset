@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: heels
   m_EditorClassIdentifier: Assembly-CSharp::ItemClothing
   ItemName: Heels
-  ItemID: 10
   Mesh: {fileID: 5989499374143469916, guid: 1651c2e76db027441a01231804731cf3, type: 3}
+  Weight: 0
+  Slot: 12288
   CharacterID: 1

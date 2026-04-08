@@ -49,9 +49,15 @@ namespace Env.Runtime
     [Serializable]
     public class InstanceableObject : List<InstanceableLOD>
     {
+
+        [SerializeField]
+        public GameObject Prefab;
+
         public InstanceableObject() { }
         public InstanceableObject(Mesh mesh) : this(mesh, null) { }
-        public InstanceableObject(InstanceableObjectAsset asset) : base(asset.LODs){}  
+        public InstanceableObject(InstanceableObjectAsset asset) : base(asset.LODs){
+            this.Prefab = asset.Prefab;
+        }  
         public InstanceableObject(IEnumerable<InstanceableLOD> lods) : base(lods) { } 
         public InstanceableObject(Mesh StaticMesh, Material[] Materials) : this(new InstanceableLOD(StaticMesh, Materials)) { }
         public InstanceableObject(InstanceableLOD lod)
@@ -105,6 +111,9 @@ namespace Env.Runtime
     {
         [SerializeField]
         public List<InstanceableLOD> LODs;
+
+        [SerializeField]
+        public GameObject Prefab;
 
         [MenuItem("Assets/Create/Proc Env/Instanced Mesh From Selected Asset")]
         static void CreateAssetFile()

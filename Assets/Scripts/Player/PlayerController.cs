@@ -42,7 +42,21 @@ public class PlayerController : AnyCharacterController
         Cursor.lockState = CursorLockMode.Locked;
 
     }
-    
+
+    public void OnInteract(InputAction.CallbackContext c)
+    {
+        if (c.performed)
+        {
+            InteractWithoutTool();
+        }
+    }
+    public void OnInteractWithTool(InputAction.CallbackContext c)
+    {
+        if (c.performed)
+        {
+            InteractWithTool();
+        }
+    }
     public void OnAttack(InputAction.CallbackContext c)
     {
         if (c.performed)

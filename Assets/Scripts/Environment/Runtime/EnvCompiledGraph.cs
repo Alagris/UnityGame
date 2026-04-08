@@ -30,7 +30,7 @@ namespace Env.Runtime
 
 
         Blackboard makeNewBB(int resX, int resZ, float size, float3 offset)
-        {
+        { 
             return new Blackboard(resX, resZ, size, offset,
                 intArraysCount: intArraysCount,
                 floatArraysCount: floatArraysCount,
@@ -60,9 +60,5 @@ namespace Env.Runtime
             }
         }
 
-        internal Section SpawnSection(int id)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

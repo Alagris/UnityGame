@@ -150,6 +150,10 @@ namespace Env.Runtime
         {
             return hash(float_as_uint(k.x), float_as_uint(k.y), float_as_uint(k.z));
         }
+        public static uint hash_float(float2 k, uint l)
+        {
+            return hash(float_as_uint(k.x), float_as_uint(k.y), l);
+        }
 
         public static uint hash_float(float4 k)
         {

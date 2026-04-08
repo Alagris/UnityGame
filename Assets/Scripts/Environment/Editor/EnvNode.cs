@@ -621,7 +621,7 @@ namespace Env.Editor
         public override EnvCompiledFunction compile(EnvCompiledGraph compiledGraph, Dictionary<IPort, int> variables)
         {
             int inputDensityArg = readFloatArrays(compiledGraph, variables, DensityPort, false);
-            uint seed = UInt(SeedOpt, 4645785);
+            uint seed = (uint)Int(SeedOpt, 4645785);
             bool alignToNormal = Bool(AlignToNormalOpt, true);
             float minTilt = Mathf.Deg2Rad * Float(MinTiltOpt, 0);
             float maxTilt = Mathf.Deg2Rad * Float(MaxTiltOpt, 0);
@@ -670,7 +670,7 @@ namespace Env.Editor
 
         protected override void OnDefineOptions(IOptionDefinitionContext ctx)
         {
-            SeedOpt = ctx.AddOption<uint>("Seed").WithDefaultValue(4645785).Build();
+            SeedOpt = ctx.AddOption<int>("Seed").WithDefaultValue(4645785).Build();
             
             AlignToNormalOpt = ctx.AddOption<bool>("AlignToNormal").WithDefaultValue(true).Build();
             MinTiltOpt = ctx.AddOption<float>("MinTilt").WithDefaultValue(0).Build();

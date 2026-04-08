@@ -1,0 +1,86 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using UnityEngine;
+
+public enum ClothingSlot : uint
+{
+    [InspectorName("NONE")]
+    NONE = 0,
+    [InspectorName("STOMACH")]
+    STOMACH = 0b0000000000000000000000000000000000000001u,
+    [InspectorName("HEAD")]
+    HEAD =    0b0000000000000000000000000000000000000010u,
+    [InspectorName("NECK")]
+    NECK =    0b0000000000000000000000000000000000000100u,
+    [InspectorName("ASS")]
+    ASS =     0b0000000000000000000000000000000000001000u,
+    [InspectorName("ARMS")]
+    ARMS =    0b0000000000000000000000000000000000010000u,
+    [InspectorName("BREAST")]
+    BREAST =  0b0000000000000000000000000000000000100000u,
+    [InspectorName("LEFT HAND")]
+    HAND_L =  0b0000000000000000000000000000000001000000u,
+    [InspectorName("RIGHT HAND")]
+    HAND_R =  0b0000000000000000000000000000000010000000u,
+    [InspectorName("LEFT THIGH")]
+    THIGH_L = 0b0000000000000000000000000000000100000000u,
+    [InspectorName("RIGHT THIGH")]
+    THIGH_R = 0b0000000000000000000000000000001000000000u,
+    [InspectorName("LEFT SHIN")]
+    SHIN_L =  0b0000000000000000000000000000010000000000u,
+    [InspectorName("RIGHT SHIN")]
+    SHIN_R =  0b0000000000000000000000000000100000000000u,
+    [InspectorName("LEFT FOOT")]
+    FOOT_L =  0b0000000000000000000000000001000000000000u,
+    [InspectorName("RIGHT FOOT")]
+    FOOT_R =  0b0000000000000000000000000010000000000000u,
+    [InspectorName("WEAPON")]
+    WEAPON =  0b0000000000000000000000000100000000000000u,
+    [InspectorName("FEET")]
+    FEET = FOOT_L | FOOT_R,
+    [InspectorName("SHINS")]
+    SHINS = SHIN_L | SHIN_R,
+    [InspectorName("THIGHS")]
+    THIGHS = THIGH_L | THIGH_R,
+    [InspectorName("LEG_L")]
+    LEG_L = THIGH_L | SHIN_L,
+    [InspectorName("LEG_R")]
+    LEG_R = THIGH_R | SHIN_R,
+    [InspectorName("LEGS")]
+    LEGS = THIGHS | SHINS,
+    [InspectorName("HANDS")]
+    HANDS = HAND_L | HAND_R,
+    [InspectorName("STOMACH+BREAST")]
+    TOP = STOMACH | BREAST,
+    [InspectorName("STOMACH+BREAST+ARMS")]
+    LONG_TOP = STOMACH | BREAST | ARMS,
+    [InspectorName("ASS+STOMACH+BREAST")]
+    TORSO = ASS | STOMACH | BREAST,
+    [InspectorName("ASS+STOMACH+BREAST+ARMS")]
+    UPPER = ASS | STOMACH | BREAST | ARMS,
+    [InspectorName("ARMS+HANDS")]
+    ARMS_HANDS = ARMS | HANDS,
+    [InspectorName("ASS+BREAST")]
+    BIKINI = ASS | BREAST,
+    [InspectorName("ASS+LEGS")]
+    PANTS = ASS | LEGS,
+    [InspectorName("FEET+LEGS")]
+    LEGS_FEET = FEET | LEGS,
+    [InspectorName("FEET+LEGS+ASS")]
+    LOWER = FEET | LEGS | ASS,
+    [InspectorName("FEET+LEGS+ASS+STOMACH+BREAST")]
+    NO_ARMS = FEET | LEGS | ASS | STOMACH | BREAST,
+    [InspectorName("FEET+LEGS+ASS+BREAST")]
+    NO_STOMACH = FEET | LEGS | ASS | BREAST,
+    [InspectorName("FEET+LEGS+ASS+BREAST+ARMS")]
+    NO_STOMACH_ARMS = FEET | LEGS | ASS | BREAST | ARMS,
+    [InspectorName("FEET+LEGS+ASS+STOMACH+BREAST+ARMS")]
+    FULL_BODY = FEET | LEGS | ASS | STOMACH | BREAST | ARMS,
+    [InspectorName("FEET+LEGS+ASS+STOMACH+BREAST+ARMS+HEAD")]
+    BODY_HEAD = FEET | LEGS | ASS | STOMACH | BREAST | ARMS | HEAD,
+    [InspectorName("EVERYTHING")]
+    ALL = 0xffffffffu,
+
+    
+}

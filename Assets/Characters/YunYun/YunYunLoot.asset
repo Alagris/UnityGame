@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b9ea23aeded97d48aa921f3a5c26a2c, type: 3}
+  m_Name: YunYunLoot
+  m_EditorClassIdentifier: Assembly-CSharp::LootAll
+  Items:
+  - Item: {fileID: 11400000, guid: 14dec44d28c63a448b656ac98cf2b630, type: 2}
+    Count: 1
+  - Item: {fileID: 11400000, guid: e4483d084d019694fb3d3f001518f8c4, type: 2}
+    Count: 1
+  - Item: {fileID: 11400000, guid: 87284c3fb4f1af64788a7dbd52994175, type: 2}
+    Count: 1
+  - Item: {fileID: 11400000, guid: 83886b4891c945348ae6d87a9980c20c, type: 2}
+    Count: 1
+  - Item: {fileID: 11400000, guid: 81b52bdbf9559d844a3282334806d0db, type: 2}
+    Count: 1
+  - Item: {fileID: 11400000, guid: 0761540b3d4653d498f6c08fea09a0bd, type: 2}
+    Count: 1

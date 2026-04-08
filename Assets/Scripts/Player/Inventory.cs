@@ -1,83 +1,120 @@
+using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.tvOS;
 
-public class Inventory : MonoBehaviour
+public class Inventory : InteractableCharacter
 {
 
     [SerializeField]
-    int CharacterID;
+    public Loot Loot;
 
     [SerializeField]
-    List<ItemClothing> EquippedClothes;
+    public ItemInstance EquippedInHand;
 
     [SerializeField]
-    List<ItemWeapon> EquippedWeapons;
+    protected Dictionary<Item, ItemInstance> Items = new Dictionary<Item, ItemInstance>();
 
-    List<GameObject> EquippedClothesInstances = new List<GameObject>();
 
-    [SerializeField]
-    List<Item> Items;
+    [DoNotSerialize]
+    protected float CarriedWeight=0;
 
-    [SerializeField]
-    SkinnedMeshRenderer Body;
-
-    readonly Dictionary<string, Transform> originalBones = new Dictionary<string, Transform>();
-    public void SetBody(int characterID, SkinnedMeshRenderer body)
+    
+    public void AddItem(Item item, int count=1)
     {
-        CharacterID = characterID;
-        Body = body;
-        originalBones.Clear();
-        foreach (var b in Body.bones)
-        {
-            originalBones.Add(b.name, b);
-        }
-        EquipClothes();
-        EquipWeapons();
+        AddItem(new ItemInstance(item, count));
     }
-    public void EquipClothes()
+    public void AddItem(ItemInstance item)
     {
-
-
-        for (int k = 0; k < EquippedClothes.Count; k++)
+        if (item.Owner == null)
         {
-
-            ItemClothing clothes = EquippedClothes[k];
-            if (clothes.CharacterID == CharacterID)
+            CarriedWeight += item.Weight;
+            if (Items.TryGetValue(item.Type, out ItemInstance prev))
             {
-                GameObject clothesInstance = Instantiate(clothes.Mesh, this.transform);
-                SkinnedMeshRenderer renderer = clothesInstance.GetComponentInChildren<SkinnedMeshRenderer>();
-                Transform[] clothesBones = renderer.bones;
-                for (int i = 0; i < clothesBones.Length; i++)
-                {
-                    Transform originalBone = originalBones[clothesBones[i].name];
-                    if (originalBone != null)
-                    {
-                        clothesBones[i] = originalBone;
-                    }
-                }
-                renderer.bones = clothesBones;
-                renderer.rootBone = Body.rootBone;
-                EquippedClothesInstances.Add(clothesInstance);
+                prev.Stack(item);
             }
-
+            else
+            {
+                item.Owner = this;
+                Items.Add(item.Type, item);
+            }
+            
         }
     }
-    public void EquipWeapons() { 
-        for (int k = 0; k < EquippedWeapons.Count; k++)
+    public ItemInstance RemoveItem(ItemInstance item)
+    {
+        return RemoveItem(item.Type, item.Count);
+    }
+    public ItemInstance RemoveItem(Item type, int count = 1)
+    {
+        if(Items.TryGetValue(type, out ItemInstance prev))
         {
-
-            ItemWeapon weapon = EquippedWeapons[k];
-            Transform parentBone = originalBones[weapon.ParentBone];
-            if (parentBone != null)
+            if(prev.Count > count)
             {
-                GameObject weaponInstance = Instantiate(weapon.Mesh, parentBone);
-                EquippedClothesInstances.Add(weaponInstance);
+                prev.Count -= count;
+                CarriedWeight -= count * prev.Weight;
             }
-
+            else
+            {
+                Unequip(prev);
+                prev.Owner = null;
+                Items.Remove(type);
+                CarriedWeight -= prev.TotalWeight;
+            }
+            return prev;
+        }
+        else
+        {
+            return null;
         }
 
     }
+    public virtual void Unequip(ItemInstance item)
+    {
+        item.Uneqip(null);
+    }
+    public virtual void ForceUnequipWeapon()
+    {
+        EquippedInHand = null;
+    }
 
-    // Update is called once per frame
-  
+    public void ForceUnequipWeapon(ItemInstance itemInstance)
+    {
+        if (EquippedInHand == itemInstance)
+        {
+            ForceUnequipWeapon();
+        }
+    }
+    public virtual void SetBody(CharacterType characterType, CharacterPrefabController newCharacterInstance)
+    {
+        CharacterID = characterType.CharacterID;
+        CharacterName = characterType.Name;
+    }
+
+    public virtual void RemoveAllItems()
+    {
+        foreach (var i in Items)
+        {
+            i.Value.Owner = null;
+        }
+        CarriedWeight = 0;
+        Items.Clear();
+        ForceUnequipWeapon();
+    }
+    public void DrawLoot()
+    {
+        DrawLoot(Loot);
+    }
+    public void DrawLoot(Loot loot, int count=1)
+    {
+        if (Loot != null) { 
+            loot.DrawLoot(this, count);
+        }
+    }
+    public void ResetInventory()
+    {
+        RemoveAllItems();
+        DrawLoot();
+    }
 }

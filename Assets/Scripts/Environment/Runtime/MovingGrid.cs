@@ -58,11 +58,12 @@ namespace Env.Runtime
 		}
 	}
 
-	public class MovingGrid : ProcSectionSpawner
-	{
+	public class MovingGrid : ProcEnvTerrain
+    {
 
+		
 
-		[SerializeField]
+        [SerializeField]
 		internal int chunkDespawnRadius = 3;
 		[SerializeField]
 		internal float chunkSpawnRadius = 2;
@@ -77,9 +78,11 @@ namespace Env.Runtime
 		[SerializeField]
 		internal Transform Player;
 
-		private void Start()
+		protected override void Start() 
 		{
-			Refresh();
+			base.Start();
+
+            Refresh();
 		}
 		public override void Refresh()
 		{
@@ -120,7 +123,7 @@ namespace Env.Runtime
 		{
 			UnloadAll();
 			unusedSections.Clear();
-			base.Clear();
+			
 		}
 
 
@@ -139,7 +142,7 @@ namespace Env.Runtime
 
 			while (unusedSections.Count < area)
 			{
-				unusedSections.Push(ProcEnv.SpawnSection(unusedSections.Count));
+				unusedSections.Push(Spawner.SpawnSection(unusedSections.Count));
 
 			}
 			while (unusedSections.Count > area)
@@ -230,7 +233,7 @@ namespace Env.Runtime
 		}
 		public int2 getChunkAbsPosFromWorldPos(float posX, float posY)
 		{
-			return new int2(Mathf.FloorToInt(posX / ChunkSize), Mathf.FloorToInt(posY / ChunkSize));
+			return new int2(Mathf.FloorToInt(posX / Spawner.ChunkSize), Mathf.FloorToInt(posY / Spawner.ChunkSize));
 		}
 		public int2 getChunkAbsPosFromWorldPos(float3 pos)
 		{

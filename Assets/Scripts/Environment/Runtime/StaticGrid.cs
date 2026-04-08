@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Env.Runtime
 {
-    public class StaticGrid : ProcSectionSpawner
+    public class StaticGrid : ProcEnvTerrain
     {
         [SerializeField]
         internal int Rows = 3;
@@ -12,12 +12,13 @@ namespace Env.Runtime
 
         // Start is called once before the first execution of Update after the MonoBehaviour is created
 
-        ProcSection[] sections;
+        Section[] sections;
 
 
 
-        private void Start()
+        protected override void Start()
         {
+            base.Start();
             Refresh();
 
         }
@@ -44,14 +45,14 @@ namespace Env.Runtime
             UnloadAll();
             if (sections == null)
             {
-                sections = new ProcSection[Rows * Columns];
+                sections = new Section[Rows * Columns];
             }
             else
             {
                 if (sections.Length != Rows * Columns)
                 {
-                    ProcSection[] old = sections;
-                    sections = new ProcSection[Rows * Columns];
+                    Section[] old = sections;
+                    sections = new Section[Rows * Columns];
                     int common = Mathf.Min(old.Length, sections.Length);
                     for (int i = 0; i < common; i++)
                     {
@@ -72,7 +73,7 @@ namespace Env.Runtime
                 {
                     if (sections[i] == null)
                     {
-                        sections[i] = SpawnSection(i);
+                        sections[i] = Spawner.SpawnSection(i);
                     }
                     sections[i].OnLoad(0, new int2(x, y) - offset);
                 }
