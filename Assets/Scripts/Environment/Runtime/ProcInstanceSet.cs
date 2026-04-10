@@ -7,8 +7,8 @@ namespace Env.Runtime
 {
     public class ProcInstanceSet: List<ProcInstances>
     {
-        
-        
+
+        public ProcInstanceSet(int capacity):base(capacity) { }
         public ProcInstanceSet() { }
         public ProcInstanceSet(IEnumerable<ProcInstances> e) :base(e){ }
         public ProcInstanceSet(ProcInstances instances)
@@ -18,6 +18,16 @@ namespace Env.Runtime
         internal ProcInstanceSet join(ProcInstanceSet b)
         {
             return new ProcInstanceSet(this.Concat(b));
+        }
+
+        public ProcInstanceSet DeepCopy()
+        {
+            ProcInstanceSet copy = new ProcInstanceSet(Count);
+            for(int i = 0; i < Count; i++)
+            {
+                copy.Add(this[i].DeepCopy());
+            }
+            return copy;
         }
 
         internal ProcInstanceSet SetMaterials(List<Material> mats)

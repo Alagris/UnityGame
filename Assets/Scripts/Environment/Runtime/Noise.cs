@@ -428,6 +428,16 @@ namespace Env.Runtime
         {
             return v1 - v0;
         }
+        /* Bilinear Interpolation:
+         *
+         * v2          v3
+         *  @ + + + + @       y
+         *  +         +       ^
+         *  +         +       |
+         *  +         +       |
+         *  @ + + + + @       @------> x
+         * v0          v1
+         */
         public static float mix(float v0, float v1, float v2, float v3, float x, float y)
         {
             float x1 = 1.0f - x;
@@ -441,6 +451,43 @@ namespace Env.Runtime
                 v2 - v0 + v * x
             );
         }
+        public static float2 mix(float2 v0, float2 v1, float2 v2, float2 v3, float x, float y)
+        {
+            float x1 = 1.0f - x;
+            return (1.0f - y) * (v0 * x1 + v1 * x) + y * (v2 * x1 + v3 * x);
+        }
+        public static float3 mix(float3 v0, float3 v1, float3 v2, float3 v3, float x, float y)
+        {
+            float x1 = 1.0f - x;
+            return (1.0f - y) * (v0 * x1 + v1 * x) + y * (v2 * x1 + v3 * x);
+        }
+        public static float4 mix(float4 v0, float4 v1, float4 v2, float4 v3, float x, float y)
+        {
+            float x1 = 1.0f - x;
+            return (1.0f - y) * (v0 * x1 + v1 * x) + y * (v2 * x1 + v3 * x);
+        }
+        public static T nearest<T>(T v0, T v1, T v2, T v3, float x, float y)
+        {
+            return x < 0.5 ? (y < 0.5 ? v0 : v2) : (y < 0.5 ? v1 : v3);
+        }
+        /* Trilinear Interpolation:
+         *
+         *   v6               v7
+         *     @ + + + + + + @
+         *     +\            +\
+         *     + \           + \
+         *     +  \          +  \
+         *     +   \ v4      +   \ v5
+         *     +    @ + + + +++ + @          z
+         *     +    +        +    +      y   ^
+         *  v2 @ + +++ + + + @ v3 +       \  |
+         *      \   +         \   +        \ |
+         *       \  +          \  +         \|
+         *        \ +           \ +          +---------> x
+         *         \+            \+
+         *          @ + + + + + + @
+         *        v0               v1
+         */
         public static float mix(float v0,
            float v1,
            float v2,
@@ -460,7 +507,6 @@ namespace Env.Runtime
                 z * (y1 * (v4 * x1 + v5 * x) + y * (v6 * x1 + v7 * x));
 
         }
-
         public static float3 mix_derivative(float v0,
             float v1,
             float v2,

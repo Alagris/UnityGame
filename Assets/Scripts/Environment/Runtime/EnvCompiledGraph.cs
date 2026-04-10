@@ -18,6 +18,8 @@ namespace Env.Runtime
         public List<int> float2ArraysCount = new List<int>();
         public List<int> int3ArraysCount = new List<int>();
         public List<int> float3ArraysCount = new List<int>();
+        public List<int> int4ArraysCount = new List<int>();
+        public List<int> float4ArraysCount = new List<int>();
         public List<int> procMeshesCount = new List<int>();
         public List<int> procInstanceSetsCount = new List<int>();
         public List<int> objectCount = new List<int>();
@@ -38,6 +40,8 @@ namespace Env.Runtime
                 float2ArraysCount: float2ArraysCount,
                 int3ArraysCount: int3ArraysCount,
                 float3ArraysCount: float3ArraysCount,
+                int4ArraysCount: int4ArraysCount,
+                float4ArraysCount: float4ArraysCount,
                 procMeshesCount: procMeshesCount,
                 procInstanceSetsCount: procInstanceSetsCount,
                 objectCount: objectCount,

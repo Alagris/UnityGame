@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Unity.Collections;
 using UnityEngine;
 
 namespace Env.Runtime
@@ -16,6 +17,9 @@ namespace Env.Runtime
         [SerializeField]
         List<Matrix4x4> Transforms;
 
+
+        //ComputeBuffer TransformsNative;
+
         int currentLOD = 0;
         bool Visible = true;
 
@@ -23,11 +27,19 @@ namespace Env.Runtime
         {
             Visible = visible;
         }
-        public void Set(List<InstanceableLOD> LODs, List<Matrix4x4> transforms)
+        public void Set(List<InstanceableLOD> LODs, List<Trans> transforms)
         {
 
             this.LODs = LODs;
-            this.Transforms = transforms;
+            this.Transforms = new List<Matrix4x4>(transforms.Count);
+            
+            //TransformsNative = new ComputeBuffer(, transforms.Count, );
+            
+            for (int i = 0; i < transforms.Count; i++)
+            {
+                this.Transforms.Add(transforms[i].toMat4());
+                //TransformsNative[i] = transforms[i].toMat4();
+            }
         }
 
         private void Update()
@@ -41,7 +53,10 @@ namespace Env.Runtime
                 {
                     if (mats[i] != null && mats[i].enableInstancing)
                     {
-                        Graphics.DrawMeshInstanced(mesh, i, mats[i], Transforms);
+                        RenderParams p = new RenderParams(mats[i]);
+                        
+                        //p.material.SetBuffer("Instances", TransformsNative);
+                        Graphics.RenderMeshInstanced(p, mesh, i, Transforms);
                     }
                 }
             }

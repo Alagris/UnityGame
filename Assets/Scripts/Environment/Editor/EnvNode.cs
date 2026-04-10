@@ -1,15 +1,10 @@
-using Codice.Client.BaseCommands;
+
 using Env.Runtime;
-using Microsoft.SqlServer.Server;
 using System;
 using System.Collections.Generic;
 using Unity.GraphToolkit.Editor;
-using UnityEditor;
+using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.UIElements;
-using static System.Net.Mime.MediaTypeNames;
-using static UnityEditor.Experimental.GraphView.GraphView;
 
 namespace Env.Editor
 {
@@ -116,6 +111,28 @@ namespace Env.Editor
             }
             return idx;
         }
+        public int readInt4Arrays(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port, bool mutable)
+        {
+            Debug.Assert(port.DataType == typeof(Vector3Int));
+            Debug.Assert(port.Direction == PortDirection.Input);
+            int idx = variables.GetValueOrDefault(port, -1);
+            if (idx >= 0)
+            {
+                g.int4ArraysCount[idx]++;
+            }
+            return idx;
+        }
+        public int readFloat4Arrays(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port, bool mutable)
+        {
+            Debug.Assert(port.DataType == typeof(Vector4));
+            Debug.Assert(port.Direction == PortDirection.Input);
+            int idx = variables.GetValueOrDefault(port, -1);
+            if (idx >= 0)
+            {
+                g.float4ArraysCount[idx]++;
+            }
+            return idx;
+        }
         public int readProcMeshes(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port, bool mutable)
         {
             Debug.Assert(port.DataType==typeof(Mesh));
@@ -191,6 +208,18 @@ namespace Env.Editor
             Debug.Assert(port.Direction==PortDirection.Output);
             return variables.GetValueOrDefault(port, -1);
         }
+        public int writeInt4Arrays(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port)
+        {
+            Debug.Assert(port.DataType == typeof(int4));
+            Debug.Assert(port.Direction == PortDirection.Output);
+            return variables.GetValueOrDefault(port, -1);
+        }
+        public int writeFloat4Arrays(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port)
+        {
+            Debug.Assert(port.DataType == typeof(Vector4));
+            Debug.Assert(port.Direction == PortDirection.Output);
+            return variables.GetValueOrDefault(port, -1);
+        }
         public int writeProcMeshes(EnvCompiledGraph g, Dictionary<IPort, int> variables, IPort port) {
             Debug.Assert(port.DataType == typeof(Mesh));
             Debug.Assert(port.Direction==PortDirection.Output);
@@ -235,27 +264,67 @@ namespace Env.Editor
         }
     }
 
-
+    public enum NoiseMode
+    {
+        LANDSCAPE, INSTANCES
+    }
     [Serializable]
     public abstract class AnyNoise : EnvNode
     {
         IPort xPort;
         IPort zPort;
+        IPort instancesPort;
         IPort gPort;
+        NoiseMode mode;
+        protected virtual bool allowInstances() => true;
+        protected override void OnDefineOptions(IOptionDefinitionContext ctx)
+        {
+            if (allowInstances()) {
+                ctx.AddOption<NoiseMode>("Mode").WithDefaultValue(NoiseMode.LANDSCAPE).Delayed();
+            }
+        }
         protected override void OnDefinePorts(IPortDefinitionContext ctx)
         {
-            xPort = ctx.AddInputPort<float>("X").Build();
-            zPort = ctx.AddInputPort<float>("Z").Build();
+            mode = NoiseMode.LANDSCAPE;
+            if (allowInstances())
+            {
+                GetNodeOptionByName("Mode").TryGetValue(out mode);
+            }
+            instancesPort = null;
+            xPort = null;
+            zPort = null;
+            switch (mode) {
+                case NoiseMode.LANDSCAPE:
+                    xPort = ctx.AddInputPort<float>("X").Build();
+                    zPort = ctx.AddInputPort<float>("Z").Build();
+                    break;
+                case NoiseMode.INSTANCES:
+                    instancesPort = ctx.AddInputPort<Transform>("Instances").Build();
+                    break;
+            }
             gPort = ctx.AddOutputPort<float>("Height").Build();
         }
         public abstract EnvCompiledFunction compile(int xArg, int zArg, int outGrad);
+        public abstract EnvCompiledFunction compileInstances(int instanceArg, int outGrad);
         public override EnvCompiledFunction compile(EnvCompiledGraph compiledGraph, Dictionary<IPort, int> variables)
         {
-             return compile(
-                 xArg:readFloatArrays(compiledGraph, variables, xPort, false), 
-                 zArg:readFloatArrays(compiledGraph, variables, zPort, false),
-                 outGrad:writeFloatArrays(compiledGraph, variables, gPort)
-             );
+            switch (mode)
+            {
+                case NoiseMode.LANDSCAPE:
+                    return compile(
+                        xArg: readFloatArrays(compiledGraph, variables, xPort, false),
+                        zArg: readFloatArrays(compiledGraph, variables, zPort, false),
+                        outGrad: writeFloatArrays(compiledGraph, variables, gPort)
+                    );
+                case NoiseMode.INSTANCES:
+                    return compileInstances(
+                        instanceArg: readProcInstanceSets(compiledGraph, variables, instancesPort, false),
+                        outGrad: writeFloatArrays(compiledGraph, variables, gPort)
+                    );
+                default:
+                    return null;
+            }
+            
         }
     }
 
@@ -283,8 +352,22 @@ namespace Env.Editor
            );
         }
 
+        public override EnvCompiledFunction compileInstances(int instanceArg, int outGrad)
+        {
+            return new ErosionNoiseInstanceCompiled(
+                scale: Float(ScaleOpt, 1),
+                pointiness: Float(PointinessOpt, 0.5f),
+                scalingPowerBase: Float(ScalingPowerBaseOpt, 3),
+                iterations: Int(IterationsOpt, 1),
+                height: Float(HeightOpt, 30),
+                instanceArg: instanceArg,
+                outputGradientsArg: outGrad
+           );
+        }
+
         protected override void OnDefineOptions(IOptionDefinitionContext ctx)
         {
+            base.OnDefineOptions(ctx);
             IterationsOpt = ctx.AddOption<int>("Iterations").WithDefaultValue(1).Build();
             ScaleOpt = ctx.AddOption<float>("Scale").WithDefaultValue(1).Build();
             PointinessOpt = ctx.AddOption<float>("Pointiness").WithDefaultValue(0.5f).Build();
@@ -317,8 +400,23 @@ namespace Env.Editor
                 outputGradientsArg: outGrad
            );
         }
+
+        public override EnvCompiledFunction compileInstances(int instanceArg, int outGrad)
+        {
+            return new PerlinFbmInstanceCompiled(
+                   scale: Float(ScaleOpt, 1),
+                   heightPowerBase: Float(HeightPowerBaseOpt, 0.5f),
+                   scalePowerBase: Float(ScalePowerBaseOpt, 0.5f),
+                   iterations: Int(IterationsOpt, 1),
+                   height: Float(HeightOpt, 30),
+                   instanceArg: instanceArg,
+                   outputGradientsArg: outGrad
+              );
+        }
+
         protected override void OnDefineOptions(IOptionDefinitionContext ctx)
         {
+            base.OnDefineOptions(ctx);
             IterationsOpt = ctx.AddOption<int>("Iterations").WithDefaultValue(3).Build();
             ScaleOpt = ctx.AddOption<float>("Scale").WithDefaultValue(0.02f).Build();
             HeightPowerBaseOpt = ctx.AddOption<float>("HeightPowerBase").WithDefaultValue(0.5f).Build();
@@ -344,8 +442,20 @@ namespace Env.Editor
                 outputGradientsArg: outGrad
            );
         }
+
+        public override EnvCompiledFunction compileInstances(int instanceArg, int outGrad)
+        {
+            return new PerlinInstanceCompiled(
+               scale: Float(ScaleOpt, 1),
+               height: Float(HeightOpt, 30),
+               instanceArg: instanceArg,
+               outputGradientsArg: outGrad
+          );
+        }
+
         protected override void OnDefineOptions(IOptionDefinitionContext ctx)
         {
+            base.OnDefineOptions(ctx);
             ScaleOpt = ctx.AddOption<float>("Scale").WithDefaultValue(1).Build();
             HeightOpt = ctx.AddOption<float>("Height").WithDefaultValue(30).Build();
         }
@@ -353,12 +463,51 @@ namespace Env.Editor
     }
 
 
+
+    [Serializable]
+    public class WhiteNoise : AnyNoise
+    {
+        INodeOption MinOpt;
+        INodeOption MaxOpt;
+
+        public override EnvCompiledFunction compile(int xArg, int zArg, int outGrad)
+        {
+            return new WhiteNoiseCompiled(
+                min: Float(MinOpt, 0),
+                max: Float(MaxOpt, 1),
+                positionXArg: xArg,
+                positionZArg: zArg,
+                outputGradientsArg: outGrad
+           );
+        }
+
+        public override EnvCompiledFunction compileInstances(int instanceArg, int outGrad)
+        {
+            return new WhiteNoiseInstanceCompiled(
+                min: Float(MinOpt, 0),
+                max: Float(MaxOpt, 1),
+                instanceArg: instanceArg,
+                outputGradientsArg: outGrad
+           );
+        }
+
+        protected override void OnDefineOptions(IOptionDefinitionContext ctx)
+        {
+            base.OnDefineOptions(ctx);
+            MinOpt = ctx.AddOption<float>("Min").WithDefaultValue(0).Build();
+            MaxOpt = ctx.AddOption<float>("Max").WithDefaultValue(1).Build();
+        }
+
+    }
     [Serializable]
     public class Linear : AnyNoise
     {
         INodeOption ScaleOpt;
         INodeOption HeightOpt;
-
+        protected override bool allowInstances()
+        {
+            return false;
+        }
         public override EnvCompiledFunction compile(int xArg, int zArg, int outGrad)
         {
             return new LinearCompiled(
@@ -371,10 +520,15 @@ namespace Env.Editor
         }
         protected override void OnDefineOptions(IOptionDefinitionContext ctx)
         {
+            base.OnDefineOptions(ctx);
             ScaleOpt = ctx.AddOption<Vector2>("Scale").WithDefaultValue(new Vector2(1, 1)).Build();
             HeightOpt = ctx.AddOption<Vector2>("Height").WithDefaultValue(new Vector2(0,0)).Build();
         }
 
+        public override EnvCompiledFunction compileInstances(int instanceArg, int outGrad)
+        {
+            throw new NotImplementedException();
+        }
     }
     
     [Serializable]
@@ -689,6 +843,223 @@ namespace Env.Editor
         }
     }
 
+
+    [Serializable]
+    public class SamplePoints : EnvNode
+    {
+        IPort InstancesPort, InAttrPort, OutAttrPort;
+
+
+        public override EnvCompiledFunction compile(EnvCompiledGraph compiledGraph, Dictionary<IPort, int> variables)
+        {
+            if (GetNodeOptionByName("Type").TryGetValue(out AttributeType attrType))
+            {
+                int inIdx = readProcInstanceSets(compiledGraph, variables, InstancesPort, false);
+                int attrIdx = -1;
+                int outAttrIdx = -1;
+                switch (attrType)
+                {
+                    case AttributeType.FLOAT:
+                        attrIdx = readFloatArrays(compiledGraph, variables, InAttrPort, false);
+                        outAttrIdx = writeFloatArrays(compiledGraph, variables, OutAttrPort);
+                        return new SamplePointsCompiledFloat(inIdx, attrIdx, outAttrIdx);
+                    case AttributeType.FLOAT2:
+                        attrIdx = readFloat2Arrays(compiledGraph, variables, InAttrPort, false);
+                        outAttrIdx = writeFloat2Arrays(compiledGraph, variables, OutAttrPort);
+                        return new SamplePointsCompiledFloat2(inIdx, attrIdx, outAttrIdx);
+                    case AttributeType.FLOAT3:
+                        attrIdx = readFloat3Arrays(compiledGraph, variables, InAttrPort, false);
+                        outAttrIdx = writeFloat3Arrays(compiledGraph, variables, OutAttrPort);
+                        return new SamplePointsCompiledFloat3(inIdx, attrIdx, outAttrIdx);
+                    case AttributeType.FLOAT4:
+                        attrIdx = readFloat4Arrays(compiledGraph, variables, InAttrPort, false);
+                        outAttrIdx = writeFloat4Arrays(compiledGraph, variables, OutAttrPort);
+                        return new SamplePointsCompiledFloat4(inIdx, attrIdx, outAttrIdx);
+                    case AttributeType.INT:
+                    case AttributeType.UINT:
+                        attrIdx = readIntArrays(compiledGraph, variables, InAttrPort, false);
+                        outAttrIdx = writeIntArrays(compiledGraph, variables, OutAttrPort);
+                        return new SamplePointsCompiledInt(inIdx, attrIdx, outAttrIdx);
+                    case AttributeType.UINT2:
+                    case AttributeType.INT2:
+                        attrIdx = readInt2Arrays(compiledGraph, variables, InAttrPort, false);
+                        outAttrIdx = writeInt2Arrays(compiledGraph, variables, OutAttrPort);
+                        return new SamplePointsCompiledInt2(inIdx, attrIdx, outAttrIdx);
+                    case AttributeType.UINT3:
+                    case AttributeType.INT3:
+                        attrIdx = readInt3Arrays(compiledGraph, variables, InAttrPort, false);
+                        outAttrIdx = writeInt3Arrays(compiledGraph, variables, OutAttrPort);
+                        return new SamplePointsCompiledInt3(inIdx, attrIdx, outAttrIdx);
+                    case AttributeType.UINT4:
+                    case AttributeType.INT4:
+                        attrIdx = readInt4Arrays(compiledGraph, variables, InAttrPort, false);
+                        outAttrIdx = writeInt4Arrays(compiledGraph, variables, OutAttrPort);
+                        return new SamplePointsCompiledInt4(inIdx, attrIdx, outAttrIdx);
+                }
+                
+            }
+            return null;
+        }
+        protected override void OnDefineOptions(IOptionDefinitionContext ctx)
+        {
+            ctx.AddOption<AttributeType>("Type").WithDefaultValue(AttributeType.FLOAT).Delayed();
+            
+        }
+        private void AddPorts<T>(IPortDefinitionContext ctx)
+        {
+            const string inName = "Landscape Data";
+            const string outName = "Instance Data";
+            InAttrPort = ctx.AddInputPort<T>(inName).Build();
+            OutAttrPort = ctx.AddOutputPort<T>(outName).Build();
+        }
+        protected override void OnDefinePorts(IPortDefinitionContext ctx)
+        {
+
+            if (GetNodeOptionByName("Type").TryGetValue(out AttributeType attrType))
+            {
+                InstancesPort = ctx.AddInputPort<Transform>("Instances").Build();
+                
+                switch (attrType)
+                {
+                    
+                    case AttributeType.FLOAT:
+                        AddPorts<float>(ctx);
+                        break;
+                    case AttributeType.FLOAT2:
+                        AddPorts<Vector2>(ctx);
+                        break;
+                    case AttributeType.FLOAT3:
+                        AddPorts<Vector3>(ctx);
+                        break;
+                    case AttributeType.FLOAT4:
+                        AddPorts<Vector4>(ctx);
+                        break;
+                    case AttributeType.UINT:
+                    case AttributeType.INT:
+                        AddPorts<int>(ctx);
+                        break;
+                    case AttributeType.UINT2:
+                    case AttributeType.INT2:
+                        AddPorts<Vector2Int>(ctx);
+                        break;
+                    case AttributeType.UINT3:
+                    case AttributeType.INT3:
+                        AddPorts<Vector3Int>(ctx);
+                        break;
+                }
+
+                
+            }
+
+        }
+    }
+    [Serializable]
+    public class SetAttribute : EnvNode
+    {
+        IPort InInstancesPort, OutInstancesPort, AttrPort;
+        INodeOption AttrNameOpt;
+
+
+        public override EnvCompiledFunction compile(EnvCompiledGraph compiledGraph, Dictionary<IPort, int> variables)
+        {
+            if (GetNodeOptionByName("Type").TryGetValue(out AttributeType attrType))
+            {
+                int inIdx = readProcInstanceSets(compiledGraph, variables, InInstancesPort, true);
+                int outIdx = writeProcInstanceSets(compiledGraph, variables, OutInstancesPort);
+                int attrIdx=-1;
+                string attrName = Val(AttrNameOpt, "");
+                switch (attrType)
+                {
+                    case AttributeType.FLOAT:
+                        attrIdx = readFloatArrays(compiledGraph, variables, AttrPort, false);
+                        return new SetAttributeCompiledFloat(attrName, inIdx, attrIdx, outIdx);
+                    case AttributeType.FLOAT2:
+                        attrIdx = readFloat2Arrays(compiledGraph, variables, AttrPort, false);
+                        return new SetAttributeCompiledFloat2(attrName, inIdx, attrIdx, outIdx);
+                    case AttributeType.FLOAT3:
+                        attrIdx = readFloat3Arrays(compiledGraph, variables, AttrPort, false);
+                        return new SetAttributeCompiledFloat3(attrName, inIdx, attrIdx, outIdx);
+                    case AttributeType.FLOAT4:
+                        attrIdx = readFloat4Arrays(compiledGraph, variables, AttrPort, false);
+                        return new SetAttributeCompiledFloat4(attrName, inIdx, attrIdx, outIdx);
+                    case AttributeType.INT:
+                        attrIdx = readIntArrays(compiledGraph, variables, AttrPort, false);
+                        return new SetAttributeCompiledInt(attrName, inIdx, attrIdx, outIdx);
+                    case AttributeType.INT2:
+                        attrIdx = readInt2Arrays(compiledGraph, variables, AttrPort, false);
+                        return new SetAttributeCompiledInt2(attrName, inIdx, attrIdx, outIdx);
+                    case AttributeType.INT3:
+                        attrIdx = readInt3Arrays(compiledGraph, variables, AttrPort, false);
+                        return new SetAttributeCompiledInt3(attrName, inIdx, attrIdx, outIdx);
+                    case AttributeType.INT4:
+                        attrIdx = readInt4Arrays(compiledGraph, variables, AttrPort, false);
+                        return new SetAttributeCompiledInt4(attrName, inIdx, attrIdx, outIdx);
+                    case AttributeType.UINT:
+                        attrIdx = readIntArrays(compiledGraph, variables, AttrPort, false);
+                        return new SetAttributeCompiledUInt(attrName, inIdx, attrIdx, outIdx);
+                    case AttributeType.UINT2:
+                        attrIdx = readInt2Arrays(compiledGraph, variables, AttrPort, false);
+                        return new SetAttributeCompiledUInt2(attrName, inIdx, attrIdx, outIdx);
+                    case AttributeType.UINT3:
+                        attrIdx = readInt3Arrays(compiledGraph, variables, AttrPort, false);
+                        return new SetAttributeCompiledUInt3(attrName, inIdx, attrIdx, outIdx);
+                    case AttributeType.UINT4:
+                        attrIdx = readInt4Arrays(compiledGraph, variables, AttrPort, false);
+                        return new SetAttributeCompiledUInt4(attrName, inIdx, attrIdx, outIdx);
+                }
+                
+            }
+            return null;
+        }
+        protected override void OnDefineOptions(IOptionDefinitionContext ctx)
+        {
+            ctx.AddOption<AttributeType>("Type").WithDefaultValue(AttributeType.FLOAT).Delayed();
+            AttrNameOpt = ctx.AddOption<string>("Name").WithDefaultValue("").Build();
+        }
+        protected override void OnDefinePorts(IPortDefinitionContext ctx)
+        {
+            
+            if(GetNodeOptionByName("Type").TryGetValue(out AttributeType attrType))
+            {
+                InInstancesPort = ctx.AddInputPort<Transform>("Instances").Build();
+                AttrPort = null;
+                switch (attrType)
+                {
+                    case AttributeType.FLOAT:
+                        AttrPort = ctx.AddInputPort<float>("Attribute").Build();
+                        break;
+                    case AttributeType.FLOAT2:
+                        AttrPort = ctx.AddInputPort<Vector2>("Attribute").Build();
+                        break;
+                    case AttributeType.FLOAT3:
+                        AttrPort = ctx.AddInputPort<Vector3>("Attribute").Build();
+                        break;
+                    case AttributeType.FLOAT4:
+                        AttrPort = ctx.AddInputPort<Vector4>("Attribute").Build();
+                        break;
+                    case AttributeType.UINT:
+                    case AttributeType.INT:
+                        AttrPort = ctx.AddInputPort<int>("Attribute").Build();
+                        break;
+                    case AttributeType.UINT2:
+                    case AttributeType.INT2:
+                        AttrPort = ctx.AddInputPort<Vector2Int>("Attribute").Build();
+                        break;
+                    case AttributeType.UINT3:
+                    case AttributeType.INT3:
+                        AttrPort = ctx.AddInputPort<Vector3Int>("Attribute").Build();
+                        break;
+                    case AttributeType.UINT4:
+                    case AttributeType.INT4:
+                        AttrPort = ctx.AddInputPort<int4>("Attribute").Build();
+                        break;
+                }
+                
+                OutInstancesPort = ctx.AddOutputPort<Transform>("Instances").Build();
+            }
+            
+        }
+    }
     [Serializable]
     public class OverrideMaterials : EnvNode
     {

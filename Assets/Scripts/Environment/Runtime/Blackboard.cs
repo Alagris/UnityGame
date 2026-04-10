@@ -9,6 +9,7 @@ namespace Env.Runtime
     {
         public T value;
         public int refs;
+        
 
         public RefCounter(int refs) 
         {
@@ -47,6 +48,8 @@ namespace Env.Runtime
         private readonly RefCounter<float2[]>[] float2Arrays;
         private readonly RefCounter<int3[]>[] int3Arrays;
         private readonly RefCounter<float3[]>[] float3Arrays;
+        private readonly RefCounter<int4[]>[] int4Arrays;
+        private readonly RefCounter<float4[]>[] float4Arrays;
         private readonly RefCounter<ProcMesh>[] procMeshes;
         private readonly RefCounter<ProcInstanceSet>[] procInstanceSets;
         private readonly RefCounter<InstanceableObject>[] objArrays;
@@ -66,6 +69,8 @@ namespace Env.Runtime
             List<int> float2ArraysCount,
             List<int> int3ArraysCount,
             List<int> float3ArraysCount,
+            List<int> int4ArraysCount,
+            List<int> float4ArraysCount,
             List<int> procMeshesCount,
             List<int> procInstanceSetsCount,
             List<int> objectCount,
@@ -78,6 +83,8 @@ namespace Env.Runtime
             this.float2Arrays = RefCounter<float2[]>.make(float2ArraysCount);
             this.int3Arrays = RefCounter<int3[]>.make(int3ArraysCount);
             this.float3Arrays = RefCounter<float3[]>.make(float3ArraysCount);
+            this.int4Arrays = RefCounter<int4[]>.make(int4ArraysCount);
+            this.float4Arrays = RefCounter<float4[]>.make(float4ArraysCount);
             this.procMeshes = RefCounter<ProcMesh>.make(procMeshesCount);
             this.procInstanceSets = RefCounter<ProcInstanceSet>.make(procInstanceSetsCount);
             this.objArrays = RefCounter<InstanceableObject>.make(objectCount);
@@ -117,6 +124,12 @@ namespace Env.Runtime
             Debug.Assert(float3Arrays[idx].value == null);
             return float3Arrays[idx].value = array;
         }
+        public float4[] setFloat4(int idx, float4[] array)
+        {
+            if (idx < 0) return null;
+            Debug.Assert(float4Arrays[idx].value == null);
+            return float4Arrays[idx].value = array;
+        }
         public float2[] setFloat2(int idx, float2[] array)
         {
             if (idx < 0) return null;
@@ -134,6 +147,12 @@ namespace Env.Runtime
             if (idx < 0) return null;
             Debug.Assert(int3Arrays[idx].value == null);
             return int3Arrays[idx].value = array;
+        }
+        public int4[] setInt4(int idx, int4[] array)
+        {
+            if (idx < 0) return null;
+            Debug.Assert(int4Arrays[idx].value == null);
+            return int4Arrays[idx].value = array;
         }
         public int2[] setInt2(int idx, int2[] array)
         {
@@ -160,6 +179,10 @@ namespace Env.Runtime
             Debug.Assert(colorArrays[idx].value == null);
             return colorArrays[idx].value = o;
         }
+        public float4[] makeFloat4(int idx, int length)
+        {
+            return setFloat4(idx, new float4[length]);
+        }
         public float3[] makeFloat3(int idx, int length)
         {
             return setFloat3(idx, new float3[length]);
@@ -175,6 +198,10 @@ namespace Env.Runtime
         public int3[] makeInt3(int idx, int length)
         {
             return setInt3(idx, new int3[length]);
+        }
+        public int4[] makeInt4(int idx, int length)
+        {
+            return setInt4(idx, new int4[length]);
         }
         public int2[] makeInt2(int idx, int length)
         {
@@ -194,6 +221,12 @@ namespace Env.Runtime
         {
             Debug.Assert(idx >= 0);
             ProcInstanceSet e = procInstanceSets[idx].pop();
+            return e;
+        }
+        public float4[] getFloat4(int idx)
+        {
+            Debug.Assert(idx >= 0);
+            float4[] e = float4Arrays[idx].pop();
             return e;
         }
         public float3[] getFloat3(int idx)
@@ -216,7 +249,6 @@ namespace Env.Runtime
         }
         public float[] getMutableFloat(int idx)
         {
-
             float[] e = getFloat(idx);
             if (floatArrays[idx].value != null)
             {
@@ -224,6 +256,21 @@ namespace Env.Runtime
                 Array.Copy(e, copy, e.Length);
                 return copy;
             }
+            return e;
+        }
+        public ProcInstanceSet getMutableInsatnceSet(int idx)
+        {
+            ProcInstanceSet instances = getInsatnceSet(idx);
+            if (procInstanceSets[idx].value != null)
+            {
+                instances = instances.DeepCopy();
+            }
+            return instances;
+        }
+        public int4[] getInt4(int idx)
+        {
+            Debug.Assert(idx >= 0);
+            int4[] e = int4Arrays[idx].pop();
             return e;
         }
         public int3[] getInt3(int idx)

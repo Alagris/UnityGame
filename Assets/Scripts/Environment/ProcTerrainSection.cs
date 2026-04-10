@@ -12,7 +12,7 @@ public class ProcTerrainSection : ProcSection, IInteractable
         Debug.Log("Interacted ");
     }
 
-    public override GameObject SpawnInstance(GameObject prefab, Matrix4x4 transform)
+    public override GameObject SpawnInstance(GameObject prefab, Trans transform)
     {
         GameObject inst = base.SpawnInstance(prefab, transform);
         if (inst.TryGetComponent(out ISpawnedInstance i))

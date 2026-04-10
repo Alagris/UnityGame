@@ -94,7 +94,7 @@ namespace Env.Runtime
                 GameObject prefab = instances.Mesh.Prefab;
                 if (prefab != null)
                 {
-                    foreach (Matrix4x4 transform in instances.Transforms)
+                    foreach (Trans transform in instances.Transforms)
                     {
                         SpawnInstance(prefab, transform);
                     }
@@ -102,11 +102,11 @@ namespace Env.Runtime
             }
         }
 
-        public virtual GameObject SpawnInstance(GameObject prefab , Matrix4x4 transform)
+        public virtual GameObject SpawnInstance(GameObject prefab , Trans transform)
         {
             GameObject copy = Instantiate(prefab);
             copy.transform.SetParent(gameObject.transform, true);
-            ProcInstances.AssignTransform(copy.transform, transform);
+            transform.AssignTo(copy.transform);
             return copy;
         }
 

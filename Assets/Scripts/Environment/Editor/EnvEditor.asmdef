@@ -5,6 +5,7 @@
         "Unity.GraphToolkit.Editor",
         "Unity.GraphToolkit.Common.Editor",
         "Unity.GraphToolkit.Utility.Editor",
+        "Unity.Mathematics",
         "EnvRuntime"
     ],
     "includePlatforms": [

@@ -55,7 +55,7 @@ namespace Env.Runtime
 
         public InstanceableObject() { }
         public InstanceableObject(Mesh mesh) : this(mesh, null) { }
-        public InstanceableObject(InstanceableObjectAsset asset) : base(asset.LODs){
+        public InstanceableObject(InstanceableObjectAsset asset) : base(asset.LODs){ 
             this.Prefab = asset.Prefab;
         }  
         public InstanceableObject(IEnumerable<InstanceableLOD> lods) : base(lods) { } 
