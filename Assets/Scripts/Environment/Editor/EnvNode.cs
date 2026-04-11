@@ -956,108 +956,122 @@ namespace Env.Editor
     [Serializable]
     public class SetAttribute : EnvNode
     {
-        IPort InInstancesPort, OutInstancesPort, AttrPort;
-        INodeOption AttrNameOpt;
+        IPort InInstancesPort, OutInstancesPort;
+        INodeOption CountOpt;
 
 
         public override EnvCompiledFunction compile(EnvCompiledGraph compiledGraph, Dictionary<IPort, int> variables)
         {
-            if (GetNodeOptionByName("Type").TryGetValue(out AttributeType attrType))
+            CountOpt.TryGetValue(out int count);
+            for (int i = 0; i < count; i++)
             {
-                int inIdx = readProcInstanceSets(compiledGraph, variables, InInstancesPort, true);
-                int outIdx = writeProcInstanceSets(compiledGraph, variables, OutInstancesPort);
-                int attrIdx=-1;
-                string attrName = Val(AttrNameOpt, "");
-                switch (attrType)
+
+                if (GetNodeOptionByName("Type " + (i + 1)).TryGetValue(out AttributeType attrType))
                 {
-                    case AttributeType.FLOAT:
-                        attrIdx = readFloatArrays(compiledGraph, variables, AttrPort, false);
-                        return new SetAttributeCompiledFloat(attrName, inIdx, attrIdx, outIdx);
-                    case AttributeType.FLOAT2:
-                        attrIdx = readFloat2Arrays(compiledGraph, variables, AttrPort, false);
-                        return new SetAttributeCompiledFloat2(attrName, inIdx, attrIdx, outIdx);
-                    case AttributeType.FLOAT3:
-                        attrIdx = readFloat3Arrays(compiledGraph, variables, AttrPort, false);
-                        return new SetAttributeCompiledFloat3(attrName, inIdx, attrIdx, outIdx);
-                    case AttributeType.FLOAT4:
-                        attrIdx = readFloat4Arrays(compiledGraph, variables, AttrPort, false);
-                        return new SetAttributeCompiledFloat4(attrName, inIdx, attrIdx, outIdx);
-                    case AttributeType.INT:
-                        attrIdx = readIntArrays(compiledGraph, variables, AttrPort, false);
-                        return new SetAttributeCompiledInt(attrName, inIdx, attrIdx, outIdx);
-                    case AttributeType.INT2:
-                        attrIdx = readInt2Arrays(compiledGraph, variables, AttrPort, false);
-                        return new SetAttributeCompiledInt2(attrName, inIdx, attrIdx, outIdx);
-                    case AttributeType.INT3:
-                        attrIdx = readInt3Arrays(compiledGraph, variables, AttrPort, false);
-                        return new SetAttributeCompiledInt3(attrName, inIdx, attrIdx, outIdx);
-                    case AttributeType.INT4:
-                        attrIdx = readInt4Arrays(compiledGraph, variables, AttrPort, false);
-                        return new SetAttributeCompiledInt4(attrName, inIdx, attrIdx, outIdx);
-                    case AttributeType.UINT:
-                        attrIdx = readIntArrays(compiledGraph, variables, AttrPort, false);
-                        return new SetAttributeCompiledUInt(attrName, inIdx, attrIdx, outIdx);
-                    case AttributeType.UINT2:
-                        attrIdx = readInt2Arrays(compiledGraph, variables, AttrPort, false);
-                        return new SetAttributeCompiledUInt2(attrName, inIdx, attrIdx, outIdx);
-                    case AttributeType.UINT3:
-                        attrIdx = readInt3Arrays(compiledGraph, variables, AttrPort, false);
-                        return new SetAttributeCompiledUInt3(attrName, inIdx, attrIdx, outIdx);
-                    case AttributeType.UINT4:
-                        attrIdx = readInt4Arrays(compiledGraph, variables, AttrPort, false);
-                        return new SetAttributeCompiledUInt4(attrName, inIdx, attrIdx, outIdx);
+                    int inIdx = readProcInstanceSets(compiledGraph, variables, InInstancesPort, true);
+                    int outIdx = writeProcInstanceSets(compiledGraph, variables, OutInstancesPort);
+                    int attrIdx = -1;
+                    GetNodeOptionByName("Name " + (i + 1)).TryGetValue(out string attrName) ;
+                    IPort AttrPort = GetInputPortByName("Attribute " + (i + 1));
+                    switch (attrType)
+                    {
+                        case AttributeType.FLOAT:
+                            attrIdx = readFloatArrays(compiledGraph, variables, AttrPort, false);
+                            return new SetAttributeCompiledFloat(attrName, inIdx, attrIdx, outIdx);
+                        case AttributeType.FLOAT2:
+                            attrIdx = readFloat2Arrays(compiledGraph, variables, AttrPort, false);
+                            return new SetAttributeCompiledFloat2(attrName, inIdx, attrIdx, outIdx);
+                        case AttributeType.FLOAT3:
+                            attrIdx = readFloat3Arrays(compiledGraph, variables, AttrPort, false);
+                            return new SetAttributeCompiledFloat3(attrName, inIdx, attrIdx, outIdx);
+                        case AttributeType.FLOAT4:
+                            attrIdx = readFloat4Arrays(compiledGraph, variables, AttrPort, false);
+                            return new SetAttributeCompiledFloat4(attrName, inIdx, attrIdx, outIdx);
+                        case AttributeType.INT:
+                            attrIdx = readIntArrays(compiledGraph, variables, AttrPort, false);
+                            return new SetAttributeCompiledInt(attrName, inIdx, attrIdx, outIdx);
+                        case AttributeType.INT2:
+                            attrIdx = readInt2Arrays(compiledGraph, variables, AttrPort, false);
+                            return new SetAttributeCompiledInt2(attrName, inIdx, attrIdx, outIdx);
+                        case AttributeType.INT3:
+                            attrIdx = readInt3Arrays(compiledGraph, variables, AttrPort, false);
+                            return new SetAttributeCompiledInt3(attrName, inIdx, attrIdx, outIdx);
+                        case AttributeType.INT4:
+                            attrIdx = readInt4Arrays(compiledGraph, variables, AttrPort, false);
+                            return new SetAttributeCompiledInt4(attrName, inIdx, attrIdx, outIdx);
+                        case AttributeType.UINT:
+                            attrIdx = readIntArrays(compiledGraph, variables, AttrPort, false);
+                            return new SetAttributeCompiledUInt(attrName, inIdx, attrIdx, outIdx);
+                        case AttributeType.UINT2:
+                            attrIdx = readInt2Arrays(compiledGraph, variables, AttrPort, false);
+                            return new SetAttributeCompiledUInt2(attrName, inIdx, attrIdx, outIdx);
+                        case AttributeType.UINT3:
+                            attrIdx = readInt3Arrays(compiledGraph, variables, AttrPort, false);
+                            return new SetAttributeCompiledUInt3(attrName, inIdx, attrIdx, outIdx);
+                        case AttributeType.UINT4:
+                            attrIdx = readInt4Arrays(compiledGraph, variables, AttrPort, false);
+                            return new SetAttributeCompiledUInt4(attrName, inIdx, attrIdx, outIdx);
+                    }
+
                 }
-                
             }
             return null;
         }
         protected override void OnDefineOptions(IOptionDefinitionContext ctx)
         {
-            ctx.AddOption<AttributeType>("Type").WithDefaultValue(AttributeType.FLOAT).Delayed();
-            AttrNameOpt = ctx.AddOption<string>("Name").WithDefaultValue("").Build();
+            CountOpt = ctx.AddOption<int>("Count").WithDefaultValue(1).Build();
+            CountOpt.TryGetValue(out int count);
+            for (int i = 0; i < count; i++)
+            {
+                ctx.AddOption<AttributeType>("Type "+(i+1)).WithDefaultValue(AttributeType.FLOAT).Delayed();
+                ctx.AddOption<string>("Name "+(i + 1)).WithDefaultValue("").Delayed();
+            }
         }
         protected override void OnDefinePorts(IPortDefinitionContext ctx)
         {
-            
-            if(GetNodeOptionByName("Type").TryGetValue(out AttributeType attrType))
+            InInstancesPort = ctx.AddInputPort<Transform>("Instances").Build();
+            OutInstancesPort = ctx.AddOutputPort<Transform>("Instances").Build();
+            CountOpt.TryGetValue(out int count);
+            for (int i = 0; i < count; i++)
             {
-                InInstancesPort = ctx.AddInputPort<Transform>("Instances").Build();
-                AttrPort = null;
-                switch (attrType)
-                {
-                    case AttributeType.FLOAT:
-                        AttrPort = ctx.AddInputPort<float>("Attribute").Build();
-                        break;
-                    case AttributeType.FLOAT2:
-                        AttrPort = ctx.AddInputPort<Vector2>("Attribute").Build();
-                        break;
-                    case AttributeType.FLOAT3:
-                        AttrPort = ctx.AddInputPort<Vector3>("Attribute").Build();
-                        break;
-                    case AttributeType.FLOAT4:
-                        AttrPort = ctx.AddInputPort<Vector4>("Attribute").Build();
-                        break;
-                    case AttributeType.UINT:
-                    case AttributeType.INT:
-                        AttrPort = ctx.AddInputPort<int>("Attribute").Build();
-                        break;
-                    case AttributeType.UINT2:
-                    case AttributeType.INT2:
-                        AttrPort = ctx.AddInputPort<Vector2Int>("Attribute").Build();
-                        break;
-                    case AttributeType.UINT3:
-                    case AttributeType.INT3:
-                        AttrPort = ctx.AddInputPort<Vector3Int>("Attribute").Build();
-                        break;
-                    case AttributeType.UINT4:
-                    case AttributeType.INT4:
-                        AttrPort = ctx.AddInputPort<int4>("Attribute").Build();
-                        break;
+                if (GetNodeOptionByName("Type "+(i+1)).TryGetValue(out AttributeType attrType))
+                {   
+                    string AttrPortName = "Attribute " + (i + 1);
+                    switch (attrType)
+                    {
+                        case AttributeType.FLOAT:
+                            ctx.AddInputPort<float>(AttrPortName ).Build();
+                            break;
+                        case AttributeType.FLOAT2:
+                            ctx.AddInputPort<Vector2>(AttrPortName ).Build();
+                            break;
+                        case AttributeType.FLOAT3:
+                            ctx.AddInputPort<Vector3>(AttrPortName ).Build();
+                            break;
+                        case AttributeType.FLOAT4:
+                            ctx.AddInputPort<Vector4>(AttrPortName ).Build();
+                            break;
+                        case AttributeType.UINT:
+                        case AttributeType.INT:
+                            ctx.AddInputPort<int>(AttrPortName ).Build();
+                            break;
+                        case AttributeType.UINT2:
+                        case AttributeType.INT2:
+                            ctx.AddInputPort<Vector2Int>(AttrPortName ).Build();
+                            break;
+                        case AttributeType.UINT3:
+                        case AttributeType.INT3:
+                            ctx.AddInputPort<Vector3Int>(AttrPortName ).Build();
+                            break;
+                        case AttributeType.UINT4:
+                        case AttributeType.INT4:
+                            ctx.AddInputPort<int4>(AttrPortName).Build();
+                            break;
+                    }
+
+                    
                 }
-                
-                OutInstancesPort = ctx.AddOutputPort<Transform>("Instances").Build();
             }
-            
         }
     }
     [Serializable]
@@ -1147,26 +1161,33 @@ namespace Env.Editor
     {
         internal IPort InstancesPort;
         internal IPort LandscapePort;
+        INodeOption MatOpt, MatWeightsParamOpt;
         public int instancesIdx;
         public int landscapeIdx;
+        public string matWeightsParam;
+        public Material landscapeMaterial;
         List<IPort> WeightPorts = new List<IPort>();
         public override EnvCompiledFunction compile(EnvCompiledGraph compiledGraph, Dictionary<IPort, int> variables)
         {
             instancesIdx = readProcInstanceSets(compiledGraph, variables, InstancesPort, false);
             landscapeIdx = readProcMeshes(compiledGraph, variables, LandscapePort, false);
+            MatOpt.TryGetValue(out landscapeMaterial);
+            MatWeightsParamOpt.TryGetValue(out matWeightsParam);
             int[] weightsArgs = new int[WeightPorts.Count];
             for (int i=0;i< WeightPorts.Count; i++)
             {
                 weightsArgs[i]= readFloatArrays(compiledGraph, variables, WeightPorts[i], false);
             }
-            return new ReturnCompiled(weightsArgs);
+            return new ReturnCompiled(weightsArgs, matWeightsParam, landscapeMaterial);
         }
 
         protected override void OnDefineOptions(IOptionDefinitionContext ctx)
         {
             
             ctx.AddOption<TerrainLayers>("Layers").Delayed();
-            
+            MatOpt = ctx.AddOption<Material>("LandscapeMaterial").Build();
+            MatWeightsParamOpt = ctx.AddOption<string>("MaterialWeightsParam").Build();
+
         }
         protected override void OnDefinePorts(IPortDefinitionContext ctx)
         {

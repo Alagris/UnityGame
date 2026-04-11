@@ -28,9 +28,7 @@ namespace Env.Runtime
             terrainMeshRenderer = gameObject.AddComponent<MeshRenderer>();
             terrainMeshFilter = gameObject.AddComponent<MeshFilter>();
             terrainMeshCollision = gameObject.AddComponent(typeof(MeshCollider)) as MeshCollider;
-            List<Material> mats = new List<Material>();
-            mats.Add(spawner.LandscapeMaterial);
-            terrainMeshRenderer.SetSharedMaterials(mats);
+            
         }
 
         public string GetDebugStr()
@@ -69,7 +67,9 @@ namespace Env.Runtime
             Mesh m = bb.GetReturnedMesh().toMesh();
             terrainMeshFilter.mesh = m;
             terrainMeshCollision.sharedMesh = m;
-
+            List<Material> mats = new List<Material>();
+            mats.Add(bb.returnedTerrainMaterial);
+            terrainMeshRenderer.SetSharedMaterials(mats);
             AddInstances(bb.GetReturnedInstances());
 
 

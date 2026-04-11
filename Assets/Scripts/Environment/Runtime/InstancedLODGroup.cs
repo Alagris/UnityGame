@@ -53,10 +53,11 @@ namespace Env.Runtime
                 {
                     if (mats[i] != null && mats[i].enableInstancing)
                     {
-                        RenderParams p = new RenderParams(mats[i]);
-                        
+                        //RenderParams p = new RenderParams(mats[i]);
+
                         //p.material.SetBuffer("Instances", TransformsNative);
-                        Graphics.RenderMeshInstanced(p, mesh, i, Transforms);
+                        //Graphics.RenderMeshInstanced(p, mesh, i, Transforms);
+                        Graphics.DrawMeshInstanced( mesh, i, mats[i], Transforms);
                     }
                 }
             }

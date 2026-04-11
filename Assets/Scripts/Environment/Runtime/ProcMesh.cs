@@ -211,7 +211,30 @@ namespace Env.Runtime
             const int padding = 1;
             int resXPadded = resX + 2 * padding;
             Debug.Assert(resXPadded * (resZ + 2 * padding) == heights.Length); // heights should have padding==1
-
+            bool unnormalised = mode == UVMode.REPEATING_UNNORMALIZED || mode == UVMode.REPEATING_PADDED_UNNORMALIZED;
+            float2 uvMultiplier; 
+            int2 uvAddition;
+            switch (mode)
+            {
+                case UVMode.REPEATING: // UVs go from 0 to 1
+                    uvAddition = new int2(0,0);
+                    uvMultiplier = new float2(1f / (resX - 1), 1f / (resZ - 1)); 
+                    break;
+                default:
+                case UVMode.REPEATING_UNNORMALIZED: // UVs go from 0 to res
+                    uvAddition = new int2(0, 0);
+                    uvMultiplier = new float2(1f, 1f); 
+                    break;
+                case UVMode.REPEATING_PADDED:// UVs go from x to 1-x where x=padding/(res+2*padding)
+                    uvAddition = new int2(1, 1);
+                    uvMultiplier = new float2(1f / (resX + 1), 1f / (resZ + 1)); 
+                    break;
+                case UVMode.REPEATING_PADDED_UNNORMALIZED:  // UVs go from padding to res+padding=(res+2*padding)-padding 
+                    uvAddition = new int2(1, 1);
+                    uvMultiplier = new float2(1f, 1f);
+                    break;
+            }
+            uvMultiplier *= uvScaling;
             for (int vz = 0, i = 0; vz < resZ; vz++)
             {
                 for (int vx = 0; vx < resX; vx++, i++)
@@ -230,9 +253,9 @@ namespace Env.Runtime
                     vertices[i] = vertex;
                     if (mode != UVMode.NONE)
                     {
-
-                        float2 uv = mode == UVMode.REPEATING ? new float2(vx / (resX - 1), vz / (resZ - 1)): vertex.xz;
-                        uvs[i] = uv * uvScaling;
+                        
+                        float2 uv = mode == UVMode.GLOBAL? vertex.xz: new int2(vx, vz);
+                        uvs[i] = uv + uvAddition * uvMultiplier;
                     }
                     // differential to the left:
                     //   (centerH-leftH)/spacingX

@@ -416,7 +416,7 @@ namespace Env.Runtime
     [Serializable]
     public enum UVMode
     {
-        NONE, REPEATING, GLOBAL
+        NONE, REPEATING, REPEATING_PADDED, REPEATING_UNNORMALIZED, REPEATING_PADDED_UNNORMALIZED, GLOBAL
     }
     [Serializable]
     public class LandscapeCompiled : EnvCompiledFunction
@@ -1119,71 +1119,89 @@ namespace Env.Runtime
     {
         [SerializeField]
         int[] weightArgs;
-        public ReturnCompiled(int[] weightArgs)
+        [SerializeField]
+        string matWeightsParam;
+        [SerializeField]
+        Material landscapeMaterial;
+        public ReturnCompiled(int[] weightArgs, string matWeightsParam, Material landscapeMaterial)
         {
             this.weightArgs = weightArgs;
+            this.matWeightsParam = matWeightsParam;
+            this.landscapeMaterial = landscapeMaterial;
         }
         public void run(Blackboard bb)
         {
-            List<float[]> weights = new List<float[]>(weightArgs.Length);
-            List<int> idxMapping = new List<int>(weightArgs.Length);
-            const int padding = 1;
-            for (int i = 0; i < weightArgs.Length; i++)
-            {
-                if (weightArgs[i] >= 0)
+            Material sectionMaterial = landscapeMaterial;
+            if (landscapeMaterial != null) {
+                List<float[]> weights = new List<float[]>(weightArgs.Length);
+                List<int> idxMapping = new List<int>(weightArgs.Length);
+                const int padding = 1;
+                for (int i = 0; i < weightArgs.Length; i++)
                 {
-                    idxMapping.Add(i);
-                    weights.Add(bb.getFloat(weightArgs[i]));
-                    Debug.Assert((bb.resX + 2 * padding) * (bb.resZ + 2 * padding) == weights[i].Length);
-                }
-            }
-            if (weights.Count > 1)
-            {
-                bb.returnedTerrainWeights = new Texture2D(bb.resX, bb.resZ, TextureFormat.RGBA32, false, true, true);
-                
-
-                for (int z = 0, j = 0; z < bb.resZ + 2; z++)
-                {
-                    for (int x = 0; x < bb.resZ + 2; j++, x++)
+                    if (weightArgs[i] >= 0)
                     {
-
-                        int maxIdx, secondMaxIdx;
-                        if (weights[0][j] > weights[1][j])
-                        {
-                            maxIdx = 0;
-                            secondMaxIdx = 1;
-                        }
-                        else
-                        {
-                            maxIdx = 1;
-                            secondMaxIdx = 0;
-                        }
-                        for (int i = 2; i < weights.Count; i++)
-                        {
-                            if (weights[i][j] > weights[secondMaxIdx][j])
-                            {
-                                if (weights[i][j] > weights[maxIdx][j])
-                                {
-                                    secondMaxIdx = maxIdx;
-                                    maxIdx = i;
-                                }
-                                else
-                                {
-                                    secondMaxIdx = i;
-                                }
-                            }
-                        }
-                        float maxValue = weights[maxIdx][j];
-                        float secondMaxValue = weights[secondMaxIdx][j];
-                        float sum = maxValue + secondMaxValue;
-                        maxValue = maxValue / sum;
-                        secondMaxValue = secondMaxValue / sum;
-                        byte maxI = (byte)idxMapping[maxIdx];
-                        byte secondMaxI = (byte)idxMapping[secondMaxIdx];
-                        bb.returnedTerrainWeights.SetPixel(x, z, new Color32(maxI, secondMaxI, (byte)(255 * maxValue), (byte)(255 * secondMaxValue)));
+                        idxMapping.Add(i);
+                        weights.Add(bb.getFloat(weightArgs[i]));
+                        Debug.Assert((bb.resX + 2 * padding) * (bb.resZ + 2 * padding) == weights[i].Length);
                     }
                 }
+
+                
+                if (weights.Count > 1)
+                {
+                    
+                    Texture2D terrainWeights = new Texture2D(bb.resX, bb.resZ, TextureFormat.RGBA32, false,  true, true);
+
+
+                    for (int z = 0, j = 0; z < bb.resZ + 2; z++)
+                    {
+                        for (int x = 0; x < bb.resZ + 2; j++, x++)
+                        {
+
+                            int maxIdx, secondMaxIdx;
+                            if (weights[0][j] > weights[1][j])
+                            {
+                                maxIdx = 0;
+                                secondMaxIdx = 1;
+                            }
+                            else
+                            {
+                                maxIdx = 1;
+                                secondMaxIdx = 0;
+                            }
+                            for (int i = 2; i < weights.Count; i++)
+                            {
+                                if (weights[i][j] > weights[secondMaxIdx][j])
+                                {
+                                    if (weights[i][j] > weights[maxIdx][j])
+                                    {
+                                        secondMaxIdx = maxIdx;
+                                        maxIdx = i;
+                                    }
+                                    else
+                                    {
+                                        secondMaxIdx = i;
+                                    }
+                                }
+                            }
+                            float maxValue = weights[maxIdx][j];
+                            float secondMaxValue = weights[secondMaxIdx][j];
+                            float sum = maxValue + secondMaxValue;
+                            maxValue = maxValue / sum;
+                            secondMaxValue = secondMaxValue / sum;
+                            byte maxI = (byte)idxMapping[maxIdx];
+                            byte secondMaxI = (byte)idxMapping[secondMaxIdx];
+                            byte maxValueI = (byte)(255 * maxValue);
+                            byte secondMaxValueI = (byte)(255 * secondMaxValue);
+                            terrainWeights.SetPixel(x, z, new Color32(maxI, secondMaxI, maxValueI, secondMaxValueI));
+                        }
+                    }
+                    sectionMaterial = new Material(landscapeMaterial);
+                    
+                    sectionMaterial.SetTexture(matWeightsParam, terrainWeights);
+                }
             }
+            bb.returnedTerrainMaterial = sectionMaterial;
         }
     }
     

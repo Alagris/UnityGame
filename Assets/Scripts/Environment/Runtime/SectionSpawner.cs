@@ -19,8 +19,7 @@ namespace Env.Runtime
         public float ChunkSize = 100;
         [SerializeField]
         public float OffsetY = 0;
-        [SerializeField]
-        public Material LandscapeMaterial;
+        
        
 
 

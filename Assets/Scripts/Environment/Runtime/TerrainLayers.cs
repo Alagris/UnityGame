@@ -64,9 +64,9 @@ namespace Env.Runtime
                     int width = tex0.width;
                     int height = tex0.height;
                     TextureFormat format = tex0.format;
-                    bool hasMipMaps = false; //  tex0.mipmapCount > 1;
+                    int mipMaps = tex0.mipmapCount;
 
-                    Texture2DArray textureArray = new Texture2DArray(width, height, layers.Count, format, hasMipMaps);
+                    Texture2DArray textureArray = new Texture2DArray(width, height, layers.Count, format, mipMaps>1);
                     textureArray.anisoLevel = tex0.anisoLevel;
                     textureArray.filterMode = tex0.filterMode;
                     textureArray.wrapMode = tex0.wrapMode;
@@ -75,27 +75,27 @@ namespace Env.Runtime
 
                         TerrainLayer layer = layers[i];
                         Texture2D tex = layerToTex[j](layer);
-                        if (width != tex.width || height != tex.height || format != tex.format)
+                        if (width != tex.width || height != tex.height || format != tex.format || mipMaps != tex.mipmapCount)
                         {
-                            Debug.LogError("Layer " + layer + " has " + filenames[j] + " texture of different format width:" + width + " != " + tex.width + ", height:" + height + " != " + tex.height + " format:" + format + " != " + tex.format);
+                            Debug.LogError("Layer " + layer + " has " + filenames[j] + " texture of different format width:" + width + " == " + tex.width + ", height:" + height + " == " + tex.height + " format:" + format + " == " + tex.format + " mipMaps: " + mipMaps + " == "+tex.mipmapCount);
                             continue;
                         }
 
 
-                        bool texHasMM = tex.mipmapCount > 1;
+                        //bool texHasMM = tex.mipmapCount > 1;
                         /*
                         if (tex.width != width || tex.height != height || tex.format!= format || hasMipMaps!= texHasMM)
                         {
                             tex.Reinitialize(width, height, format, hasMipMaps);
                         }
                         */
-                        /*
+                        
                         for (int mip = 0; mip < tex.mipmapCount; mip++)
                         {
                             Graphics.CopyTexture(tex, 0, mip, textureArray, i, mip);
                         }
-                        */
-                        Graphics.CopyTexture(tex, 0, 0, textureArray, i, 0);
+                        
+                        //Graphics.CopyTexture(tex, 0, 0, textureArray, i, 0);
                         //Color[] pixels = tex.GetPixels();
                         //textureArray.SetPixels(pixels, i);
                     }

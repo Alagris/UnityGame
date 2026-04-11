@@ -60,7 +60,7 @@ namespace Env.Runtime
         public readonly float3 offset;
 
         public int returnedInstances, returnedLandscape;
-        public Texture2D returnedTerrainWeights;
+        public Material returnedTerrainMaterial;
 
         public Blackboard(int resX, int resZ, float size, float3 offset,
             List<int> intArraysCount,
