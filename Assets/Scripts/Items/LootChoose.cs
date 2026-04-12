@@ -1,24 +1,27 @@
-﻿using System;
+﻿using Inv;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-
-[CreateAssetMenu(fileName = "Item", menuName = "Scriptable Objects/Loot/Choose")]
-public class LootChoose : Loot
+namespace Items
 {
-
-    [SerializeField]
-    int Count;
-    [SerializeField]
-    List<Loot> Items;
-
-    public override void DrawLoot(Inventory destination, int count)
+    [CreateAssetMenu(fileName = "Item", menuName = "Scriptable Objects/Loot/Choose")]
+    public class LootChoose : Loot
     {
-        for (int i = 0; i < Count; i++)
+
+        [SerializeField]
+        int Count;
+        [SerializeField]
+        List<Loot> Items;
+
+        public override void DrawLoot(Inventory destination, int count)
         {
-            int idx = UnityEngine.Random.Range(0, Items.Count);
-            Items[idx].DrawLoot(destination, count);
+            for (int i = 0; i < Count; i++)
+            {
+                int idx = UnityEngine.Random.Range(0, Items.Count);
+                Items[idx].DrawLoot(destination, count);
+            }
         }
+
     }
 
 }
-

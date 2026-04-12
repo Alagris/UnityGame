@@ -1,13 +1,12 @@
 ﻿
 using Env.Runtime;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Inter;
+using Items;
 using UnityEngine;
 public class ProcTerrainSection : ProcSection, IInteractable
 {
     
-    public void Interact(GameObject interactor, ItemInstance tool, RaycastHit hit)
+    public void Interact(GameObject interactor, ItemInstance tool, ref RaycastHit hit)
     { 
         Debug.Log("Interacted ");
     }

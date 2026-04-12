@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Items;
 using UnityEngine;
-
-public interface IAttackable
+namespace Inter
 {
-    public void Attack(GameObject attacker, ItemInstance weapon, RaycastHit hit);
-}
+    public interface IAttackable
+    {
+        public void Attack(GameObject attacker, ItemInstance weapon, ref RaycastHit hit);
+    }
 
+}

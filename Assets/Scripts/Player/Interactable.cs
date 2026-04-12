@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Items;
 using UnityEngine;
-
-public interface IInteractable
+namespace Inter
 {
-    public void Interact(GameObject interactor, ItemInstance tool, RaycastHit hit);
-}
+    public interface IInteractable
+    {
+        public void Interact(GameObject interactor, ItemInstance tool, ref RaycastHit hit);
 
+    }
+
+}

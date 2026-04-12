@@ -1,22 +1,25 @@
+using Inv;
 using UnityEngine;
-
-[CreateAssetMenu(fileName = "ItemClothing", menuName = "Scriptable Objects/Item/Clothing")]
-public class ItemClothing : Item
+namespace Items
 {
-    [SerializeField]
-    public int CharacterID;
-
-    
-
-    
-    public override bool TryEquipAsClothes(ClothingInventory user, ItemInstance inst)
+    [CreateAssetMenu(fileName = "ItemClothing", menuName = "Scriptable Objects/Item/Clothing")]
+    public class ItemClothing : Item
     {
-        Debug.Assert(inst.CurrentMeshInstance == null);
-        return user.CharacterID == CharacterID && user.ForceEquipSkeletalClothes(inst);
-    }
+        [SerializeField]
+        public int CharacterID;
 
-    public override void Uneqip(ClothingInventory user, ItemInstance itemInstance)
-    {
-        user.ForceUnequipClothes(itemInstance);
+
+
+
+        public override bool TryEquipAsClothes(ClothingInventory user, ItemInstance inst)
+        {
+            Debug.Assert(inst.CurrentMeshInstance == null);
+            return user.CharacterID == CharacterID && user.ForceEquipSkeletalClothes(inst);
+        }
+
+        public override void Uneqip(ClothingInventory user, ItemInstance itemInstance)
+        {
+            user.ForceUnequipClothes(itemInstance);
+        }
     }
 }

@@ -1,3 +1,6 @@
+using Inter;
+using Inv;
+using Items;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -213,7 +216,7 @@ public abstract class AnyCharacterController : MonoBehaviour
     [SerializeField]
     public Transform EyeTransform;
 
-    public bool LineTrace(out RaycastHit hit)
+    public virtual bool LineTrace(out RaycastHit hit)
     {
         if (EyeTransform != null)
         {
@@ -253,7 +256,7 @@ public abstract class AnyCharacterController : MonoBehaviour
         {
             if (hit.collider.gameObject.TryGetComponent(out IInteractable interactable))
             {
-                interactable.Interact(gameObject, tool, hit);
+                interactable.Interact(gameObject, tool, ref hit);
             }
         }
         return null;
@@ -265,7 +268,7 @@ public abstract class AnyCharacterController : MonoBehaviour
         {
             if (hit.collider.gameObject.TryGetComponent(out IAttackable attackable))
             {
-                attackable.Attack(gameObject, weapon, hit);
+                attackable.Attack(gameObject, weapon, ref hit);
             }
         }
         return null;

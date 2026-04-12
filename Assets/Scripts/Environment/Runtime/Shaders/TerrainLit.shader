@@ -176,7 +176,7 @@ Shader "Proc Env/Terrain Lit"
             #pragma instancing_options renderinglayer
             #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
 
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/LitInput.hlsl"
+            #include "TerrainLitInput.hlsl"
             #include "TerrainLitForwardPass.hlsl"
             ENDHLSL
         }

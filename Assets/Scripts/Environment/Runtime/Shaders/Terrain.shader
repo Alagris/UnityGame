@@ -4,13 +4,16 @@ Shader "Proc Env/Terrain"
 {
     Properties
     {
-        _TerrainLayers ("Layers", 2DArray) = "" {}
+        _DiffuseMap ("Diffuse", 2DArray) = "" {}
+        _NormalMap ("Normal", 2DArray) = "" {}
+        _Ambient ("Ambient", Color) = (0.1, 0.1, 0.1, 1)
         _LayerWeights("Weight Map", 2D) = "white" {}
+        _LightSmooth("Light Smoothing", Range(0.0,1.0)) = 0.1
         _UVScale ("UVScale", Float) = 1.0
     }
     SubShader
     {
-         Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" }
+        Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" }
 
         Pass
         {
@@ -19,7 +22,18 @@ Shader "Proc Env/Terrain"
             #pragma fragment frag
             #pragma require 2darray
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl"   
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+
+            
+
+            CBUFFER_START(UnityPerMaterial)
+                half4 _Ambient;
+                float _UVScale;
+                float _LightSmooth;
+            CBUFFER_END
 
             struct Attributes
             {
@@ -33,8 +47,7 @@ Shader "Proc Env/Terrain"
                 float4 positionHCS : SV_POSITION;
                 float2 uv : TEXCOORD0;
                 float3 positionWorld : TEXCOORD1;
-                float4 shadowCoords : TEXCOORD3;
-                float3 normal: NORMAL;
+                float3 worldNormal: NORMAL;
             };
 
             
@@ -44,15 +57,15 @@ Shader "Proc Env/Terrain"
                 OUT.positionHCS = TransformObjectToHClip(IN.positionOS);
                 OUT.uv = IN.uv;
                 OUT.positionWorld = IN.positionOS;
-                OUT.normal = IN.normal;
-                VertexPositionInputs positions = GetVertexPositionInputs(IN.positionOS.xyz);
-                float4 shadowCoordinates = GetShadowCoord(positions);
-                OUT.shadowCoords = shadowCoordinates;
+                OUT.worldNormal = TransformObjectToWorldNormal(IN.normal);
+                
                 return OUT;
             }
             
-            TEXTURE2D_ARRAY(_TerrainLayers);
-            SAMPLER(sampler_TerrainLayers);
+            TEXTURE2D_ARRAY(_DiffuseMap);
+            SAMPLER(sampler_DiffuseMap);
+            TEXTURE2D_ARRAY(_NormalMap);
+            SAMPLER(sampler_NormalMap);
             sampler2D _LayerWeights;
 
             float2 mix2d(float2 v0, float2 v1, float2 v2, float2 v3, float x, float y)
@@ -62,7 +75,18 @@ Shader "Proc Env/Terrain"
             }
             half4 frag (Varyings IN) : SV_Target
             {
-                half shadowAmount = MainLightRealtimeShadow(IN.shadowCoords); 
+                float2 worldUV = IN.positionWorld.xz * _UVScale;
+                float layerIdx = 2;
+                VertexPositionInputs positions = GetVertexPositionInputs(IN.positionWorld);
+                float4 shadowCoords = GetShadowCoord(positions);
+                half shadowAmount = MainLightRealtimeShadow(shadowCoords); 
+                Light mainLight = GetMainLight();
+                float lightDot = dot(normalize(IN.worldNormal), normalize(-mainLight.direction)) ;
+                float lightSmooth = smoothstep(0, _LightSmooth, lightDot);
+                half3 diffuse = SAMPLE_TEXTURE2D_ARRAY(_DiffuseMap, sampler_DiffuseMap, worldUV, layerIdx) ;
+
+                half4 normal = SAMPLE_TEXTURE2D_ARRAY(_NormalMap, sampler_NormalMap, worldUV, layerIdx);
+                half3 lighting = mainLight.color * diffuse * lerp(_LightSmooth, 1, shadowAmount); 
                 /*
                 float2 bottomLeft = floor(IN.uv);
                 float2 bottomRight = bottomLeft+float2(1,0);
@@ -84,8 +108,57 @@ Shader "Proc Env/Terrain"
 
                 mix2d(bottomLeftColor.zw, bottomRightColor.zw, topLeftColor.zw, topRightColor.zw);
                 */
-                return SAMPLE_TEXTURE2D_ARRAY(_TerrainLayers, sampler_TerrainLayers, IN.positionWorld.xz, 2) * shadowAmount;
+                return half4(lighting, 1);
             }
+            ENDHLSL
+        }
+        Pass
+        {
+            Name "ShadowCaster"
+            Tags
+            {
+                "LightMode" = "ShadowCaster"
+            }
+
+            // -------------------------------------
+            // Render State Commands
+            ZWrite On
+            ZTest LEqual
+            ColorMask 0
+            // Cull[_Cull]
+
+            HLSLPROGRAM
+            #pragma target 2.0
+
+            // -------------------------------------
+            // Shader Stages
+            #pragma vertex ShadowPassVertex
+            #pragma fragment ShadowPassFragment
+
+            // -------------------------------------
+            // Material Keywords
+            #pragma shader_feature_local _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+
+            //--------------------------------------
+            // GPU Instancing
+            #pragma multi_compile_instancing
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
+
+            // -------------------------------------
+            // Universal Pipeline keywords
+
+            // -------------------------------------
+            // Unity defined keywords
+            #pragma multi_compile _ LOD_FADE_CROSSFADE
+
+            // This is used during shadow map generation to differentiate between directional and punctual light shadows, as they use different formulas to apply Normal Bias
+            #pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+
+            // -------------------------------------
+            // Includes
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/LitInput.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/ShadowCasterPass.hlsl"
             ENDHLSL
         }
         

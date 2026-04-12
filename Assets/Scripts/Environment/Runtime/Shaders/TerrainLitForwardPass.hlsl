@@ -33,9 +33,7 @@ struct Varyings
 {
 	float2 uv : TEXCOORD0;
 
-#if defined(REQUIRES_WORLD_SPACE_POS_INTERPOLATOR)
     float3 positionWS               : TEXCOORD1;
-#endif
 
 	float3 normalWS : TEXCOORD2;
 #if defined(REQUIRES_WORLD_SPACE_TANGENT_INTERPOLATOR)
@@ -74,9 +72,7 @@ void InitializeInputData(Varyings input, half3 normalTS, out InputData inputData
 {
 	inputData = (InputData) 0;
 
-#if defined(REQUIRES_WORLD_SPACE_POS_INTERPOLATOR)
     inputData.positionWS = input.positionWS;
-#endif
 
 #if defined(DEBUG_DISPLAY)
     inputData.positionCS = input.positionCS;
@@ -190,7 +186,7 @@ Varyings LitPassVertex(Attributes input)
 	fogFactor = ComputeFogFactor(vertexInput.positionCS.z);
 #endif
 
-	output.uv = TRANSFORM_TEX(input.texcoord, _BaseMap);
+	output.uv = input.texcoord;
 
     // already normalized from normal transform to WS.
 	output.normalWS = normalInput.normalWS;
@@ -219,9 +215,8 @@ Varyings LitPassVertex(Attributes input)
 	output.fogFactor = fogFactor;
 #endif
 
-#if defined(REQUIRES_WORLD_SPACE_POS_INTERPOLATOR)
     output.positionWS = vertexInput.positionWS;
-#endif
+
 
 #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
     output.shadowCoord = GetShadowCoord(vertexInput);
@@ -251,11 +246,11 @@ void LitPassFragment(
     half3 viewDirWS = GetWorldSpaceNormalizeViewDir(input.positionWS);
     half3 viewDirTS = GetViewDirectionTangentSpace(input.tangentWS, input.normalWS, viewDirWS);
 #endif
-    ApplyPerPixelDisplacement(viewDirTS, input.uv);
+    ApplyPerPixelDisplacement(viewDirTS, input.positionWS.xz);
 #endif
 
 	SurfaceData surfaceData;
-	InitializeStandardLitSurfaceData(input.uv, surfaceData);
+	InitializeStandardLitSurfaceData(input.positionWS.xz, surfaceData);
 
 #ifdef LOD_FADE_CROSSFADE
     LODFadeCrossFade(input.positionCS);
@@ -263,7 +258,7 @@ void LitPassFragment(
 
 	InputData inputData;
 	InitializeInputData(input, surfaceData.normalTS, inputData);
-	SETUP_DEBUG_TEXTURE_DATA(inputData, UNDO_TRANSFORM_TEX(input.uv, _BaseMap));
+    SETUP_DEBUG_TEXTURE_DATA(inputData, input.positionWS.xz);
 
 #if defined(_DBUFFER)
     ApplyDecalToSurfaceData(input.positionCS, surfaceData, inputData);
@@ -273,7 +268,7 @@ void LitPassFragment(
 
 	half4 color = UniversalFragmentPBR(inputData, surfaceData);
 	color.rgb = MixFog(color.rgb, inputData.fogCoord);
-	color.a = OutputAlpha(color.a, IsSurfaceTypeTransparent(_Surface));
+	color.a = 1;
 
 	outColor = color;
 
