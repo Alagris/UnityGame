@@ -1,0 +1,15 @@
+:root {
+	
+}
+#item-list {
+	background-color: rgba(0, 0, 0, 0.45); 
+	left: 2%; 
+	right: 60%; 
+	position: absolute; 
+	top: 2%; 
+	bottom: 2%;
+	-unity-background-image-tint-color: rgb(255, 255, 255); 
+	color: rgb(255, 255, 255); 
+	-unity-font-style: normal; 
+	font-size: 18px;
+}

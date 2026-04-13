@@ -325,7 +325,7 @@ MonoBehaviour:
     SplineCurvature: 0.5
   RecenteringTarget: 2
   HorizontalAxis:
-    Value: 0
+    Value: -124.65152
     Center: 0
     Range: {x: -180, y: 180}
     Wrap: 1
@@ -335,7 +335,7 @@ MonoBehaviour:
       Time: 2
     Restrictions: 0
   VerticalAxis:
-    Value: 0
+    Value: -34.190823
     Center: 17.5
     Range: {x: -70, y: 60}
     Wrap: 0
@@ -465,7 +465,7 @@ GameObject:
   - component: {fileID: 7139165119053829814}
   - component: {fileID: 8018844187214871229}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: StatusCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -531,7 +531,7 @@ MonoBehaviour:
   m_UiScaleMode: 0
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
+  m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -634,6 +634,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 8d30b52e0f21a8f41b16466dc1652a18, type: 3}
       insertIndex: -1
       addedObject: {fileID: 938946107278618254}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 8d30b52e0f21a8f41b16466dc1652a18, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1264195920517743437}
   m_SourcePrefab: {fileID: 100100000, guid: 8d30b52e0f21a8f41b16466dc1652a18, type: 3}
 --- !u!1 &5785831392048830062 stripped
 GameObject:
@@ -661,11 +664,12 @@ MonoBehaviour:
   EyeTransform: {fileID: 0}
   cam: {fileID: 0}
   cinecam: {fileID: 7435286256705249997}
-  InteractionMessageText: {fileID: 8207335615494981563}
+  hudController: {fileID: 0}
   ZoomSensitivity: -0.2
   MinZoom: 0.3
   MaxZoom: 3
   MaxPhysicsHandleSpeed: 1
+  TimeToTriggerInteract: 1
 --- !u!114 &5494668527510411092
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -849,9 +853,9 @@ MonoBehaviour:
     m_ActionName: 'Player/InteractWithTool[/Mouse/rightButton]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 5209732938090144719}
-        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
-        m_MethodName: OnHold
+      - m_Target: {fileID: 1264195920517743437}
+        m_TargetAssemblyTypeName: Player.HudUIController, Assembly-CSharp
+        m_MethodName: OnTriggerInventory
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -861,8 +865,40 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-    m_ActionId: 0a7ebc08-30c9-4c48-8e3d-699692d2cfe1
-    m_ActionName: 'Player/Hold[/Mouse/rightButton]'
+    m_ActionId: 0402f0fe-6705-47a5-829f-35312831c203
+    m_ActionName: 'Player/OpenInventory[/Keyboard/e]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 5209732938090144719}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: OnDropItem
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: a413632f-4808-4cae-8d2d-698015b3cabb
+    m_ActionName: 'Player/DropItem[/Keyboard/q]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1264195920517743437}
+        m_TargetAssemblyTypeName: Player.HudUIController, Assembly-CSharp
+        m_MethodName: OnTriggerInventory
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: d636bbeb-7520-4276-ad0e-3d59c9a58cf1
+    m_ActionName: 'UI/OpenInventory[/Keyboard/e]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -891,6 +927,22 @@ MonoBehaviour:
   EquippedClothes: []
   Body: {fileID: 0}
   EquippedSlots: 0
+--- !u!114 &1264195920517743437
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5785831392048830062}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 23e516815eed8f247a30b27bb0e5e16b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Player.HudUIController
+  InteractionMessageText: {fileID: 8207335615494981563}
+  HUD: {fileID: 7632055422988567868}
+  inventoryPrefab: {fileID: 6250236013842948677, guid: e2b9328d37815da46bc4b569f12ce888, type: 3}
+  inventory: {fileID: 0}
 --- !u!4 &6557441527464824020 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 8d30b52e0f21a8f41b16466dc1652a18, type: 3}

@@ -1,9 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ui:UXML
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:ui="UnityEngine.UIElements"
-    xmlns:uie="UnityEditor.UIElements"
-    xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd"
->
-    
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Scripts/Items/UI/Inventory.uss?fileID=7433441132597879392&amp;guid=adb452986141cd44b8a8caf5684f0717&amp;type=3#Inventory"/>
+    <ui:ListView item-template="project://database/Assets/Scripts/Items/UI/ItemRow.uxml?fileID=9197481963319205126&amp;guid=680a5384eafbd8f48aa2ca07bd4ca8a7&amp;type=3#ItemRow" name="item-list" virtualization-method="DynamicHeight"/>
 </ui:UXML>

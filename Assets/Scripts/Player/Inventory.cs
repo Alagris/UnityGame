@@ -1,4 +1,6 @@
 using Items;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -120,5 +122,15 @@ namespace Inv
         }
 
         public bool hasEquippedInHand() => EquippedInHand != null && EquippedInHand.IsValid();
+
+        public List<ItemInstance> GetItemList()
+        {
+            return new List<ItemInstance>(Items.Values); 
+        }
+
+        public void DropItem()
+        {
+            
+        }
     }
 }
