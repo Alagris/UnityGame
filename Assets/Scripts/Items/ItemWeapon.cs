@@ -11,6 +11,21 @@ namespace Items
         [SerializeField]
         public string ParentBone;
 
+        public override void OnUse(AnyCharacterController user, ItemInstance inst)
+        {
+            if (inst.Owner is ClothingInventory)
+            {
+                ClothingInventory c = (ClothingInventory)inst.Owner;
+                if (inst.IsEquipped())
+                {
+                    Uneqip(c, inst);
+                }
+                else
+                {
+                    TryEquipInHand(c, inst);
+                }
+            }
+        }
         public override void OnAttack(AnyCharacterController user, ItemInstance inst)
         {
             user.InteractAttack(inst);

@@ -20,6 +20,10 @@ namespace Items
 
         [DoNotSerialize]
         public GameObject CurrentMeshInstance;
+        public static int EQUIPPED_AT_NONE = -2;
+        public static int EQUIPPED_AT_HAND = -1;
+        [DoNotSerialize]
+        public int EquippedAt = EQUIPPED_AT_NONE;
 
         public ItemInstance() { }
 
@@ -44,7 +48,7 @@ namespace Items
         [DoNotSerialize]
         public float TotalWeight { get => Type.Weight * Count; }
         [DoNotSerialize]
-        public byte SlotRaw { get => Type.SlotRaw; }
+        public uint SlotRaw { get => Type.SlotRaw; }
 
         public IInteractable OnInteract(AnyCharacterController user) => Type.OnInteract(user, this);
 
@@ -83,7 +87,7 @@ namespace Items
             return weapon.CurrentMeshInstance == null && Type.TryEquipInHand(user, this);
         }
 
-        public bool Collides(byte slot)
+        public bool Collides(uint slot)
         {
             return Type.Collides(slot);
         }
@@ -105,5 +109,7 @@ namespace Items
         }
 
         public bool IsValid() => Type != null;
+
+        public bool IsEquipped() => EquippedAt > EQUIPPED_AT_NONE;
     }
 }

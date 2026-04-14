@@ -1,6 +1,7 @@
 ﻿using Items;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -8,33 +9,125 @@ using static UnityEngine.Rendering.DebugUI.MessageBox;
 
 namespace Inv.UI
 {
-    public class InventoryUIController : MonoBehaviour
+    public class InventoryUIController : MonoBehaviour, InventoryListener
     {
-        List<ItemInstance> itemInstanceList;
-        Inventory inv;
-        public void RefreshItemList(Inventory inv)
+        
+        private Inventory inv;
+        private ListView itemList;
+        private Dictionary<ItemInstance, VisualElement> itemToVisElem = new Dictionary<ItemInstance, VisualElement>();
+        private void RefreshList()
+        {
+            itemList.itemsSource = inv.GetItemList();
+        }
+        public void SetInventory(Inventory inv)
         {
             this.inv = inv;
-            UIDocument doc = GetComponent<UIDocument>();
-            VisualElement root = doc.rootVisualElement;
-            ListView itemList = root.Q<ListView>("item-list");
-            itemInstanceList = inv.GetItemList();
-            itemList.itemsSource = itemInstanceList;
-            itemList.bindItem = onBindItem;
-            itemList.unbindItem = onUnbindItem;
+            if (itemList == null)
+            {
+                UIDocument doc = GetComponent<UIDocument>();
+                VisualElement root = doc.rootVisualElement;
+                itemList = root.Q<ListView>("item-list");
+                itemList.bindItem = onBindItem;
+                itemList.unbindItem = onUnbindItem;
+                
+            }
+            RefreshList();
+            inv.listener = this;
         }
+
+       
 
         void onBindItem(VisualElement visElem, int idx)
         {
-            ItemInstance i = itemInstanceList[idx];
-            Label itemNameLabel = visElem.Q<Label>("item-name");
-            itemNameLabel.text = i.ItemName;
-            //.style.unityFontStyleAndWeight. = FontStyle.Bold;
-            //itemNameLabel.SetBinding("style.-unity-font-style");
+            ItemInstance i = (ItemInstance)itemList.itemsSource[idx];
+            itemToVisElem.Add(i, visElem);
+            visElem.dataSource = i;
+            visElem.RegisterCallback<MouseOverEvent>(OnMouseHoverOverItem);
+            visElem.RegisterCallback<ClickEvent>(OnMouseClickOverItem);
+            UpdateItem(i, visElem);
         }
         void onUnbindItem(VisualElement visElem, int idx)
         {
-            
+            itemToVisElem.Remove((ItemInstance)visElem.dataSource);
+            visElem.UnregisterCallback<MouseOverEvent>(OnMouseHoverOverItem);
+            visElem.UnregisterCallback<ClickEvent>(OnMouseClickOverItem);
+            visElem.dataSource = null;
+        }
+
+        private void OnMouseClickOverItem(ClickEvent evt)
+        {
+            VisualElement e = (VisualElement)evt.currentTarget;
+            object o = e.dataSource;
+            if (o != null) 
+            {
+                ItemInstance i = (ItemInstance)o;
+                if (inv.TryGetComponent(out AnyCharacterController c))
+                {
+                    i.OnUse(c);
+                }
+            }
+        }
+        
+        private void OnMouseHoverOverItem(MouseOverEvent evt)
+        {
+
+            VisualElement e = (VisualElement)evt.currentTarget;
+            object i = e.dataSource;
+            int idx = itemList.itemsSource.IndexOf(i);
+            itemList.SetSelection(idx);
+        }
+
+
+        public void OnItemAdded(Inventory inv, ItemInstance item) {
+            RefreshList();
+        }
+        public void OnItemChanged(Inventory inv, ItemInstance item) {
+            UpdateItem(item);
+        }
+        public void OnItemRemoved(Inventory inv, ItemInstance item) {
+            RefreshList();
+        }
+        public void OnItemPutOn(Inventory inv, ItemInstance item) {
+            UpdateItem(item);
+        }
+        public void OnItemTakenOff(Inventory inv, ItemInstance item) {
+            UpdateItem(item);
+        }
+        public void OnItemEquippedInHand(Inventory inv, ItemInstance item) {
+            UpdateItem(item);
+        }
+        public void OnItemUnequippedFromHand(Inventory inv, ItemInstance item) {
+            UpdateItem(item);
+        }
+        public void OnInventoryStripped(Inventory inv) {
+            UpdateAllItems();
+        }
+        public void OnInventoryCleared(Inventory inv) {
+            RefreshList();
+        }
+        private void UpdateAllItems()
+        {
+            itemList.RefreshItems();
+        }
+        private void UpdateItem(ItemInstance i)
+        { 
+            if(itemToVisElem.TryGetValue(i, out VisualElement visElem))
+            {
+                UpdateItem(i, visElem);
+            }
+        }
+        private void UpdateItem(ItemInstance i, VisualElement visElem)
+        {
+            Label itemNameLabel = visElem.Q<Label>("item-name");
+            itemNameLabel.text = i.ItemName;
+            if (i.IsEquipped())
+            {
+                itemNameLabel.AddToClassList("worn-item");
+            }
+            else
+            {
+                itemNameLabel.RemoveFromClassList("worn-item");
+            }
         }
     }
 }

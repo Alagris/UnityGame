@@ -6,8 +6,23 @@ using Unity.VisualScripting;
 using UnityEngine;
 namespace Inv
 {
+    public interface InventoryListener
+    {
+        void OnItemAdded(Inventory inv, ItemInstance item) { }
+        void OnItemChanged(Inventory inv, ItemInstance item) { }
+        void OnItemRemoved(Inventory inv, ItemInstance item) { }
+        void OnItemPutOn(Inventory inv, ItemInstance item) { }
+        void OnItemTakenOff(Inventory inv, ItemInstance item) { }
+        void OnItemEquippedInHand(Inventory inv, ItemInstance item) { }
+        void OnItemUnequippedFromHand(Inventory inv, ItemInstance item) { }
+        void OnInventoryStripped(Inventory inv) { }
+        void OnInventoryCleared(Inventory inv) { }
+    }
+
     public class Inventory : InteractableCharacter
     {
+
+        public InventoryListener listener;
 
         [SerializeField]
         public Loot Loot;
@@ -35,11 +50,19 @@ namespace Inv
                 if (Items.TryGetValue(item.Type, out ItemInstance prev))
                 {
                     prev.Stack(item);
+                    if(listener != null)
+                    {
+                        listener.OnItemChanged(this, prev);
+                    }
                 }
                 else
                 {
                     item.Owner = this;
                     Items.Add(item.Type, item);
+                    if (listener != null)
+                    {
+                        listener.OnItemAdded(this, item);
+                    }
                 }
 
             }
@@ -56,6 +79,10 @@ namespace Inv
                 {
                     prev.Count -= count;
                     CarriedWeight -= count * prev.Weight;
+                    if (listener != null)
+                    {
+                        listener.OnItemChanged(this, prev);
+                    }
                 }
                 else
                 {
@@ -63,6 +90,10 @@ namespace Inv
                     prev.Owner = null;
                     Items.Remove(type);
                     CarriedWeight -= prev.TotalWeight;
+                    if (listener != null)
+                    {
+                        listener.OnItemRemoved(this, prev);
+                    }
                 }
                 return prev;
             }
@@ -103,6 +134,10 @@ namespace Inv
             CarriedWeight = 0;
             Items.Clear();
             ForceUnequipWeapon();
+            if (listener != null)
+            {
+                listener.OnInventoryCleared(this);
+            }
         }
         public void DrawLoot()
         {

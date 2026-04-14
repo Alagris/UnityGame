@@ -20,7 +20,7 @@ namespace Items
         public ClothingSlot Slot;
 
         [DoNotSerialize]
-        public byte SlotRaw { get => (byte)Slot; }
+        public uint SlotRaw { get => (uint)Slot; }
 
         public virtual IInteractable OnInteract(AnyCharacterController user, ItemInstance inst) { return user.Interact(inst); }
 
@@ -41,21 +41,21 @@ namespace Items
         {
 
         }
-        public static bool Collides(byte slot1, byte slot2)
+        public static bool Collides(uint slot1, uint slot2)
         {
             return (slot1 & slot2) != 0;
         }
-        public static bool Collides(ClothingSlot slot, byte slots)
+        public static bool Collides(ClothingSlot slot, uint slots)
         {
-            return Collides((byte)slot, slots);
+            return Collides((uint)slot, slots);
         }
-        public bool Collides(byte slots)
+        public bool Collides(uint slots)
         {
             return Collides(Slot, slots);
         }
         public bool Collides(ClothingSlot slots)
         {
-            return Collides((byte)slots);
+            return Collides((uint)slots);
         }
     }
 }

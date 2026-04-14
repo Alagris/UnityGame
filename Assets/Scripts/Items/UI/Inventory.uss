@@ -2,7 +2,7 @@
 	
 }
 #item-list {
-	background-color: rgba(0, 0, 0, 0.45); 
+	background-color: rgba(0, 0, 0, 0.7); 
 	left: 2%; 
 	right: 60%; 
 	position: absolute; 
@@ -12,4 +12,21 @@
 	color: rgb(255, 255, 255); 
 	-unity-font-style: normal; 
 	font-size: 18px;
+}
+
+.worn-item {
+    -unity-font-style: bold; 
+}
+
+.unity-collection-view__item:hover {
+    background-color: rgba(255,255,255, 0.03);
+	
+}
+
+.unity-collection-view__item--selected:hover {
+    background-color: rgba(255,255,255, 0.15);	
+}
+
+.unity-collection-view__item--selected {
+    background-color: rgba(255,255,255, 0.12);	
 }

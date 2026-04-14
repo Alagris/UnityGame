@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Unity.AppUI.Redux;
+using Unity.Collections;
 using Unity.VisualScripting;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
@@ -18,7 +20,7 @@ namespace Inv
         SkinnedMeshRenderer Body;
 
         [DoNotSerialize]
-        public byte EquippedSlots = 0;
+        public uint EquippedSlots = 0;
 
         readonly Dictionary<string, Transform> originalBones = new Dictionary<string, Transform>();
 
@@ -44,16 +46,19 @@ namespace Inv
             }
             EquippedClothes.Clear();
             EquippedSlots = 0;
+            if (listener != null)
+            {
+                listener.OnInventoryStripped(this);
+            }
         }
         public void Strip()
-        {
-            StripClothes();
+        {   
             if (EquippedInHand != null)
             {
                 EquippedInHand.Destroy();
                 EquippedInHand = null;
             }
-
+            StripClothes();
         }
         public void AutoEquip()
         {
@@ -85,7 +90,7 @@ namespace Inv
             return clothes.CurrentMeshInstance == null && clothes.TryEquipAsClothes(this);
         }
         public void UnEquipCollidingClothes(ItemInstance clothes) => UnEquipCollidingClothes(clothes.SlotRaw);
-        public void UnEquipCollidingClothes(byte slots)
+        public void UnEquipCollidingClothes(uint slots)
         {
             if (Item.Collides(EquippedSlots, slots))
             {
@@ -100,36 +105,64 @@ namespace Inv
         }
         public bool ForceEquipSkeletalClothes(ItemInstance clothes)
         {
-
-            UnEquipCollidingClothes(clothes);
-            GameObject clothesInstance = Instantiate(clothes.Mesh, this.transform);
-            SkinnedMeshRenderer renderer = clothesInstance.GetComponentInChildren<SkinnedMeshRenderer>();
-            AddSkeletalMesh(renderer);
-            clothes.CurrentMeshInstance = clothesInstance;
-            Debug.Assert((clothes.SlotRaw & EquippedSlots) == 0);
-            EquippedSlots |= clothes.SlotRaw;
-            return true;
+            if (clothes.EquippedAt == ItemInstance.EQUIPPED_AT_NONE)
+            {
+                UnEquipCollidingClothes(clothes);
+                GameObject clothesInstance = Instantiate(clothes.Mesh, this.transform);
+                SkinnedMeshRenderer renderer = clothesInstance.GetComponentInChildren<SkinnedMeshRenderer>();
+                AddSkeletalMesh(renderer);
+                ForceEquipAnyClothes(clothes, clothesInstance);
+                return true;
+            }
+            return false;
         }
+        
         public bool ForceEquipStaticClothes(ItemInstance clothes, string parentBone)
         {
-
-            UnEquipCollidingClothes(clothes);
-            GameObject clothesInstance = Instantiate(clothes.Mesh, this.transform);
-            AddStaticMesh(clothesInstance, parentBone);
+            if (clothes.EquippedAt == ItemInstance.EQUIPPED_AT_NONE)
+            {
+                UnEquipCollidingClothes(clothes);
+                GameObject clothesInstance = Instantiate(clothes.Mesh, this.transform);
+                AddStaticMesh(clothesInstance, parentBone);
+                ForceEquipAnyClothes(clothes, clothesInstance);
+                return true;
+            }
+            return false;
+        }
+        private void ForceEquipAnyClothes(ItemInstance clothes, GameObject clothesInstance)
+        {
             clothes.CurrentMeshInstance = clothesInstance;
+            clothes.EquippedAt = EquippedClothes.Count;
+            EquippedClothes.Add(clothes);
             Debug.Assert((clothes.SlotRaw & EquippedSlots) == 0);
             EquippedSlots |= clothes.SlotRaw;
-            return true;
+            if (listener != null)
+            {
+                listener.OnItemPutOn(this, clothes);
+            }
         }
         public void ForceUnequipClothes(ItemInstance itemInstance)
         {
-            if (EquippedClothes.Remove(itemInstance))
+            
+            if (itemInstance.IsEquipped())
             {
+                Debug.Assert(itemInstance.EquippedAt >=0 && EquippedClothes[itemInstance.EquippedAt] == itemInstance);
+                int idx = itemInstance.EquippedAt;
+                EquippedClothes.RemoveAtSwapBack(idx);
+                if (idx < EquippedClothes.Count) {
+                    EquippedClothes[idx].EquippedAt = idx;
+                }
                 Destroy(itemInstance.CurrentMeshInstance);
                 itemInstance.CurrentMeshInstance = null;
+                itemInstance.EquippedAt = ItemInstance.EQUIPPED_AT_NONE;
+
                 Debug.Assert((itemInstance.SlotRaw | EquippedSlots) == EquippedSlots);
                 Debug.Assert((itemInstance.SlotRaw & EquippedSlots) != 0);
                 EquippedSlots ^= itemInstance.SlotRaw;
+                if (listener != null)
+                {
+                    listener.OnItemTakenOff(this, itemInstance);
+                }
             }
         }
 
@@ -160,6 +193,11 @@ namespace Inv
                 EquippedInHand = weapon;
                 Debug.Assert(EquippedInHand.Type != null);
                 weapon.CurrentMeshInstance = weaponInstance;
+                EquippedInHand.EquippedAt = ItemInstance.EQUIPPED_AT_HAND;
+                if (listener != null)
+                {
+                    listener.OnItemUnequippedFromHand(this, weapon);
+                }
             }
             return weaponInstance;
         }
@@ -171,7 +209,14 @@ namespace Inv
 
                 Destroy(EquippedInHand.CurrentMeshInstance);
                 EquippedInHand.CurrentMeshInstance = null;
+                EquippedInHand.EquippedAt = ItemInstance.EQUIPPED_AT_NONE;
+                ItemInstance i = EquippedInHand;
                 EquippedInHand = null;
+
+                if (listener != null)
+                {
+                    listener.OnItemUnequippedFromHand(this, i);
+                }
             }
         }
         public GameObject AddStaticMesh(GameObject mesh, string parentBoneName)

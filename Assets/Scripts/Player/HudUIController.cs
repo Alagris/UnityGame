@@ -89,7 +89,7 @@ namespace Player
                 }
                 
                 inventoryUiInstance = Instantiate(inventoryPrefab);
-                inventoryUiInstance.RefreshItemList(inventory);
+                inventoryUiInstance.SetInventory(inventory);
                 State = HudState.INVENTORY;
                 Cursor.visible = true;
                 Cursor.lockState = CursorLockMode.Confined;
