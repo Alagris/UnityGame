@@ -27,7 +27,7 @@ namespace Player
         [SerializeField]
         float MaxPhysicsHandleSpeed = 10;
         [SerializeField]
-        float TimeToTriggerInteract = 1;
+        float TimeToTriggerInteract = 0.2f;
 
         private CinemachineOrbitalFollow cinecamOrbitalFollow;
         private float DesiredZoomValue;
@@ -78,8 +78,10 @@ namespace Player
         }
         private Rigidbody CurrentlyHeldObject;
         private float HeldObjectDistance = 0;
+        double holdStartTime;
         public void HoldStart()
         {
+            holdStartTime = Time.time;
             CurrentlyHeldObject = null;
             if (HasRaycastHit)
             {
@@ -101,7 +103,7 @@ namespace Player
                 InteractWithoutTool();
             }
         }
-
+        
         public void OnInteractWithTool(InputAction.CallbackContext c)
         {
             if (c.performed)
@@ -111,8 +113,9 @@ namespace Player
             }
             else if (c.canceled)
             {
+                double duration = Time.time - holdStartTime;
                 HoldEnd();
-                if (c.duration < TimeToTriggerInteract)
+                if (duration < TimeToTriggerInteract)
                 {
                     InteractWithTool();
                 }
@@ -122,7 +125,7 @@ namespace Player
         {
             if (c.performed)
             {
-                inventory.DropItem();
+                DropItem();
             }
         }
         

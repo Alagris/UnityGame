@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.tvOS;
 namespace Inv
 {
     public interface InventoryListener
@@ -67,13 +68,13 @@ namespace Inv
 
             }
         }
-        public ItemInstance RemoveItem(ItemInstance item)
+        public ItemInstance RemoveItem(ItemInstance item, bool drop=false)
         {
-            return RemoveItem(item.Type, item.Count);
+            return item==null?null:RemoveItem(item.Type, item.Count);
         }
-        public ItemInstance RemoveItem(Item type, int count = 1)
+        public ItemInstance RemoveItem(Item type, int count = 1, bool drop=false)
         {
-            if (Items.TryGetValue(type, out ItemInstance prev))
+            if (count>0 && Items.TryGetValue(type, out ItemInstance prev))
             {
                 if (prev.Count > count)
                 {
@@ -82,6 +83,13 @@ namespace Inv
                     if (listener != null)
                     {
                         listener.OnItemChanged(this, prev);
+                    }
+                    if (drop)
+                    {
+                        ItemInstance dropped = new ItemInstance();
+                        dropped.Type = prev.Type;
+                        dropped.Count = count;
+                        return dropped;
                     }
                 }
                 else
@@ -165,7 +173,30 @@ namespace Inv
 
         public void DropItem()
         {
+            if (EquippedInHand != null)
+            {
+                DropItem(EquippedInHand);
+            }
+        }
+        public ItemObject DropItem(Item Type, int count=1)
+        {
+            return SpawnItemObject(RemoveItem(Type, count, true));
+        }
+        public ItemObject DropItem(ItemInstance i)
+        {
+            return SpawnItemObject(RemoveItem(i, true));
             
+        }
+        public ItemObject SpawnItemObject(ItemInstance i)
+        {
+            if (i != null)
+            {
+                ItemObject spawned = Instantiate(i.Type.ItemObject);
+                spawned.SetItem(i);
+                
+                return spawned;
+            }
+            return null;
         }
     }
 }

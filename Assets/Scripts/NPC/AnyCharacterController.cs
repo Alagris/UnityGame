@@ -1,6 +1,7 @@
 using Inter;
 using Inv;
 using Items;
+using System;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -355,4 +356,19 @@ public abstract class AnyCharacterController : MonoBehaviour
         }
     }
 
+    public ItemObject  DropItem(Item type, int count=1)
+    {
+        if (inventory != null && CharacterInstance!=null)
+        {
+            ItemObject i = inventory.DropItem(type, count);
+            if(i != null)
+            {
+                i.transform.position = CharacterInstance.transform.position;
+                return i;
+            }
+        }
+        return null;
+    }
+    public ItemObject DropItem(ItemInstance i)=>i==null?null:DropItem(i.Type, i.Count);
+    public ItemObject DropItem() => inventory==null?null: DropItem(inventory.EquippedInHand);
 }

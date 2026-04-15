@@ -14,6 +14,9 @@ namespace Items
         public GameObject Mesh;
 
         [SerializeField]
+        public ItemObject ItemObject;
+
+        [SerializeField]
         public float Weight;
 
         [SerializeField]

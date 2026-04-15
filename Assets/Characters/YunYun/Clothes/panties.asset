@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemClothing
   ItemName: Panties
   Mesh: {fileID: 5989499374143469916, guid: 5589b6ca660ba3248ba6fd85357cd268, type: 3}
+  ItemObject: {fileID: 2872578170502017067, guid: 18853015391d316488c716cf73014aaa, type: 3}
   Weight: 0
   Slot: 8
   CharacterID: 1

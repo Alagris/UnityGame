@@ -668,8 +668,8 @@ MonoBehaviour:
   ZoomSensitivity: -0.2
   MinZoom: 0.3
   MaxZoom: 3
-  MaxPhysicsHandleSpeed: 1
-  TimeToTriggerInteract: 1
+  MaxPhysicsHandleSpeed: 10
+  TimeToTriggerInteract: 0.2
 --- !u!114 &5494668527510411092
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -734,7 +734,7 @@ MonoBehaviour:
   - m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 5209732938090144719}
-        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_TargetAssemblyTypeName: Player.PlayerController, Assembly-CSharp
         m_MethodName: OnInteract
         m_Mode: 0
         m_Arguments:
@@ -899,6 +899,54 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: d636bbeb-7520-4276-ad0e-3d59c9a58cf1
     m_ActionName: 'UI/OpenInventory[/Keyboard/e]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1264195920517743437}
+        m_TargetAssemblyTypeName: Player.HudUIController, Assembly-CSharp
+        m_MethodName: OnTriggerEscape
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 98030b89-e009-404c-8b0e-47597429df0d
+    m_ActionName: 'UI/Escape[/Keyboard/escape]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1264195920517743437}
+        m_TargetAssemblyTypeName: Player.HudUIController, Assembly-CSharp
+        m_MethodName: OnUseItem
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 2cd238fb-5bdd-42d0-9945-05672486b46f
+    m_ActionName: 'UI/Use[/Keyboard/e]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1264195920517743437}
+        m_TargetAssemblyTypeName: Player.HudUIController, Assembly-CSharp
+        m_MethodName: OnDropItem
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 58f95efc-0b9a-4d84-a7e2-02acf5f62e0a
+    m_ActionName: 'UI/Drop[/Keyboard/r]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -924,6 +972,7 @@ MonoBehaviour:
     Count: 0
     Owner: {fileID: 0}
     CurrentMeshInstance: {fileID: 0}
+    EquippedAt: -2
   EquippedClothes: []
   Body: {fileID: 0}
   EquippedSlots: 0
@@ -940,9 +989,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player.HudUIController
   InteractionMessageText: {fileID: 8207335615494981563}
+  PlayerInput: {fileID: 0}
   HUD: {fileID: 7632055422988567868}
   inventoryPrefab: {fileID: 6250236013842948677, guid: e2b9328d37815da46bc4b569f12ce888, type: 3}
   inventory: {fileID: 0}
+  InventoryActionMap: UI
+  GameActionMap: Player
 --- !u!4 &6557441527464824020 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 8d30b52e0f21a8f41b16466dc1652a18, type: 3}

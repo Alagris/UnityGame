@@ -37,9 +37,9 @@
                     "name": "Interact",
                     "type": "Button",
                     "id": "852140f2-7766-474d-8707-702459ba45f3",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
-                    "interactions": "Hold",
+                    "interactions": "",
                     "initialStateCheck": false
                 },
                 {
@@ -472,7 +472,7 @@
                     "path": "<Keyboard>/e",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Keyboard&Mouse",
+                    "groups": "",
                     "action": "Interact",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -502,7 +502,7 @@
                 {
                     "name": "",
                     "id": "36e52cba-0905-478e-a818-f4bfcb9f3b9a",
-                    "path": "<Keyboard>/c",
+                    "path": "<Keyboard>/leftCtrl",
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard&Mouse",
@@ -535,7 +535,7 @@
                 {
                     "name": "",
                     "id": "e2bba637-aa97-444f-b9d5-fdcc1a89b7d0",
-                    "path": "<Keyboard>/e",
+                    "path": "<Keyboard>/c",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -546,7 +546,7 @@
                 {
                     "name": "",
                     "id": "835b42f5-f4b3-4e33-8be0-f10106f366c8",
-                    "path": "<Keyboard>/q",
+                    "path": "<Keyboard>/r",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -663,6 +663,24 @@
                     "name": "Escape",
                     "type": "Button",
                     "id": "98030b89-e009-404c-8b0e-47597429df0d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Use",
+                    "type": "Button",
+                    "id": "2cd238fb-5bdd-42d0-9945-05672486b46f",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Drop",
+                    "type": "Button",
+                    "id": "58f95efc-0b9a-4d84-a7e2-02acf5f62e0a",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -1091,7 +1109,7 @@
                 {
                     "name": "",
                     "id": "cbc40343-b2a9-40c7-92a8-7162f2b9d054",
-                    "path": "<Keyboard>/e",
+                    "path": "<Keyboard>/c",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -1107,6 +1125,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "Escape",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ffa65d15-f98b-4019-852f-9e84a8bfdfe7",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Use",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1f0859dd-91a6-4030-bd85-4e4edebadb81",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Drop",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

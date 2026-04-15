@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemClothing
   ItemName: Thigh band
   Mesh: {fileID: 5989499374143469916, guid: d7ad8350517a3db459e6ff37dee56a78, type: 3}
+  ItemObject: {fileID: -5511530577788300675, guid: cf198d7b1956224448b460e9b0d6a83c, type: 3}
   Weight: 0
   Slot: 256
   CharacterID: 1

@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemWeapon
   ItemName: Katana
   Mesh: {fileID: 3804050427014384921, guid: 5fbd2d77e10a67b409ca1c28ecd7781c, type: 3}
+  ItemObject: {fileID: -4817884367856305247, guid: 1d07e93e67c98de4e9e98d1ccae703a3, type: 3}
   Weight: 0
   Slot: 0
   CharacterID: 1

@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemClothing
   ItemName: Bra
   Mesh: {fileID: 5989499374143469916, guid: 3596d0e72609e1242832a0d86ca3061b, type: 3}
+  ItemObject: {fileID: 1771789193243670026, guid: 3d5c00edef487184381aa33bae76f751, type: 3}
   Weight: 0
   Slot: 32
   CharacterID: 1

@@ -135,6 +135,20 @@ namespace Player
             }
         }
 
+        public void OnDropItem(InputAction.CallbackContext c)
+        {
+            if (c.performed && IsInventoryOpen())
+            {
+                inventoryUiInstance.DropSelectedItem();
+            }
+        }
+        public void OnUseItem(InputAction.CallbackContext c)
+        {
+            if (c.performed && IsInventoryOpen())
+            {
+                inventoryUiInstance.UseSelectedItem();
+            }
+        }
         public void TriggerEscape()
         {
             switch (State)

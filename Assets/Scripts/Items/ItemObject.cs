@@ -9,22 +9,16 @@ namespace Items
     [Serializable]
     public class ItemObject : MonoBehaviour, IInteractable, IInteractableMessage
     {
-        [SerializeField]
-        private Item Type;
+        
         [SerializeField]
         private ItemInstance Item;
 
-        public bool SetItem(ItemInstance Item)
+        public void SetItem(ItemInstance Item)
         {
-            if (Item.Type == Type)
-            {
-                this.Item = Item;
-                return true;
-            }
-            return false;
+            this.Item = Item;
         }
 
-        public Item getType() => Type;
+        public Item getType() => Item==null?null:Item.Type;
 
         [MenuItem("GameObject/3D/Item", false, 10)]
         static void CreateItemObject(MenuCommand menuCommand)

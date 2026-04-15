@@ -40,7 +40,7 @@ namespace Inv.UI
         void onBindItem(VisualElement visElem, int idx)
         {
             ItemInstance i = (ItemInstance)itemList.itemsSource[idx];
-            itemToVisElem.Add(i, visElem);
+            itemToVisElem[i] = visElem;
             visElem.dataSource = i;
             visElem.RegisterCallback<MouseOverEvent>(OnMouseHoverOverItem);
             visElem.RegisterCallback<ClickEvent>(OnMouseClickOverItem);
@@ -53,12 +53,17 @@ namespace Inv.UI
             visElem.UnregisterCallback<ClickEvent>(OnMouseClickOverItem);
             visElem.dataSource = null;
         }
-
-        private void OnMouseClickOverItem(ClickEvent evt)
+        public void DropSelectedItem()
         {
-            VisualElement e = (VisualElement)evt.currentTarget;
-            object o = e.dataSource;
-            if (o != null) 
+            DropItem(itemList.selectedItem);
+        }
+        public void UseSelectedItem()
+        {
+            UseItem(itemList.selectedItem);
+        }
+        private void UseItem(object o)
+        {
+            if (o != null)
             {
                 ItemInstance i = (ItemInstance)o;
                 if (inv.TryGetComponent(out AnyCharacterController c))
@@ -67,10 +72,26 @@ namespace Inv.UI
                 }
             }
         }
+        private void DropItem(object o)
+        {
+            if (o != null)
+            {
+                ItemInstance i = (ItemInstance)o;
+                if (inv.TryGetComponent(out AnyCharacterController c))
+                {
+                    c.DropItem(i.Type);
+                }
+            }
+        }
+        private void OnMouseClickOverItem(ClickEvent evt)
+        {
+            VisualElement e = (VisualElement)evt.currentTarget;
+            UseItem(e.dataSource);
+           
+        }
         
         private void OnMouseHoverOverItem(MouseOverEvent evt)
         {
-
             VisualElement e = (VisualElement)evt.currentTarget;
             object i = e.dataSource;
             int idx = itemList.itemsSource.IndexOf(i);

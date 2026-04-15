@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemStaticClothing
   ItemName: Scabbard
   Mesh: {fileID: 504104851024534328, guid: bbbd1c6e55c8b1645a94d64945defc91, type: 3}
+  ItemObject: {fileID: 243249406555722507, guid: c7184bdd0f0441e40ac70c039f02c6a4, type: 3}
   Weight: 1
   Slot: 16384
   CharacterID: 1
