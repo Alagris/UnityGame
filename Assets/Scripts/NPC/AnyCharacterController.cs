@@ -16,21 +16,19 @@ public abstract class AnyCharacterController : MonoBehaviour
     public CharacterType CharacterType;
     
     protected CharacterPrefabController CharacterInstance;
-    public CharacterPrefabController GetCharacterInstance()
+    public CharacterPrefabController GetCharacterInstance()=>CharacterInstance;
+    public bool HasCharacter()=>CharacterInstance != null;
+    public Transform GetCharacterTransform() => CharacterInstance.transform;
+    public float3 GetCharacterPosition() => CharacterInstance.transform.position;
+    protected Vector2 lookRotation;
+    protected Vector3 cameraTargetLocalPosition;
+    public Transform getCameraTarget() => CharacterInstance.CameraTarget;
+    public void AddLookRotation(Vector2 rotation)
     {
-        return CharacterInstance;
-    }
-    public bool HasCharacter()
-    { 
-        return CharacterInstance != null;
-    }
-    public Transform GetCharacterTransform()
-    {
-        return CharacterInstance.transform;
-    }
-    public float3 GetCharacterPosition()
-    {
-        return CharacterInstance.transform.position;
+        lookRotation += rotation;
+        lookRotation.y = Mathf.Clamp(lookRotation.y, -90, 90);
+        lookRotation.x = lookRotation.x % 360;
+        getCameraTarget().rotation = Quaternion.Euler(-lookRotation.y, lookRotation.x, 0);
     }
     public void SetCharacterType(CharacterType characterType)
     {
@@ -54,7 +52,10 @@ public abstract class AnyCharacterController : MonoBehaviour
             CharacterPrefabController newCharacterInstance = i.GetComponent<CharacterPrefabController>();
             newCharacterInstance.Owner = this;
             inventory.SetBody(CharacterType, newCharacterInstance);
-            walkSpeed = CharacterType.SlowWalkSpeed;
+            desiredLocomotionSpeed = smoothedLocomotionSpeed = CharacterType.WalkSpeed;
+            locomotionSpeedChangeVelocity = 0;
+            cameraTargetLocalPosition = newCharacterInstance.CameraTarget.transform.localPosition;
+            newCharacterInstance.CameraTarget.transform.parent = transform;
             return newCharacterInstance;
         }
         return null;
@@ -62,18 +63,30 @@ public abstract class AnyCharacterController : MonoBehaviour
 
     [SerializeField]
     public Inventory inventory;
-    
     [SerializeField]
-    public float gravity = 9.81f;
+    public float rotationSpeed = 15f;
+    [SerializeField]
+    public float weight = 1f;
     [SerializeField]
     public float jumpForce = 10f;
     [SerializeField]
-    public float walkSpeed = 4;
-  
+    public float ReachDistance = 7;
+    [SerializeField]
+    public Transform EyeTransform;
+    [SerializeField]
+    public float MaxGroundedFeetDistance=1;
+    [SerializeField]
+    public float accelerationSpeed=0.3f;
+    [SerializeField]
+    LayerMask GroundCollisionLayer;
+    private float smoothedLocomotionSpeed;
+    private float desiredLocomotionSpeed;
+    private float locomotionSpeedChangeVelocity;
+
     protected Vector3 velocity;
     protected Vector2 movementDirection;
-
-
+    protected float smoothedYaw;
+    public bool isGrounded { get; private set;  }
 
     /**Every attack animation consists of 3 stages:
      1. animation plays and player cannot attack again. Clicking attack button is ignored.
@@ -109,12 +122,21 @@ public abstract class AnyCharacterController : MonoBehaviour
             +"]" + msg
         );
     }
-    
-    
 
+
+    public void StartRun()
+    {
+        desiredLocomotionSpeed = CharacterType.RunSpeed;
+    }
+
+    public void StopRun()
+    {
+        desiredLocomotionSpeed = CharacterType.WalkSpeed;
+    }
     public void Jump()
     {
         wantsToJump = true;
+        
     }
 
     public void StopJump()
@@ -126,16 +148,15 @@ public abstract class AnyCharacterController : MonoBehaviour
     {
         if (canAttack) // if in stage 3
         {
-            CharacterInstance.TriggerAttack();
-            if (inventory != null && inventory.hasEquippedInHand())
-            {
+            if (inventory != null && inventory.hasEquippedInHand()) {
+                CharacterInstance.TriggerAttack();
                 inventory.EquippedInHand.OnAttack(this);
+                bufferAttackRequests = false;
+                canAttack = false;
+                canMove = false;
+                wantsToAttack = false;
+                DebugLog("Attack started");
             }
-            bufferAttackRequests = false;
-            canAttack = false;
-            canMove = false;
-            wantsToAttack = false;
-            DebugLog("Attack started");
         }
         else if (bufferAttackRequests) // if in stage 2
         {
@@ -212,10 +233,6 @@ public abstract class AnyCharacterController : MonoBehaviour
         
     }
 
-    [SerializeField]
-    public float ReachDistance=7;
-    [SerializeField]
-    public Transform EyeTransform;
 
     public virtual bool LineTrace(out RaycastHit hit)
     {
@@ -293,17 +310,18 @@ public abstract class AnyCharacterController : MonoBehaviour
     }
 
 
-    public float locomotionSpeed
-    {
-        get
-        {
-            return walkSpeed;
-        }
-    }
-
-    protected abstract Vector3 transformMovementDirection(Vector2 localMovemenetDirection);
     
 
+    protected abstract Vector3 transformMovementDirection(Vector2 localMovemenetDirection);
+
+    Ray getDownwardsRay()
+    {
+        Vector3 pos = GetCharacterPosition();
+        float offset = CharacterInstance.characterController.center.y;
+        pos.y += offset;
+        return new Ray(pos, Vector3.down);
+        
+    }
     // Update is called once per frame
     protected virtual void Update()
     {
@@ -312,31 +330,32 @@ public abstract class AnyCharacterController : MonoBehaviour
             Vector3 movementVector;
             Vector3 movementVector2d;
             float speed = 0;
+
+            Ray downwardsRay = getDownwardsRay();
+            float feetMaxDistance = CharacterInstance.characterController.center.y + MaxGroundedFeetDistance;
+            bool isGrounded = Physics.SphereCast(downwardsRay, CharacterInstance.characterController.radius, feetMaxDistance, GroundCollisionLayer);
+            Debug.DrawRay(downwardsRay.origin, downwardsRay.direction* feetMaxDistance, Color.red);
             if (canMove)
             {
-                Vector2 localMovemenetDirection = movementDirection * locomotionSpeed;
+                smoothedLocomotionSpeed = Mathf.SmoothDamp(smoothedLocomotionSpeed, desiredLocomotionSpeed, ref locomotionSpeedChangeVelocity, accelerationSpeed);
+                Vector2 localMovemenetDirection = movementDirection * smoothedLocomotionSpeed;
                 movementVector = transformMovementDirection(localMovemenetDirection);
                 movementVector2d = movementVector;
                 movementVector2d.y = 0;
 
-                if (CharacterInstance.characterController.isGrounded)
+                if (isGrounded && wantsToJump && velocity.y <= 0)
                 {
-                    if (wantsToJump)
-                    {
-                        velocity.y += jumpForce;
-                    }
-                    if (velocity.y <= 0)
-                    {
-                       
-                       
-                            velocity.y = 0;
-                        
-                    }
-                    
+                    velocity.y += jumpForce;
+                    CharacterInstance.TriggerJump();
+                }
+                
+                if (CharacterInstance.characterController.isGrounded && velocity.y < 0)
+                {
+                    velocity.y = 0;
                 }
                 else
                 {
-                    velocity.y -= gravity * Time.deltaTime;
+                    velocity.y += weight * Physics.gravity.y * Time.deltaTime;
                 }
                 movementVector += velocity;
                 speed = localMovemenetDirection.magnitude;
@@ -350,9 +369,12 @@ public abstract class AnyCharacterController : MonoBehaviour
             CharacterInstance.characterController.Move(movementVector * Time.deltaTime);
             if (speed != 0)
             {
-                CharacterInstance.transform.rotation = Quaternion.LookRotation(movementVector2d);
+                CharacterInstance.transform.rotation = Quaternion.RotateTowards(CharacterInstance.transform.rotation, Quaternion.LookRotation(movementVector2d), rotationSpeed);
             }
             CharacterInstance.SetAnimationWalkSpeed(speed);
+            CharacterInstance.SetIsGrounded(isGrounded);
+            if (!isGrounded) Debug.Log("Not grounded");
+            getCameraTarget().transform.position = cameraTargetLocalPosition + CharacterInstance.transform.position;
         }
     }
 

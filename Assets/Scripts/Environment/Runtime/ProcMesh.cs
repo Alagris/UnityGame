@@ -18,7 +18,7 @@ namespace Env.Runtime
         public Vector3[] normals;
         public Color[] colors;
         public int[] triangles;
-        
+        public int Layer;
 
         public Mesh toMesh()
         {

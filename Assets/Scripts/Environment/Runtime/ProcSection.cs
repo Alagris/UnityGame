@@ -63,10 +63,11 @@ namespace Env.Runtime
             float2 xzOffset = (float2)sectionPosition * spawner.ChunkSize;
             float3 offset = new float3(xzOffset.x, spawner.OffsetY, xzOffset.y);
             Blackboard bb = spawner.ProcEnv.Run(spawner.ResX, spawner.ResZ, spawner.ChunkSize, offset);
-
-            Mesh m = bb.GetReturnedMesh().toMesh();
+            ProcMesh procMesh =  bb.GetReturnedMesh();
+            Mesh m = procMesh.toMesh();
             terrainMeshFilter.mesh = m;
             terrainMeshCollision.sharedMesh = m;
+            gameObject.layer = procMesh.Layer;
             List<Material> mats = new List<Material>();
             mats.Add(bb.returnedTerrainMaterial);
             terrainMeshRenderer.SetSharedMaterials(mats);

@@ -17,12 +17,21 @@ public class CharacterPrefabController : MonoBehaviour
     [SerializeField]
     string attackAnimationTrigger = "attack";
     [SerializeField]
+    string isGroundedAnimationParam = "isGrounded";
+    [SerializeField]
+    string jumpAnimationTrigger = "jump";
+    [SerializeField]
     string leftFootFrontAnimationParam = "leftFootFront";
-
+    [SerializeField]
+    public Transform HeadBone;
+    [SerializeField]
+    public Transform NeckBone;
 
     protected int velocityParamId;
     protected int attackTriggerId;
     protected int leftFootParamId;
+    protected int isGroundedParamId;
+    protected int jumpTriggerId;
     public void OnAttackCanListen() // enters stage 2
     {
         Owner.OnAttackCanListen();
@@ -46,6 +55,8 @@ public class CharacterPrefabController : MonoBehaviour
         velocityParamId = Animator.StringToHash(velocityAnimationParam);
         attackTriggerId = Animator.StringToHash(attackAnimationTrigger);
         leftFootParamId = Animator.StringToHash(leftFootFrontAnimationParam);
+        isGroundedParamId = Animator.StringToHash(isGroundedAnimationParam);
+        jumpTriggerId = Animator.StringToHash(jumpAnimationTrigger);
         if (characterController == null)
         {
             characterController = GetComponent<CharacterController>();
@@ -81,5 +92,15 @@ public class CharacterPrefabController : MonoBehaviour
     internal void SetAnimationWalkSpeed(float speed)
     {
         animator.SetFloat(velocityParamId, speed);
+    }
+
+    internal void TriggerJump()
+    {
+        animator.SetTrigger(jumpTriggerId);
+    }
+
+    internal void SetIsGrounded(bool isGrounded)
+    {
+        animator.SetBool(isGroundedParamId, isGrounded);
     }
 }

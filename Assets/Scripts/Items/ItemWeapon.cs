@@ -33,7 +33,7 @@ namespace Items
         public override bool TryEquipInHand(ClothingInventory user, ItemInstance inst)
         {
             Debug.Assert(inst.CurrentMeshInstance == null);
-            return user.ForceEquipWeapon(inst, ParentBone);
+            return user.CharacterID == CharacterID &&  user.ForceEquipWeapon(inst, ParentBone);
         }
         public override void Uneqip(ClothingInventory user, ItemInstance itemInstance)
         {

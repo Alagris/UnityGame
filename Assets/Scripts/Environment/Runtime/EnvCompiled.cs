@@ -429,13 +429,16 @@ namespace Env.Runtime
         int heightArg, outputLandscapeArg;
         [SerializeField]
         UVMode uvMode;
-        public LandscapeCompiled(bool shadeFlat, UVMode uvMode, float uvScaling, int heightArg, int outputLandscapeArg)
+        [SerializeField]
+        int layer;
+        public LandscapeCompiled(bool shadeFlat, UVMode uvMode, float uvScaling, int heightArg, int outputLandscapeArg, int layer)
         {
             this.uvScaling = uvScaling;
             this.uvMode = uvMode;
             this.shadeFlat = shadeFlat;
             this.heightArg = heightArg;
             this.outputLandscapeArg = outputLandscapeArg;
+            this.layer = layer;
         }
         public void run(Blackboard bb)
         {
@@ -446,6 +449,7 @@ namespace Env.Runtime
             {
                 m = m.ShadeFlat();
             }
+            m.Layer = layer;
             bb.setMesh(outputLandscapeArg, m);
         }
     }

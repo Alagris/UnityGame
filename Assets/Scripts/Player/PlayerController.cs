@@ -5,6 +5,7 @@ using TMPro;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 namespace Player
 {
@@ -15,7 +16,7 @@ namespace Player
         [SerializeField]
         Camera cam;
         [SerializeField]
-        CinemachineCamera cinecam;
+        CinemachineThirdPersonFollow cinecam;
         [SerializeField]
         HudUIController hudController;
         [SerializeField]
@@ -28,19 +29,23 @@ namespace Player
         float MaxPhysicsHandleSpeed = 10;
         [SerializeField]
         float TimeToTriggerInteract = 0.2f;
+        [SerializeField]
+        float LookSensitivity = 0.1f;
 
-        private CinemachineOrbitalFollow cinecamOrbitalFollow;
+        bool IsFirstPersonCam() => DesiredZoomValue < 0;
+
+        
         private float DesiredZoomValue;
         private float ZoomVelocity;
         private RaycastHit CurrentRaycastHit;
         private bool HasRaycastHit = false;
+        
         public override CharacterPrefabController InstantiateCharacterType()
         {
             CharacterPrefabController i = base.InstantiateCharacterType();
             if (i != null)
             {
-                cinecam.transform.parent = i.transform;
-                cinecam.Follow = i.CameraTarget;
+                cinecam.VirtualCamera.Follow = i.CameraTarget;
             }
             return i;
         }
@@ -53,16 +58,15 @@ namespace Player
             {
                 hudController = GetComponent<HudUIController>();
             }
-            cinecamOrbitalFollow = cinecam.GetComponent<CinemachineOrbitalFollow>();
-            DesiredZoomValue = cinecamOrbitalFollow.Radius;
             
+            DesiredZoomValue = cinecam.CameraDistance;
             EyeTransform = cam.transform;
         }
         Ray getEyeRay(float distance = 0)
         {
             Transform eyeTransform = cam.transform;
             Vector3 eyePos = eyeTransform.position;
-            float eyeDist = cinecam.Follow == null ? 0 : Vector3.Distance(cinecam.Follow.position, eyePos);
+            float eyeDist = IsFirstPersonCam() ? 0 : Vector3.Distance(getCameraTarget().position, eyePos);
             Vector3 fwd = eyeTransform.forward;
             return new Ray(eyePos + fwd * (eyeDist + distance), fwd);
         }
@@ -99,7 +103,6 @@ namespace Player
         {
             if (c.performed)
             {
-                Debug.Log("Interact ");
                 InteractWithoutTool();
             }
         }
@@ -147,19 +150,68 @@ namespace Player
                 StopJump();
             }
         }
+        public void OnRun(InputAction.CallbackContext c)
+        {
+            if (c.performed)
+            {
+                StartRun();
+            }
+            else if(c.canceled)
+            {
+                StopRun();
+            }
+        }
+        public void OnLook(InputAction.CallbackContext c)
+        {
+            AddLookRotation(c.ReadValue<Vector2>() * LookSensitivity);
+
+        }
         public void OnMove(InputAction.CallbackContext c)
         {
             movementDirection = c.ReadValue<Vector2>();
         }
+        public void SwitchToFirstPerson()
+        {
+            DesiredZoomValue = -1;
+            cinecam.CameraDistance = 0;
+            cinecam.CameraSide = 0.5f;
+            ZoomVelocity = 0;
+
+        }
+        public void SwitchToThirdPerson()
+        {
+            cinecam.CameraDistance = DesiredZoomValue = MinZoom;
+            cinecam.CameraSide = 1;
+            ZoomVelocity = 0;
+        }
         public void OnZoom(InputAction.CallbackContext c)
         {
-            float zoom = c.ReadValue<float>();
-            DesiredZoomValue = Mathf.Clamp(DesiredZoomValue + zoom * ZoomSensitivity, MinZoom, MaxZoom);
+            float zoom = c.ReadValue<float>() * ZoomSensitivity;
+            if (IsFirstPersonCam())
+            {
+                if (zoom > 0)
+                {
+                    SwitchToThirdPerson();
+                }
+            }
+            else
+            {
+                if (DesiredZoomValue == MinZoom && zoom < 0)
+                {
+                    SwitchToFirstPerson();
+                }
+                else
+                {
+                    DesiredZoomValue = Mathf.Clamp(DesiredZoomValue + zoom, MinZoom, MaxZoom);
+                }
+                
+            }
+            
 
         }
         private void OnGUI()
         {
-            GUI.Label(new Rect(10, 10, 100, 20), (wantsToAttack ? "W" : "") + (canAttack ? "C" : "") + (bufferAttackRequests ? "B" : ""));
+            //GUI.Label(new Rect(10, 10, 100, 20), (wantsToAttack ? "W" : "") + (canAttack ? "C" : "") + (bufferAttackRequests ? "B" : ""));
         }
 
         protected override Vector3 transformMovementDirection(Vector2 localMovemenetDirection)
@@ -175,7 +227,13 @@ namespace Player
         protected override void Update()
         {
             base.Update();
-            cinecamOrbitalFollow.Radius = Mathf.SmoothDamp(cinecamOrbitalFollow.Radius, DesiredZoomValue, ref ZoomVelocity, 0.2f);
+            
+            if (IsFirstPersonCam()) {
+
+            } else { 
+                cinecam.CameraDistance = Mathf.SmoothDamp(cinecam.CameraDistance, DesiredZoomValue, ref ZoomVelocity, 0.1f);
+
+            }
             if (CurrentlyHeldObject == null)
             {
                 DoNewLineTrace();

@@ -619,18 +619,23 @@ namespace Env.Editor
         IPort HeightPort;
         IPort LandscapePort;
         INodeOption ShadeFlatOpt, UV_Mode;
-        INodeOption UVScalingOpt;
+        INodeOption UVScalingOpt, CollisionLayersOpt;
         public override EnvCompiledFunction compile(EnvCompiledGraph compiledGraph, Dictionary<IPort, int> variables)
         {
-            
+            int layerIdx = 0;
+            if(CollisionLayersOpt.TryGetValue(out LayerMask layer))
+            {
+                layerIdx = (int)Mathf.Log(layer.value, 2);
+
+            }
             return new LandscapeCompiled(
                 shadeFlat:Bool(ShadeFlatOpt, false),
                 uvScaling:Float(UVScalingOpt, 1),
                 uvMode: Val(UV_Mode, UVMode.GLOBAL),
                 heightArg: readFloatArrays(compiledGraph, variables, HeightPort, false),
-                outputLandscapeArg: writeProcMeshes(compiledGraph, variables, LandscapePort)
-                
-                );
+                outputLandscapeArg: writeProcMeshes(compiledGraph, variables, LandscapePort),
+                layer: layerIdx
+            );
         }
         
         protected override void OnDefineOptions(IOptionDefinitionContext ctx)
@@ -638,6 +643,7 @@ namespace Env.Editor
             ShadeFlatOpt = ctx.AddOption<bool>("ShadeFlat").WithDefaultValue(false).Build();
             UV_Mode = ctx.AddOption<UVMode>("UV Mode").WithDefaultValue(UVMode.GLOBAL).Build();
             UVScalingOpt = ctx.AddOption<float>("UV Scaling").WithDefaultValue(1).Build();
+            CollisionLayersOpt = ctx.AddOption<LayerMask>("Collision Layers").Build();
         }
         protected override void OnDefinePorts(IPortDefinitionContext ctx)
         {
