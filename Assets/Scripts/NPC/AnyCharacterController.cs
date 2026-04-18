@@ -88,7 +88,7 @@ public abstract class AnyCharacterController : MonoBehaviour
 
     protected Vector3 velocity;
     protected Vector2 localMovemenetDirection;
-    protected float smoothedYaw;
+    
     public bool isGrounded { get; private set;  }
 
     /**Every attack animation consists of 3 stages:
@@ -400,7 +400,21 @@ public abstract class AnyCharacterController : MonoBehaviour
             }
         }
     }
-
+    static float ModularClamp(float angle, float min, float max)
+    {
+        if (angle > 180f) angle = angle - 360;
+        else if (angle < -180f) angle = angle + 360;
+        return Mathf.Clamp(angle, -90, 90);
+    }
+    static float ModularClampOrZero(float angle, float min, float max, float thresholdMin, float thresholdMax)
+    {
+        if (angle > 180f) angle = angle - 360;
+        else if (angle < -180f) angle = angle + 360;
+        if (angle < thresholdMin || angle > thresholdMax) return 0;
+        return Mathf.Clamp(angle, -90, 90);
+    }
+    
+    float smoothedYaw = 0, currentYawVelocity=0;
     private void LateUpdate()
     {
         if (enableHeadIK)
@@ -408,11 +422,13 @@ public abstract class AnyCharacterController : MonoBehaviour
             Vector3 lookRot = getCameraTarget().rotation.eulerAngles;
             Vector3 frontRot = CharacterInstance.transform.rotation.eulerAngles;
             Vector3 difference = lookRot - frontRot;
-            float yaw = Mathf.Clamp(difference.y, -90, 90); 
-            float pitch = Mathf.Clamp(difference.x, -70, 70);
+            float desiredYaw = ModularClampOrZero(difference.y, -90, 90, -120, 120);
+
+            float pitch = ModularClamp(difference.x, -70, 70);
+            smoothedYaw = Mathf.SmoothDamp(smoothedYaw, desiredYaw, ref currentYawVelocity, 0.2f);
             //Quaternion differencePerBone = Quaternion.Slerp(Quaternion.identity, difference, 0.333f);
             //CharacterInstance.LowerNeckBone.transform.localRotation *= differencePerBone;
-            Quaternion rot = Quaternion.Euler(0, yaw , 0);
+            Quaternion rot = Quaternion.Euler(0, smoothedYaw, 0);
             CharacterInstance.HeadBone.transform.localRotation = CharacterInstance.HeadBone.transform.localRotation * rot;
             //CharacterInstance.NeckBone.transform.localRotation = CharacterInstance.NeckBone.transform.localRotation * rot;
             //CharacterInstance.LowerNeckBone.transform.localRotation = CharacterInstance.LowerNeckBone.transform.localRotation * rot;
