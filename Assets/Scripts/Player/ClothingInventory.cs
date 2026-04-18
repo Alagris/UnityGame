@@ -1,4 +1,5 @@
 ﻿using Items;
+using System;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.VisualScripting;
@@ -233,6 +234,16 @@ namespace Inv
         public override void Unequip(ItemInstance item)
         {
             item.Uneqip(this);
+        }
+
+        public bool ForceEquipFullBodyReplacementClothes(ItemInstance inst)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ForceUnequipFullBodyReplacementClothes(ItemInstance itemInstance)
+        {
+            throw new NotImplementedException();
         }
     }
 }

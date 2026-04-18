@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterType
   CharacterID: 3
   Name: Bunny
-  Prefab: {fileID: 208363847031568252, guid: 6c1b9be4b11268e4383fb2606511c9fc, type: 3}
+  Prefab: {fileID: 4452023384810872074, guid: 6c1b9be4b11268e4383fb2606511c9fc, type: 3}
   SlowWalkSpeed: 1.56
   WalkSpeed: 4
   RunSpeed: 8
