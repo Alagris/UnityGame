@@ -393,4 +393,6 @@ public abstract class AnyCharacterController : MonoBehaviour
     }
     public ItemObject DropItem(ItemInstance i)=>i==null?null:DropItem(i.Type, i.Count);
     public ItemObject DropItem() => inventory==null?null: DropItem(inventory.EquippedInHand);
+
+    public Animator getAnimator() => CharacterInstance.animator;
 }

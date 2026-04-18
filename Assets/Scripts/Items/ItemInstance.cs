@@ -98,7 +98,7 @@ namespace Items
 
         public bool Collides(ItemInstance clothes) => Collides(clothes.Slot);
 
-        internal void Destroy()
+        public void Destroy()
         {
             if (CurrentMeshInstance != null)
             {
@@ -111,5 +111,17 @@ namespace Items
         public bool IsValid() => Type != null;
 
         public bool IsEquipped() => EquippedAt > EQUIPPED_AT_NONE;
+
+        public ItemObject SpawnItemObject()
+        {
+            if (Type != null)
+            {
+                ItemObject spawned = GameObject.Instantiate(Type.ItemObject);
+                spawned.SetItem(this);
+
+                return spawned;
+            }
+            return null;
+        }
     }
 }

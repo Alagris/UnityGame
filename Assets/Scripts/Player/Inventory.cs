@@ -191,7 +191,7 @@ namespace Inv
         {
             if (i != null)
             {
-                ItemObject spawned = Instantiate(i.Type.ItemObject);
+                ItemObject spawned = i.SpawnItemObject();
                 spawned.SetItem(i);
                 
                 return spawned;

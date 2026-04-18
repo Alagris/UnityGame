@@ -9,7 +9,9 @@ namespace Items
     [Serializable]
     public class ItemObject : MonoBehaviour, IInteractable, IInteractableMessage
     {
-        
+        [SerializeField]
+        public Animator animator;
+
         [SerializeField]
         private ItemInstance Item;
 
