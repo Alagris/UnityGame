@@ -21,12 +21,16 @@ namespace Inv
 
         readonly Dictionary<string, Transform> originalBones = new Dictionary<string, Transform>();
 
-
+        private Mesh originalBody;
+        private Material[] originalMaterials;
+        private ItemInstance fullBodyReplacement;
         public override void SetBody(CharacterType characterType, CharacterPrefabController characterInstance)
         {
             Strip();
             base.SetBody(characterType, characterInstance);
             Body = characterInstance.Body;
+            originalBody = Body.sharedMesh;
+            originalMaterials = Body.sharedMaterials;
             originalBones.Clear();
             foreach (var b in Body.bones)
             {
@@ -113,7 +117,23 @@ namespace Inv
             }
             return false;
         }
-        
+
+        internal bool ForceEquipFullBodyReplacementClothes(ItemInstance clothes, Mesh fullBodyReplacement, Material[] materialOverrides)
+        {
+            if (clothes.EquippedAt == ItemInstance.EQUIPPED_AT_NONE)
+            {
+                if (this.fullBodyReplacement != null)
+                {
+                    this.fullBodyReplacement.Uneqip(this);
+                }
+                UnEquipCollidingClothes(clothes);
+                ForceReplaceBody(fullBodyReplacement, materialOverrides);
+                ForceEquipAnyClothes(clothes, null);
+                this.fullBodyReplacement = clothes;
+                return true;
+            }
+            return false;
+        }
         public bool ForceEquipStaticClothes(ItemInstance clothes, string parentBone)
         {
             if (clothes.EquippedAt == ItemInstance.EQUIPPED_AT_NONE)
@@ -125,6 +145,12 @@ namespace Inv
                 return true;
             }
             return false;
+        }
+        
+        public void ForceReplaceBody(Mesh bodyReplacement, Material[] materialOverrides)
+        {
+            Body.sharedMesh = bodyReplacement;
+            Body.sharedMaterials = materialOverrides;
         }
         private void ForceEquipAnyClothes(ItemInstance clothes, GameObject clothesInstance)
         {
@@ -140,16 +166,36 @@ namespace Inv
         }
         public void ForceUnequipClothes(ItemInstance itemInstance)
         {
-            
+            ForceUnequipAnyClothes(itemInstance);
+        }
+
+        internal void ForceUnequipFullBodyReplacementClothes(ItemInstance itemInstance)
+        {
+            if (ForceUnequipAnyClothes(itemInstance))
+            {
+                if (fullBodyReplacement == itemInstance)
+                {
+                    Body.sharedMesh = originalBody;
+                    Body.sharedMaterials = originalMaterials;
+                    fullBodyReplacement = null;
+                }
+            }
+        }
+        internal bool ForceUnequipAnyClothes(ItemInstance itemInstance)
+        {
             if (itemInstance.IsEquipped())
             {
-                Debug.Assert(itemInstance.EquippedAt >=0 && EquippedClothes[itemInstance.EquippedAt] == itemInstance);
+                Debug.Assert(itemInstance.EquippedAt >= 0 && EquippedClothes[itemInstance.EquippedAt] == itemInstance);
                 int idx = itemInstance.EquippedAt;
                 EquippedClothes.RemoveAtSwapBack(idx);
-                if (idx < EquippedClothes.Count) {
+                if (idx < EquippedClothes.Count)
+                {
                     EquippedClothes[idx].EquippedAt = idx;
                 }
-                Destroy(itemInstance.CurrentMeshInstance);
+                if (itemInstance.CurrentMeshInstance != null)
+                {
+                    Destroy(itemInstance.CurrentMeshInstance);
+                }
                 itemInstance.CurrentMeshInstance = null;
                 itemInstance.EquippedAt = ItemInstance.EQUIPPED_AT_NONE;
 
@@ -160,9 +206,10 @@ namespace Inv
                 {
                     listener.OnItemTakenOff(this, itemInstance);
                 }
+                return true;
             }
+            return false;
         }
-
         internal void AddSkeletalMesh(SkinnedMeshRenderer renderer)
         {
             Transform[] clothesBones = renderer.bones;
@@ -236,14 +283,5 @@ namespace Inv
             item.Uneqip(this);
         }
 
-        public bool ForceEquipFullBodyReplacementClothes(ItemInstance inst)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ForceUnequipFullBodyReplacementClothes(ItemInstance itemInstance)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

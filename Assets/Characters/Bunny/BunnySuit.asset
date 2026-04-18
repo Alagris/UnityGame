@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75260dacdc8ad3449a4d3265b4c7d2f1, type: 3}
+  m_Name: BunnySuit
+  m_EditorClassIdentifier: Assembly-CSharp::Items.ItemClothingFullBodyReplacement
+  ItemName: Bunny Suit
+  Mesh: {fileID: -7667937696387224200, guid: 7466d25d6bdd8fa45920da5ff299b957, type: 3}
+  ItemObject: {fileID: 0}
+  Weight: 0
+  Slot: 16169
+  CharacterID: 3
+  BodyReplacement: {fileID: -5660798385637009641, guid: 7466d25d6bdd8fa45920da5ff299b957, type: 3}
+  MaterialOverrides:
+  - {fileID: 2100000, guid: 6abbdd32fe560894bb9d3e6042a7d39e, type: 2}
+  - {fileID: 2100000, guid: e358fe83a516c334a8c5dfad8ac604a8, type: 2}
