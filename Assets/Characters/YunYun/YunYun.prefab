@@ -242,6 +242,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6296173631019162476, guid: 66f7fb857c1d6f44fa217ea06a2b6d28, type: 3}
   m_PrefabInstance: {fileID: 4634472445301548172}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &2671586844078599922 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7296840980284672638, guid: 66f7fb857c1d6f44fa217ea06a2b6d28, type: 3}
+  m_PrefabInstance: {fileID: 4634472445301548172}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2710865490615150955 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -1887542677814915609, guid: 66f7fb857c1d6f44fa217ea06a2b6d28, type: 3}
@@ -280,6 +285,11 @@ Transform:
 --- !u!4 &4835400311083627448 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 237071013588440884, guid: 66f7fb857c1d6f44fa217ea06a2b6d28, type: 3}
+  m_PrefabInstance: {fileID: 4634472445301548172}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &4978087999192302740 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8843578131576594408, guid: 66f7fb857c1d6f44fa217ea06a2b6d28, type: 3}
   m_PrefabInstance: {fileID: 4634472445301548172}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &5177535792321758055 stripped
@@ -367,7 +377,12 @@ MonoBehaviour:
   CameraTarget: {fileID: 2138347406422483027}
   velocityAnimationParam: velocity
   attackAnimationTrigger: attack
+  isGroundedAnimationParam: isGrounded
+  jumpAnimationTrigger: jump
   leftFootFrontAnimationParam: leftFootFront
+  HeadBone: {fileID: 7638842628559732321}
+  LowerNeckBone: {fileID: 4978087999192302740}
+  NeckBone: {fileID: 2671586844078599922}
 --- !u!114 &5803008187992316887
 MonoBehaviour:
   m_ObjectHideFlags: 0

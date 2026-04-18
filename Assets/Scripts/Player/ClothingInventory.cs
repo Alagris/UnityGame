@@ -1,11 +1,7 @@
 ﻿using Items;
-using System;
 using System.Collections.Generic;
-using System.Text;
-using Unity.AppUI.Redux;
 using Unity.Collections;
 using Unity.VisualScripting;
-using UnityEditor.Build.Reporting;
 using UnityEngine;
 namespace Inv
 {

@@ -168,7 +168,7 @@ namespace Player
         }
         public void OnMove(InputAction.CallbackContext c)
         {
-            movementDirection = c.ReadValue<Vector2>();
+            localMovemenetDirection = c.ReadValue<Vector2>();
         }
         public void SwitchToFirstPerson()
         {
@@ -209,21 +209,12 @@ namespace Player
             
 
         }
-        private void OnGUI()
-        {
+        //private void OnGUI()
+        //{
             //GUI.Label(new Rect(10, 10, 100, 20), (wantsToAttack ? "W" : "") + (canAttack ? "C" : "") + (bufferAttackRequests ? "B" : ""));
-        }
+        //}
 
-        protected override Vector3 transformMovementDirection(Vector2 localMovemenetDirection)
-        {
-            float angle = -Mathf.Deg2Rad * cam.transform.eulerAngles.y;
-            float x = localMovemenetDirection.x;
-            float y = localMovemenetDirection.y;
-            float c = Mathf.Cos(angle);
-            float s = Mathf.Sin(angle);
-            return new Vector3(c * x - s * y, 0, s * x + c * y);
-            //return cam.transform.TransformDirection(new Vector3(localMovemenetDirection.x, 0, localMovemenetDirection.y));
-        }
+        
         protected override void Update()
         {
             base.Update();

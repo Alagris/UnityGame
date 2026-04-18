@@ -25,6 +25,8 @@ public class CharacterPrefabController : MonoBehaviour
     [SerializeField]
     public Transform HeadBone;
     [SerializeField]
+    public Transform LowerNeckBone;
+    [SerializeField]
     public Transform NeckBone;
 
     protected int velocityParamId;

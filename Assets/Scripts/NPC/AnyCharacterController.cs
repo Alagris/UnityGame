@@ -43,6 +43,7 @@ public abstract class AnyCharacterController : MonoBehaviour
         }
         CharacterInstance = newCharacterInstance;
     }
+    
     public virtual CharacterPrefabController InstantiateCharacterType()
     {
         if (CharacterType != null)
@@ -79,12 +80,14 @@ public abstract class AnyCharacterController : MonoBehaviour
     public float accelerationSpeed=0.3f;
     [SerializeField]
     LayerMask GroundCollisionLayer;
+    [SerializeField]
+    bool enableHeadIK=true;
     private float smoothedLocomotionSpeed;
     private float desiredLocomotionSpeed;
     private float locomotionSpeedChangeVelocity;
 
     protected Vector3 velocity;
-    protected Vector2 movementDirection;
+    protected Vector2 localMovemenetDirection;
     protected float smoothedYaw;
     public bool isGrounded { get; private set;  }
 
@@ -312,7 +315,15 @@ public abstract class AnyCharacterController : MonoBehaviour
 
     
 
-    protected abstract Vector3 transformMovementDirection(Vector2 localMovemenetDirection);
+    protected Vector3 transformMovementDirection(Vector2 localMovemenetDirection)
+    {
+        float angle = -Mathf.Deg2Rad * lookRotation.x;
+        float x = localMovemenetDirection.x;
+        float y = localMovemenetDirection.y;
+        float c = Mathf.Cos(angle);
+        float s = Mathf.Sin(angle);
+        return new Vector3(c * x - s * y, 0, s * x + c * y);
+    }
 
     Ray getDownwardsRay()
     {
@@ -322,26 +333,29 @@ public abstract class AnyCharacterController : MonoBehaviour
         return new Ray(pos, Vector3.down);
         
     }
+    private Vector3 lastMovementDirection2d;
+    Vector3 movementVector;
     // Update is called once per frame
     protected virtual void Update()
     {
         if (CharacterInstance!=null)
         {
-            Vector3 movementVector;
+            
             Vector3 movementVector2d;
-            float speed = 0;
 
             Ray downwardsRay = getDownwardsRay();
             float feetMaxDistance = CharacterInstance.characterController.center.y + MaxGroundedFeetDistance;
             bool isGrounded = Physics.SphereCast(downwardsRay, CharacterInstance.characterController.radius, feetMaxDistance, GroundCollisionLayer);
-            Debug.DrawRay(downwardsRay.origin, downwardsRay.direction* feetMaxDistance, Color.red);
+            
             if (canMove)
             {
-                smoothedLocomotionSpeed = Mathf.SmoothDamp(smoothedLocomotionSpeed, desiredLocomotionSpeed, ref locomotionSpeedChangeVelocity, accelerationSpeed);
-                Vector2 localMovemenetDirection = movementDirection * smoothedLocomotionSpeed;
-                movementVector = transformMovementDirection(localMovemenetDirection);
-                movementVector2d = movementVector;
-                movementVector2d.y = 0;
+                movementVector2d = transformMovementDirection(localMovemenetDirection.normalized);
+                float mag = movementVector2d.magnitude;
+                if (mag > 0)
+                {
+                    lastMovementDirection2d = movementVector2d;
+                }
+                smoothedLocomotionSpeed = Mathf.SmoothDamp(smoothedLocomotionSpeed, desiredLocomotionSpeed * mag, ref locomotionSpeedChangeVelocity, accelerationSpeed);
 
                 if (isGrounded && wantsToJump && velocity.y <= 0)
                 {
@@ -357,24 +371,53 @@ public abstract class AnyCharacterController : MonoBehaviour
                 {
                     velocity.y += weight * Physics.gravity.y * Time.deltaTime;
                 }
-                movementVector += velocity;
-                speed = localMovemenetDirection.magnitude;
+                movementVector = lastMovementDirection2d * smoothedLocomotionSpeed + velocity;
+                
 
             }
             else
             {
+                smoothedLocomotionSpeed = 0;
                 movementVector = velocity;
-                movementVector2d = Vector3.zero;
+                lastMovementDirection2d = Vector3.zero;
+                movementVector2d = Vector2.zero;
             }
+            
             CharacterInstance.characterController.Move(movementVector * Time.deltaTime);
-            if (speed != 0)
+            if (smoothedLocomotionSpeed != 0)
             {
-                CharacterInstance.transform.rotation = Quaternion.RotateTowards(CharacterInstance.transform.rotation, Quaternion.LookRotation(movementVector2d), rotationSpeed);
+                CharacterInstance.transform.rotation = Quaternion.RotateTowards(CharacterInstance.transform.rotation, Quaternion.LookRotation(lastMovementDirection2d), rotationSpeed);
             }
-            CharacterInstance.SetAnimationWalkSpeed(speed);
+            CharacterInstance.SetAnimationWalkSpeed(smoothedLocomotionSpeed);
             CharacterInstance.SetIsGrounded(isGrounded);
-            if (!isGrounded) Debug.Log("Not grounded");
+            
             getCameraTarget().transform.position = cameraTargetLocalPosition + CharacterInstance.transform.position;
+            if (enableHeadIK)
+            {
+                //CharacterInstance.HeadBone.transform.localRotation = Quaternion.identity;
+                //CharacterInstance.NeckBone.transform.localRotation = Quaternion.identity;
+                //CharacterInstance.LowerNeckBone.transform.localRotation = Quaternion.identity;
+            }
+        }
+    }
+
+    private void LateUpdate()
+    {
+        if (enableHeadIK)
+        {
+            Vector3 lookRot = getCameraTarget().rotation.eulerAngles;
+            Vector3 frontRot = CharacterInstance.transform.rotation.eulerAngles;
+            Vector3 difference = lookRot - frontRot;
+            float yaw = Mathf.Clamp(difference.y, -90, 90); 
+            float pitch = Mathf.Clamp(difference.x, -70, 70);
+            //Quaternion differencePerBone = Quaternion.Slerp(Quaternion.identity, difference, 0.333f);
+            //CharacterInstance.LowerNeckBone.transform.localRotation *= differencePerBone;
+            Quaternion rot = Quaternion.Euler(0, yaw , 0);
+            CharacterInstance.HeadBone.transform.localRotation = CharacterInstance.HeadBone.transform.localRotation * rot;
+            //CharacterInstance.NeckBone.transform.localRotation = CharacterInstance.NeckBone.transform.localRotation * rot;
+            //CharacterInstance.LowerNeckBone.transform.localRotation = CharacterInstance.LowerNeckBone.transform.localRotation * rot;
+            
+            
         }
     }
 

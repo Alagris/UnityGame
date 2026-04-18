@@ -339,7 +339,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: 7d74b4a4ffb5b3cfe46a039030f69a19
         m_Version: 2
-        m_Position: {x: 136.58142, y: 230.44133}
+        m_Position: {x: 122.033905, y: 206.63632}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -351,11 +351,13 @@ MonoBehaviour:
           - __option_UV Scaling
           - Height
           - __option_UV Mode
+          - __option_Collision Layers
           m_ValueList:
           - rid: 6549109201066786902
           - rid: 6549109201066786903
           - rid: 6549109201066786904
           - rid: 6549109212120088645
+          - rid: 6549109484386517060
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -1367,3 +1369,9 @@ MonoBehaviour:
           m_PortDirection: 1
           m_PortOrientation: 0
           m_Title: Instances
+    - rid: 6549109484386517060
+      type: {class: 'Constant`1[[UnityEngine.LayerMask, UnityEngine.CoreModule]]', ns: Unity.GraphToolkit.Editor, asm: UnityEditor.GraphToolkitModule}
+      data:
+        m_Value:
+          serializedVersion: 2
+          m_Bits: 8

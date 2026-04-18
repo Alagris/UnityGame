@@ -1,11 +1,6 @@
-using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using Unity.GraphToolkit.Editor;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.XR;
 
 
 namespace Env.Runtime
@@ -115,40 +110,5 @@ namespace Env.Runtime
         [SerializeField]
         public GameObject Prefab;
 
-        [MenuItem("Assets/Create/Proc Env/Instanced Mesh From Selected Asset")]
-        static void CreateAssetFile()
-        {
-            InstanceableObjectAsset asset = ScriptableObject.CreateInstance<InstanceableObjectAsset>();
-
-            
-            if (Selection.activeObject is Mesh)
-            {
-                Mesh m = (Mesh)Selection.activeObject;
-                asset.LODs = new InstanceableObject(m);
-            }
-            else if (Selection.activeObject is GameObject)
-            {
-                GameObject go = (GameObject)Selection.activeObject;
-                MeshRenderer mesh = go.GetComponent<MeshRenderer>();
-                if (mesh != null)
-                {
-                    asset.LODs = new InstanceableObject(mesh);
-                }
-                else
-                {
-                    LODGroup lods = go.GetComponent<LODGroup>();
-                    if (lods != null)
-                    {
-                        asset.LODs = new InstanceableObject(lods);
-                    }
-                }
-
-            }
-
-            String path = AssetDatabase.GetAssetPath(Selection.activeObject);
-            String assetPath = Path.GetFileNameWithoutExtension(path) + " instanced.asset";
-
-            ProjectWindowUtil.CreateAsset(asset, assetPath);
-        }
     }
 }

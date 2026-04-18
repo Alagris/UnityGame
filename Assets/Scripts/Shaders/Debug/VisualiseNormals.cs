@@ -1,6 +1,4 @@
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class VisualiseNormals : MonoBehaviour
 {
@@ -13,10 +11,7 @@ public class VisualiseNormals : MonoBehaviour
     Mesh originalMesh=null;
     void Start()
     {
-        if(linesMaterial == null)
-        {
-            linesMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/Scripts/Shaders/Debug/LineDebugShader.mat"); 
-        }
+        
         originalFilter = GetComponent<MeshFilter>();
         GameObject normalsChild = new GameObject("Normals");
         normalsChild.transform.parent = transform;
