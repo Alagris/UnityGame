@@ -8,10 +8,13 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: bunny_clothes_material
-  m_Shader: {fileID: 4800000, guid: a9dfd50908db1a54cb1e5a3cf0f9d38c, type: 3}
+  m_Shader: {fileID: 4800000, guid: 7692199809f5f37478777de5775b127a, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _FRESNEL_SPECULAR_HIGHLIGHT_ON
+  - _RIM_LIGHT_ON
+  - _SHADOW_ON
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -28,14 +31,35 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    m_Ints: []
+    - _FaceSdfMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints:
+    - _DISABLE_FRESNEL_SPECULAR_HIGHLIGHT_ON_FACE: 0
+    - _DISABLE_FRESNEL_SPECULAR_HIGHLIGHT_ON_HAIR: 0
+    - _FACE_SDF: 0
+    - _FRESNEL_SPECULAR_HIGHLIGHT: 1
+    - _RIM_LIGHT: 1
+    - _RIM_LIGHT_ON_SHADOW_SIDE: 0
+    - _RIM_LIGHT_SMOOTHSTEP: 0
+    - _SHADOW: 1
     m_Floats:
+    - _FaceLightSmooth: 0.1
+    - _FaceMidBand: 0.01
+    - _FaceShadowAngle: 0
     - _LightSmooth: 0.023
     - _MidBand: 0.01
+    - _RimLightFalloff: 0
+    - _RimLightPower: 1.5
+    - _SpecularFalloff: 1
+    - _SpecularStrength: 0.9
     m_Colors:
-    - _BaseColor: {r: 0.9811321, g: 0.33784264, b: 0.33784264, a: 1}
-    - _HalfShadowColor: {r: 0.6960922, g: 0.61667854, b: 0.7735849, a: 1}
-    - _ShadowColor: {r: 0.49056602, g: 0.49056602, b: 0.49056602, a: 1}
+    - _BaseColor: {r: 0.6886792, g: 0, b: 0.28574988, a: 1}
+    - _HalfShadowColor: {r: 0.6792453, g: 0.09291565, b: 0.33610928, a: 1}
+    - _RimLightColor: {r: 0.6901961, g: 0, b: 0.62684494, a: 1}
+    - _ShadowColor: {r: 0.509434, g: 0, b: 0.21129939, a: 1}
+    - _SpecularColor: {r: 0.5566038, g: 0.102394104, b: 0.26092225, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &7843896551394781546
