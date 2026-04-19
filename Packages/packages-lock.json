@@ -1,5 +1,11 @@
 {
   "dependencies": {
+    "com.distantlands.cozy.core": {
+      "version": "file:com.distantlands.cozy.core",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.gator-dragon-games.jigglephysics": {
       "version": "https://github.com/naelstrof/JigglePhysics.git#upm",
       "depth": 0,

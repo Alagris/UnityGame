@@ -13,8 +13,15 @@ Shader "Proc Env/Terrain"
     }
     SubShader
     {
-        Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" }
-
+        Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" "Queue" = "Geometry"}
+        ZWrite On
+        ZTest LEqual 
+        Stencil
+        {
+             Ref 221
+             Comp Always
+             Pass Replace
+        }
         Pass
         {
             HLSLPROGRAM
@@ -86,7 +93,7 @@ Shader "Proc Env/Terrain"
                 half3 diffuse = SAMPLE_TEXTURE2D_ARRAY(_DiffuseMap, sampler_DiffuseMap, worldUV, layerIdx) ;
 
                 half4 normal = SAMPLE_TEXTURE2D_ARRAY(_NormalMap, sampler_NormalMap, worldUV, layerIdx);
-                half3 lighting = mainLight.color * diffuse * lerp(_LightSmooth, 1, shadowAmount); 
+                half3 lighting = max(mainLight.color, _Ambient) * diffuse * lerp(_LightSmooth, 1, shadowAmount); 
                 /*
                 float2 bottomLeft = floor(IN.uv);
                 float2 bottomRight = bottomLeft+float2(1,0);
