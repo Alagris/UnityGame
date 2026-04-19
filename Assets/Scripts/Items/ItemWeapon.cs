@@ -28,6 +28,7 @@ namespace Items
         }
         public override void OnAttack(AnyCharacterController user, ItemInstance inst)
         {
+            user.combat.ForceAttack();
             user.InteractAttack(inst);
         }
         public override bool TryEquipInHand(ClothingInventory user, ItemInstance inst)

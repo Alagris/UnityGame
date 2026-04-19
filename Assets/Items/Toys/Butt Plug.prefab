@@ -114,7 +114,7 @@ CapsuleCollider:
   m_Radius: 0.03
   m_Height: 0.15
   m_Direction: 2
-  m_Center: {x: 0.1195676, y: -0.054925174, z: 0.079507306}
+  m_Center: {x: 0, y: 0, z: 0.079507306}
 --- !u!114 &6532098612510498840
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -127,8 +127,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8bb22f6c5efe65b45ade59f595119fae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Items.ItemObject
+  animator: {fileID: 0}
   Item:
     Type: {fileID: 11400000, guid: b7a80ca41cd0bae47adea4a6ce28f990, type: 2}
     Count: 1
     Owner: {fileID: 0}
     CurrentMeshInstance: {fileID: 0}
+    EquippedAt: -2

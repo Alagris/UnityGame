@@ -116,7 +116,7 @@ namespace Items
         {
             if (Type != null)
             {
-                ItemObject spawned = GameObject.Instantiate(Type.ItemObject);
+                ItemObject spawned = UnityEngine.Object.Instantiate(Type.ItemObject);
                 spawned.SetItem(this);
 
                 return spawned;

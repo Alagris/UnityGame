@@ -36,11 +36,11 @@ public class CharacterPrefabController : MonoBehaviour
     protected int jumpTriggerId;
     public void OnAttackCanListen() // enters stage 2
     {
-        Owner.OnAttackCanListen();
+        Owner.combat.OnAttackCanListen();
     }
     public void OnAttackReady() // enters stage 3
     {
-        Owner.OnAttackReady();
+        Owner.combat.OnAttackReady();
     }
 
     public void OnLeftFootInFront() // enters stage 3

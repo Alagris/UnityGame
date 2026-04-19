@@ -12,7 +12,7 @@ public class AttackAnimationState : StateMachineBehaviour
         CharacterPrefabController p = animator.GetComponent<CharacterPrefabController>();
         if (p != null && p.Owner != null)
         {
-            p.Owner.OnAttackStart(debugString);
+            p.Owner.combat.OnAttackStart(debugString);
         }
     }
 
@@ -28,7 +28,7 @@ public class AttackAnimationState : StateMachineBehaviour
         CharacterPrefabController p = animator.GetComponent<CharacterPrefabController>();
         if(p != null && p.Owner!=null)
         {
-            p.Owner.OnAttackEnd(beginSheathing, debugString);
+            p.Owner.combat.OnAttackEnd(beginSheathing, debugString);
         }
     }
 

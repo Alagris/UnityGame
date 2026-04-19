@@ -11,18 +11,14 @@ namespace Items
 
         public override void OnUse(AnyCharacterController user, ItemInstance inst)
         {
-            user.getAnimator().CrossFade(SexAnimationName, 0.2f);
-            ItemObject i = inst.SpawnItemObject();
-            i.animator.transform.parent = user.GetCharacterTransform();
-            if (i.animator != null)
+            if(user.TryGetComponent(out SexSceneController controller))
             {
-                i.animator.CrossFade(SexAnimationName, 0.2f);
+                controller.EnterScene(SexAnimationName, inst);
+                if (user.TryGetComponent(out HudUIController c))
+                {
+                    c.CloseInventory();
+                }
             }
-            if (user.TryGetComponent(out HudUIController c))
-            {
-                c.CloseInventory();
-            }
-
         }
     }
 }

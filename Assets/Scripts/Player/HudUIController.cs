@@ -58,7 +58,7 @@ namespace Player
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
             PauseGame(false);
-            PlayerInput.SwitchCurrentActionMap(GameActionMap);
+            
             if (HUD != null)
             {
                 HUD.enabled = true;
@@ -102,6 +102,10 @@ namespace Player
                 Destroy(inventoryUiInstance.gameObject);
                 inventoryUiInstance = null;
                 EnterGameState();
+                if (PlayerInput.currentActionMap.name == InventoryActionMap)
+                {
+                    PlayerInput.SwitchCurrentActionMap(GameActionMap);
+                }
             }
         }
         public bool IsInventoryOpen() => inventoryUiInstance != null;

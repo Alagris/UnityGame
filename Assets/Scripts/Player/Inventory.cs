@@ -188,10 +188,7 @@ namespace Inv
         {
             if (i != null)
             {
-                ItemObject spawned = i.SpawnItemObject();
-                spawned.SetItem(i);
-                
-                return spawned;
+                return i.SpawnItemObject();
             }
             return null;
         }

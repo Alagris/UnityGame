@@ -11,7 +11,7 @@ public class SheathingAnimationState : StateMachineBehaviour
         CharacterPrefabController p = animator.GetComponent<CharacterPrefabController>();
         if (p != null && p.Owner != null)
         {
-            p.Owner.OnSheathingStart(debugString);
+            p.Owner.combat.OnSheathingStart(debugString);
         }
     }
 
@@ -27,7 +27,7 @@ public class SheathingAnimationState : StateMachineBehaviour
         CharacterPrefabController p = animator.GetComponent<CharacterPrefabController>();
         if(p != null && p.Owner!=null)
         {
-            p.Owner.OnSheathingEnd(debugString);
+            p.Owner.combat.OnSheathingEnd(debugString);
         }
     }
 

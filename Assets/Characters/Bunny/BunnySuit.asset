@@ -20,5 +20,5 @@ MonoBehaviour:
   CharacterID: 3
   BodyReplacement: {fileID: -5660798385637009641, guid: 7466d25d6bdd8fa45920da5ff299b957, type: 3}
   MaterialOverrides:
-  - {fileID: 2100000, guid: 6abbdd32fe560894bb9d3e6042a7d39e, type: 2}
+  - {fileID: 2100000, guid: a796882ec70ed1b4dbc1619a7b20d12f, type: 2}
   - {fileID: 2100000, guid: e358fe83a516c334a8c5dfad8ac604a8, type: 2}

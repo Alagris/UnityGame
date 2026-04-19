@@ -1,11 +1,8 @@
 using Inter;
-using Inv.UI;
-using TMPro;
 
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UIElements;
 
 namespace Player
 {
@@ -134,9 +131,9 @@ namespace Player
         
         public void OnAttack(InputAction.CallbackContext c)
         {
-            if (c.performed)
+            if (c.performed && combat != null)
             {
-                Attack();
+                combat.Attack();
             }
         }
         public void OnJump(InputAction.CallbackContext c)

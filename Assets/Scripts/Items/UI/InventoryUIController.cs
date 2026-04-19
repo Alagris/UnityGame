@@ -140,7 +140,7 @@ namespace Inv.UI
         private void UpdateItem(ItemInstance i, VisualElement visElem)
         {
             Label itemNameLabel = visElem.Q<Label>("item-name");
-            itemNameLabel.text = i.ItemName;
+            itemNameLabel.text = i.Count>1 ?i.Count+"x "+i.ItemName: i.ItemName;
             if (i.IsEquipped())
             {
                 itemNameLabel.AddToClassList("worn-item");

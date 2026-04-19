@@ -18,6 +18,7 @@ namespace Items
         public void SetItem(ItemInstance Item)
         {
             this.Item = Item;
+            this.Item.CurrentMeshInstance = gameObject;
         }
 
         public Item getType() => Item==null?null:Item.Type;
@@ -29,13 +30,18 @@ namespace Items
             if(Item!=null && Item.IsValid() && interactor.TryGetComponent(out Inventory inv))
             {
                 inv.AddItem(Item);
-                Destroy(gameObject);
+                Destroy();
             }
         }
 
         public string InteractMessage(GameObject interactor, ItemInstance tool, ref RaycastHit hit)
         {
             return Item!=null && Item.IsValid() ? "Pick up " + Item.ItemName : "";
+        }
+
+        public void Destroy()
+        {
+            Destroy(gameObject);
         }
     }
 }
